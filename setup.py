@@ -9,9 +9,9 @@ setup(
     ]),
     install_requires=[
         # Used to manage endpoints and swagger
-        'flask-restplus',
+        'flask-restplus==0.10.1',
         # Used to parse configurations
-        'pyaml',
+        'pyaml==17.8.0',
     ],
     extras_require={
         'testing': [
