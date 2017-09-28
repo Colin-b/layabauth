@@ -1,4 +1,7 @@
+import logging
 from flask_restplus import Resource, fields
+
+logger = logging.getLogger(__name__)
 
 
 def _exception_model(api):
@@ -19,12 +22,13 @@ def add_exception_handler(api):
     exception_model = _exception_model(api)
 
     @api.errorhandler(Exception)
-    @api.marshal_with(exception_model, code=400)
+    @api.marshal_with(exception_model, code=500)
     def handle_exception(exception):
         """This is the default error handling."""
-        return {'message': str(exception)}, 400
+        logger.exception('An unexpected error occurred.')
+        return {'message': str(exception)}, 500
 
-    return 400, 'An unexpected error occurred.', exception_model
+    return 500, 'An unexpected error occurred.', exception_model
 
 
 def add_monitoring_namespace(api, exception_response, health_controller):

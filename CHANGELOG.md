@@ -6,6 +6,13 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.0.0 (2017-09-28) ##
+
+### Release notes ###
+
+- Exception are logged on server side as well with all information.
+- Status code 500 (Server error) is now returned in case of an unhandled Exception (instead of 400 - Client error, previously).
+
 ## Version 1.1.0 (2017-09-27) ##
 
 ### Release notes ###
