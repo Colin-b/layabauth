@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.1.0 (2017-09-29) ##
+
+### Enhancements ###
+
+- Health check Swagger documentation does not reference Consul anymore.
+
 ## Version 2.0.0 (2017-09-28) ##
 
 ### Release notes ###

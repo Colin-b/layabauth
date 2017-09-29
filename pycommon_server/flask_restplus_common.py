@@ -45,12 +45,13 @@ def add_monitoring_namespace(api, exception_response, health_controller):
     @monitoring_ns.route('/health')
     class Health(Resource):
 
-        @monitoring_ns.marshal_with(health_controller.marshaller(monitoring_ns))
+        @monitoring_ns.marshal_with(health_controller.marshaller(monitoring_ns),
+                                    description='Server is in a coherent state.')
         @monitoring_ns.response(*exception_response)
         def get(self):
             """
             Check service health.
-            This endpoint is called at regular interval by Consul to check service health.
+            This endpoint perform a quick server state check.
             """
             return health_controller().get()
 
