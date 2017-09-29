@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.2.0 (2017-09-29) ##
+
+### Enhancements ###
+
+- Add test cases.
+
 ## Version 2.1.0 (2017-09-29) ##
 
 ### Enhancements ###
