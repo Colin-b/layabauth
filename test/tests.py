@@ -95,6 +95,14 @@ class ConfigurationTest(unittest.TestCase):
 
 class FlaskRestPlusTest(unittest.TestCase):
 
+    def setUp(self):
+        logger.info(f'-------------------------------')
+        logger.info(f'Start of {self._testMethodName}')
+
+    def tearDown(self):
+        logger.info(f'End of {self._testMethodName}')
+        logger.info(f'-------------------------------')
+
     def test_successful_return(self):
         self.assertEqual(({'status': 'Successful'}, 200), flask_restplus_common.successful_return)
 
