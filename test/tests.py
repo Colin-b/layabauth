@@ -2,9 +2,12 @@ import os
 import os.path
 import tempfile
 import unittest
+import logging
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration
 from pycommon_server import flask_restplus_common
+
+logger = logging.getLogger(__name__)
 
 
 def _add_file(dir, file_name, *lines):
@@ -15,7 +18,13 @@ def _add_file(dir, file_name, *lines):
 class ConfigurationTest(unittest.TestCase):
 
     def setUp(self):
+        logger.info(f'-------------------------------')
+        logger.info(f'Start of {self._testMethodName}')
         os.environ.pop('ENVIRONMENT', None)
+
+    def tearDown(self):
+        logger.info(f'End of {self._testMethodName}')
+        logger.info(f'-------------------------------')
 
     def test_empty_configuration_if_file_not_found(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
