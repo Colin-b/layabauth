@@ -29,6 +29,8 @@ def load_logging_configuration(configuration_folder: str) -> str:
     Return loaded configuration file path. None if not loaded.
     """
     environment = os.environ.get('ENVIRONMENT', 'default')
+    environment = os.environ.get('SERVER_ENVIRONMENT', environment)
+
     file_path = os.path.join(configuration_folder, f'logging_{environment}.yml')
     return _load_logging_configuration(file_path)
 
