@@ -9,6 +9,19 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
+def load(server_file_path: str) -> dict:
+    """
+    Load logging and server YAML configurations according to ENVIRONMENT environment variable.
+
+    :param server_file_path: Path to the server.py file (or any other file located in the python module directory).
+    :return: server configuration as a dictionary.
+    """
+    module_directory = os.path.abspath(os.path.dirname(server_file_path))
+    configuration_folder = os.path.join(module_directory, '..', 'configuration')
+    load_logging_configuration(configuration_folder)
+    return load_configuration(configuration_folder)
+
+
 def load_logging_configuration(configuration_folder: str) -> str:
     """
     Load logging configuration according to ENVIRONMENT environment variable.

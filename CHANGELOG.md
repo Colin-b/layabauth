@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.3.0 (2017-10-06) ##
+
+### Enhancements ###
+
+- Introduce configuration.load() method to use for standard configurations loading.
+
 ## Version 2.2.0 (2017-09-29) ##
 
 ### Enhancements ###
