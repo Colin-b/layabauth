@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.4.0 (2017-10-06) ##
+
+### Enhancements ###
+
+- SERVER_ENVIRONMENT can also be used and has precedence on ENVIRONMENT
+
 ## Version 2.3.0 (2017-10-06) ##
 
 ### Enhancements ###
