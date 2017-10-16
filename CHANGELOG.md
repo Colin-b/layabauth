@@ -6,6 +6,9 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.4.1
+
+
 ## Version 2.4.0 (2017-10-06) ##
 
 ### Enhancements ###

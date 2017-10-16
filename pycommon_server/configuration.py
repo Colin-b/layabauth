@@ -59,6 +59,8 @@ def load_configuration(configuration_folder: str) -> dict:
     Return a dictionary (empty if file cannot be found).
     """
     environment = os.environ.get('ENVIRONMENT', 'default')
+    environment = os.environ.get('SERVER_ENVIRONMENT', environment)
+
     file_path = os.path.join(configuration_folder, f'configuration_{environment}.yml')
     return _load_configuration(file_path)
 

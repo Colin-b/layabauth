@@ -59,6 +59,18 @@ class ConfigurationTest(unittest.TestCase):
                 },
                 load_configuration(tmp_dir))
 
+    def test_server_environment_configuration_loaded(self):
+        os.environ['SERVER_ENVIRONMENT'] = 'test'
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            _add_file(tmp_dir, 'configuration_test.yml', 'section_test:', '  key: value')
+            self.assertEqual(
+                {
+                    'section_test': {
+                        'key': 'value'
+                    }
+                },
+                load_configuration(tmp_dir))
+
     def test_hardcoded_default_logging_configuration_if_file_not_found(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             self.assertIsNone(load_logging_configuration(tmp_dir))
