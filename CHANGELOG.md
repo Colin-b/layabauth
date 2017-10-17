@@ -6,7 +6,13 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 2.5.0 (2017-10-06) ##
+## Version 2.6.0 (2017-10-17) ##
+
+### Enhancements ###
+
+- Register LogRequestDetails as Flask-RestPlus decorator when importing flask_restplus_common.
+
+## Version 2.5.0 (2017-10-17) ##
 
 ### Enhancements ###
 

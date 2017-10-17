@@ -86,3 +86,7 @@ class LogRequestDetails:
             logger.info(f'{request}: {request.data}')
         else:
             logger.info(f'{request}')
+
+
+# This will log every incoming request (do not use a method to avoid registering it twice by accident)
+Resource.method_decorators.append(LogRequestDetails)
