@@ -180,6 +180,46 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual("Successful: {'status': 'Successful'}",
                          flask_restplus_common.successful_model(TestApi))
 
+    def test_log_get_request_details(self):
+        @flask_restplus_common.LogRequestDetails
+        def get():
+            return 'Test get method is still called with decorator.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'data')
+        flask.request = TestRequest(data=None)
+        self.assertEqual('Test get method is still called with decorator.', get())
+
+    def test_log_delete_request_details(self):
+        @flask_restplus_common.LogRequestDetails
+        def delete():
+            return 'Test get method is still called with decorator.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'data')
+        flask.request = TestRequest(data=None)
+        self.assertEqual('Test get method is still called with decorator.', delete())
+
+    def test_log_post_request_details(self):
+        @flask_restplus_common.LogRequestDetails
+        def post():
+            return 'Test get method is still called with decorator.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'data')
+        flask.request = TestRequest(data='{}')
+        self.assertEqual('Test get method is still called with decorator.', post())
+
+    def test_log_put_request_details(self):
+        @flask_restplus_common.LogRequestDetails
+        def put():
+            return 'Test get method is still called with decorator.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'data')
+        flask.request = TestRequest(data='{}')
+        self.assertEqual('Test get method is still called with decorator.', put())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 2.5.0 (2017-10-06) ##
+
+### Enhancements ###
+
+- Introduce LogRequestDetails decorator.
+
 ## Version 2.4.0 (2017-10-06) ##
 
 ### Enhancements ###

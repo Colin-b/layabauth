@@ -67,3 +67,22 @@ def successful_model(api):
 
 successful_deletion_return = '', 204
 successful_deletion_response = 204, 'Sample deleted'
+
+
+class LogRequestDetails:
+    """
+    Decorator for incoming requests.
+    """
+    def __init__(self, request_method):
+        self.request_method = request_method
+
+    def __call__(self, *args, **kwargs):
+        self.log_request()
+        return self.request_method(*args, **kwargs)
+
+    def log_request(self):
+        from flask import request
+        if self.request_method.__name__ in ['post', 'put']:
+            logger.info(f'{request}: {request.data}')
+        else:
+            logger.info(f'{request}')
