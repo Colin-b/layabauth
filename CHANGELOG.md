@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.0.0 (2017-10-23) ##
+
+### Release notes ###
+
+- Health controller should now contains a instead of a marshaller method.
+
 ## Version 2.6.0 (2017-10-17) ##
 
 ### Enhancements ###

@@ -41,12 +41,12 @@ def add_monitoring_namespace(api, exception_response, health_controller):
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
     monitoring_ns = api.namespace('monitoring', path='/', description='Monitoring operations')
+    health_controller.namespace(monitoring_ns)
 
     @monitoring_ns.route('/health')
     class Health(Resource):
 
-        @monitoring_ns.marshal_with(health_controller.marshaller(monitoring_ns),
-                                    description='Server is in a coherent state.')
+        @monitoring_ns.marshal_with(health_controller.get_response_model, description='Server is in a coherent state.')
         @monitoring_ns.response(*exception_response)
         def get(self):
             """
