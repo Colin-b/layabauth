@@ -19,3 +19,6 @@ Importing pycommon_server.flask_restplus_common will make sure that every flask 
 ```python
 import pycommon_server.flask_restplus_common
 ```
+
+For more information:
+http://guru.trading.gdfsuez.net/confluence/display/ETRMdev/Using+the+INFRA+project+on+Azure
