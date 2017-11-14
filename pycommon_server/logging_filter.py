@@ -2,46 +2,62 @@ import uuid
 import logging
 import flask
 
-def generate_request_id(original_id=''):
-    new_id = uuid.uuid4()
-    if original_id:
-        new_id = "{},{}".format(original_id, new_id)
-    return new_id
 
-# Returns the current request ID or a new one if there is none
-# In order of preference:
-#   * If we've already created a request ID and stored it in the flask.g context local, use that
-#   * If a client has passed in the X-Request-Id header, create a new ID with that prepended
-#   * Otherwise, generate a request ID and store it in flask.g.request_id.py
-def request_id():
+def _request_id():
+    """
+    Returns the current request identifier or a new one if there is none
+    Also store it in flask.g.request_id
+
+    In order of preference:
+    * If we have already created a request identifier and stored it in the flask.g context local, use that
+    * If a client has passed in the X-Request-Id header, create a new ID with that prepended
+    * Otherwise, generate a request identifier and store it in flask.g.request_id
+
+    :return: current request identifier or a new one if there is none
+    """
     if getattr(flask.g, 'request_id', None):
         return flask.g.request_id
+
     headers = flask.request.headers
-    original_request_id = headers.get("X-Request-Id")
-    new_uuid = generate_request_id(original_request_id)
-    flask.g.request_id = new_uuid
-    return new_uuid
+    original_request_id = headers.get('X-Request-Id')
+    request_id = f"{original_request_id},{uuid.uuid4()}" if original_request_id else uuid.uuid4()
+
+    flask.g.request_id = request_id
+    return request_id
+
+
+def _user_id():
+    """
+    Returns the user identifier or anonymous if there is none
+    Also store it in flask.g.user_id
+
+    :return: current user identifier or anonymous if there is none
+    """
+    if getattr(flask.g, 'user_id', None):
+        return flask.g.user_id
+
+    # TODO implement generic authentication user_id retrieval
+    user_id = 'anonymous'
+
+    flask.g.user_id = user_id
+    return user_id
 
 
 class RequestIdFilter(logging.Filter):
-    # This is a logging filter that makes the request ID available for use in
-    # the logging format. Note that we're checking if we're in a request
-    # context, as we may want to log things before Flask is fully loaded.
+    """
+    This is a logging filter that makes the request identifier available for use in the logging format.
+    Note that we are checking if we are in a request context, as we may want to log things before Flask is fully loaded.
+    """
     def filter(self, record):
-        record.request_id = request_id() if flask.has_request_context() else ''
+        record.request_id = _request_id() if flask.has_request_context() else ''
         return True
 
 
 class UserIdFilter(logging.Filter):
+    """
+    This is a logging filter that makes the user identifier available for use in the logging format.
+    Note that we are checking if we are in a request context, as we may want to log things before Flask is fully loaded.
+    """
     def filter(self, record):
-        if flask.has_request_context():
-            if getattr(flask.g, 'user_id', None):
-                user_id = flask.g.user_id
-            else:
-                # TODO implement generic authentication user_id retrieval
-                user_id = 'anonymous'
-                flask.g.user_id = user_id
-        else:
-            user_id = ''
-        record.user_id = user_id
+        record.user_id = _user_id() if flask.has_request_context() else ''
         return True

@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.1.0 (2017-11-14) ##
+
+### Enhancements ###
+
+- Introduce pycommon_server.logging_filter module allowing to display request identifier or user identifier in logs.
+
 ## Version 3.0.0 (2017-10-23) ##
 
 ### Release notes ###

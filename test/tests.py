@@ -5,7 +5,7 @@ import unittest
 import logging
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
-from pycommon_server import flask_restplus_common
+from pycommon_server import flask_restplus_common, logging_filter
 
 logger = logging.getLogger(__name__)
 
@@ -231,6 +231,75 @@ class FlaskRestPlusTest(unittest.TestCase):
         TestRequest = collections.namedtuple('TestRequest', 'data')
         flask.request = TestRequest(data='{}')
         self.assertEqual('Test get method is still called with decorator.', put())
+
+
+class LoggingFilterTest(unittest.TestCase):
+
+    def setUp(self):
+        logger.info(f'-------------------------------')
+        logger.info(f'Start of {self._testMethodName}')
+
+    def tearDown(self):
+        logger.info(f'End of {self._testMethodName}')
+        logger.info(f'-------------------------------')
+
+    def test_request_id_filter_without_flask(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push(None)
+        logging_filter.RequestIdFilter().filter(record)
+        self.assertEqual('', record.request_id)
+
+    def test_request_id_filter_with_value_already_set_in_flask_flobals(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push('SimulateFlaskContext')
+        flask.g = collections.namedtuple('TestGlobals', 'request_id')(request_id='TestId')
+        logging_filter.RequestIdFilter().filter(record)
+        self.assertEqual('TestId', record.request_id)
+
+    def test_request_id_filter_with_value_not_set_in_header(self):
+        import collections, flask, uuid
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push('SimulateFlaskContext')
+        flask.g = collections.namedtuple('TestGlobals', [])
+        TestRequest = collections.namedtuple('TestRequest', 'headers')
+        flask.request = TestRequest(headers={})
+        logging_filter.RequestIdFilter().filter(record)
+        self.assertTrue(isinstance(record.request_id, uuid.UUID))
+
+    def test_request_id_filter_with_value_set_in_header(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push('SimulateFlaskContext')
+        flask.g = collections.namedtuple('TestGlobals', [])
+        TestRequest = collections.namedtuple('TestRequest', 'headers')
+        flask.request = TestRequest(headers={'X-Request-Id': 'PreviousId'})
+        logging_filter.RequestIdFilter().filter(record)
+        self.assertRegex(record.request_id, 'PreviousId,.*-.*-.*-.*-.*')
+
+    def test_user_id_filter_without_flask(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push(None)
+        logging_filter.UserIdFilter().filter(record)
+        self.assertEqual('', record.user_id)
+
+    def test_user_id_filter_with_value_already_set_in_flask_flobals(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push('SimulateFlaskContext')
+        flask.g = collections.namedtuple('TestGlobals', 'user_id')(user_id='TestId')
+        logging_filter.UserIdFilter().filter(record)
+        self.assertEqual('TestId', record.user_id)
+
+    def test_user_id_filter_with_value_not_set_in_header(self):
+        import collections, flask
+        record = collections.namedtuple('TestRecord', [])
+        flask._request_ctx_stack.push('SimulateFlaskContext')
+        flask.g = collections.namedtuple('TestGlobals', [])
+        logging_filter.UserIdFilter().filter(record)
+        self.assertEqual('anonymous', record.user_id)
 
 
 if __name__ == '__main__':
