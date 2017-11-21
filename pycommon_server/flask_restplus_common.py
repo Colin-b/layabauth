@@ -91,7 +91,7 @@ class LogRequestDetails:
         else:
             args_name = list(OrderedDict.fromkeys(inspect.getfullargspec(self.request_method)[0] + list(func_kwargs.keys())))
             args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
-            stats = {'func_name': self.request_method.__qualname__}
+            stats = {'func_name': '.'.join(self.request_method.__qualname__.rsplit('.',2)[-2:])}
             stats.update(args_dict)
             # add request args
             if has_request_context():
@@ -101,7 +101,6 @@ class LogRequestDetails:
             try:
                 ret =  self.request_method(*func_args, **func_kwargs)
             except Exception as e:
-
                 if has_request_context():
                     stats['request.data'] = request.data
                 exc_type, exc_value, exc_traceback = sys.exc_info()
