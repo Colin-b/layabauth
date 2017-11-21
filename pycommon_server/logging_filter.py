@@ -1,6 +1,7 @@
-import uuid
 import logging
+import uuid
 import flask
+from pycommon_server.jwt_checker import get_user
 
 
 def _request_id():
@@ -37,7 +38,7 @@ def _user_id():
         return flask.g.user_id
 
     # TODO implement generic authentication user_id retrieval
-    user_id = 'anonymous'
+    user_id = get_user(flask.request.headers.get('Bearer'))
 
     flask.g.user_id = user_id
     return user_id
@@ -59,5 +60,13 @@ class UserIdFilter(logging.Filter):
     Note that we are checking if we are in a request context, as we may want to log things before Flask is fully loaded.
     """
     def filter(self, record):
-        record.user_id = _user_id() if flask.has_request_context() else ''
+        if flask.has_request_context():
+            if getattr(flask.g, 'user_id', None):
+                user_id = flask.g.user_id
+            else:
+                user_id = get_user(flask.request.headers.get('Bearer'))
+                flask.g.user_id = user_id
+        else:
+            user_id = ''
+        record.user_id = user_id
         return True
