@@ -95,8 +95,8 @@ class LogRequestDetails:
             stats.update(args_dict)
             # add request args
             if has_request_context():
-                stats.update(dict([(f'request.args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
-                stats.update({f'request.headers.{k}':v for k,v in dict(request.headers).items()})
+                stats.update(dict([(f'request_args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
+                stats.update({f'request_headers.{k}':v for k,v in dict(request.headers).items()})
             start = time.perf_counter()
             try:
                 ret =  self.request_method(*func_args, **func_kwargs)
@@ -115,7 +115,7 @@ class LogRequestDetails:
                 logger.critical(stats)
                 raise e
 
-            stats['request.processing_time'] = time.perf_counter() - start
+            stats['request_processing_time'] = time.perf_counter() - start
             logger.info(stats)
             return ret
 
