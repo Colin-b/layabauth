@@ -185,8 +185,9 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual((204, 'Sample deleted'), flask_restplus_common.successful_deletion_response)
 
     def test_successful_model(self):
-        self.assertEqual("Successful: {'status': 'Successful'}",
-                         flask_restplus_common.successful_model(TestAPI))
+        model = flask_restplus_common.successful_model(TestAPI)
+        self.assertEqual('Successful', model.name)
+        self.assertEqual({'status': 'Successful'}, model.fields_default)
 
     def test_log_get_request_details(self):
         @flask_restplus_common.LogRequestDetails
