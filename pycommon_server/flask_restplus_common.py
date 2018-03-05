@@ -136,6 +136,22 @@ class RequiresAuthentication:
             }
         }
 
+    @staticmethod
+    def method_authorizations(*scopes) -> dict:
+        """
+        Return method security.
+        Contains only one OAuth2 security.
+
+        :param scopes: All scope names that should be available (as string).
+        """
+        return {
+            'security': [
+                {
+                    'oauth2': scopes
+                }
+            ]
+        }
+
     def __init__(self, request_method):
         self.__doc__ = request_method.__doc__  # Propagate method documentation (used in Swagger description)
         self.request_method = request_method
