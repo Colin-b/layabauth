@@ -12,10 +12,13 @@ setup(
         'flask-restplus==0.10.1',
         # Used to parse configurations
         'pyaml==17.8.0',
-        'oauth2helper==0.1'
     ],
     extras_require={
         'testing': [
+            'pycommon-test==1.7.0',
+        ],
+        'authentication': [
+            'oauth2helper==0.1',
         ],
     },
 )

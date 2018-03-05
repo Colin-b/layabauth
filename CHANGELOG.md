@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.2.0 (2018-03-02) ##
+
+### Enhancements ###
+
+- Introduce new decorator to authenticate user and methods to provide authorization in swagger.
+
 ## Version 3.1.0 (2017-11-14) ##
 
 ### Enhancements ###

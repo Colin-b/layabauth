@@ -6,7 +6,9 @@ import inspect
 import sys
 import traceback
 import os
-
+import flask
+from http import HTTPStatus
+from werkzeug.exceptions import Unauthorized
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +31,40 @@ def add_exception_handler(api):
     exception_model = _exception_model(api)
 
     @api.errorhandler(Exception)
-    @api.marshal_with(exception_model, code=500)
+    @api.marshal_with(exception_model, code=HTTPStatus.INTERNAL_SERVER_ERROR)
     def handle_exception(exception):
         """This is the default error handling."""
         logger.exception('An unexpected error occurred.')
-        return {'message': str(exception)}, 500
+        return {'message': str(exception)}, HTTPStatus.INTERNAL_SERVER_ERROR
 
-    return 500, 'An unexpected error occurred.', exception_model
+    return HTTPStatus.INTERNAL_SERVER_ERROR, 'An unexpected error occurred.', exception_model
+
+
+def _unauthorized_exception_model(api):
+    exception_details = {
+        'message': fields.String(description='Description of the error.',
+                                 required=True,
+                                 example='This is a description of the error.')
+    }
+    return api.model('Unauthorized', exception_details)
+
+
+def add_unauthorized_exception_handler(api):
+    """
+    Add the Unauthorized Exception handler.
+
+    :param api: The root Api
+    """
+    exception_model = _unauthorized_exception_model(api)
+
+    @api.errorhandler(Unauthorized)
+    @api.marshal_with(exception_model, code=HTTPStatus.UNAUTHORIZED)
+    def handle_exception(exception):
+        """This is the Unauthorized error handling."""
+        logger.exception(HTTPStatus.UNAUTHORIZED.description)
+        return {'message': str(exception)}, HTTPStatus.UNAUTHORIZED
+
+    return HTTPStatus.UNAUTHORIZED, HTTPStatus.UNAUTHORIZED.description, exception_model
 
 
 def add_monitoring_namespace(api, exception_response, health_controller):
@@ -65,15 +94,65 @@ def add_monitoring_namespace(api, exception_response, health_controller):
     return monitoring_ns
 
 
-successful_return = {'status': 'Successful'}, 200
+successful_return = {'status': 'Successful'}, HTTPStatus.OK
 
 
 def successful_model(api):
     return api.model('Successful', {'status': fields.String(default='Successful')})
 
 
-successful_deletion_return = '', 204
-successful_deletion_response = 204, 'Sample deleted'
+successful_deletion_return = '', HTTPStatus.NO_CONTENT
+successful_deletion_response = HTTPStatus.NO_CONTENT, 'Sample deleted'
+
+
+class User:
+    def __init__(self, decoded_body: dict):
+        import oauth2helper.content
+        self.name = oauth2helper.content.user_name(decoded_body)
+
+
+class RequiresAuthentication:
+    """
+    When added to a Resource method, ensure that proper authentication will succeed.
+    """
+
+    @staticmethod
+    def authorizations(**scopes) -> dict:
+        """
+        Return all security definitions.
+        Contains only one OAuth2 definition using Engie Azure authentication.
+
+        :param scopes: All scopes that should be available (scope_name = 'description as a string').
+        """
+        engie_token_id = '24139d14-c62c-4c47-8bdd-ce71ea1d50cf'
+        nonce = scopes.pop('nonce', '7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7')
+
+        return {
+            'oauth2': {
+                'scopes': scopes,
+                'flow': 'implicit',
+                'authorizationUrl': f'https://login.microsoftonline.com/{engie_token_id}/oauth2/authorize?nonce={nonce}',
+                'type': 'oauth2'
+            }
+        }
+
+    def __init__(self, request_method):
+        self.__doc__ = request_method.__doc__  # Propagate method documentation (used in Swagger description)
+        self.request_method = request_method
+
+    def __call__(self, *func_args, **func_kwargs):
+        flask.g.current_user = self._to_user(flask.request.headers.get('Bearer'))
+        return self.request_method(*func_args, **func_kwargs)
+
+    def _to_user(self, token: str) -> User:
+        try:
+            import oauth2helper.token
+            json_header, json_body = oauth2helper.token.validate(token)
+            return User(json_body)
+        except ImportError:
+            raise Unauthorized('Server is missing oauth2helper module to handle authentication.')
+        except ValueError as e:
+            raise Unauthorized(e.args[0])
 
 
 class LogRequestDetails:
@@ -105,7 +184,7 @@ class LogRequestDetails:
                     stats['request.data'] = request.data
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 trace = traceback.extract_tb(exc_traceback)
-                #don't want the current frame in the traceback
+                # Do not want the current frame in the traceback
                 if len(trace) > 1:
                     trace = trace[1:]
                 trace.reverse()

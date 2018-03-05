@@ -3,6 +3,7 @@ import os.path
 import tempfile
 import unittest
 import logging
+from pycommon_test.flask_restplus_mock import TestAPI
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 from pycommon_server import flask_restplus_common, logging_filter
@@ -184,13 +185,8 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual((204, 'Sample deleted'), flask_restplus_common.successful_deletion_response)
 
     def test_successful_model(self):
-        class TestApi:
-            @classmethod
-            def model(cls, name, fields):
-                testable_fields = {key: value.default for key, value in fields.items()}
-                return f'{name}: {testable_fields}'
         self.assertEqual("Successful: {'status': 'Successful'}",
-                         flask_restplus_common.successful_model(TestApi))
+                         flask_restplus_common.successful_model(TestAPI))
 
     def test_log_get_request_details(self):
         @flask_restplus_common.LogRequestDetails
