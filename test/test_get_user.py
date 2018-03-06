@@ -9,7 +9,7 @@ class JWTUserTest(unittest.TestCase):
     def test_get_user_bearer(self):
         with self.assertRaises(ValueError) as em:
             jwt_checker.get_user(bearer=self.encoded, no_auth=False)
-        self.assertTrue(str(em.exception).startswith("Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM cannot be found in "))
+        self.assertRegex(str(em.exception), "Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM is not a valid key identifier. Valid ones are .*")
 
     def test_get_user_no_auth_no_bearer(self):
         user = jwt_checker.get_user(bearer=None, no_auth=True)
@@ -22,7 +22,7 @@ class JWTUserTest(unittest.TestCase):
     def test_get_user_no_auth_wrong_key(self):
         with self.assertRaises(ValueError) as em:
             jwt_checker.get_user(bearer="TOTO", no_auth=True)
-        self.assertTrue(str(em.exception).startswith("Token validation error: not enough values to unpack "))
+        self.assertEqual(str(em.exception), "Token validation error: Invalid JWT Token (header, body and signature must be separated by dots).")
 
     def test_get_user_no_auth_no_br(self):
         user = jwt_checker.get_user(bearer="SESAME", no_auth=False)

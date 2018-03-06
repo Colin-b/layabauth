@@ -8,6 +8,7 @@ import traceback
 import os
 import flask
 from http import HTTPStatus
+from jwt.exceptions import InvalidTokenError, InvalidKeyError
 from werkzeug.exceptions import Unauthorized
 
 logger = logging.getLogger(__name__)
@@ -167,7 +168,7 @@ class RequiresAuthentication:
             return User(json_body)
         except ImportError:
             raise Unauthorized('Server is missing oauth2helper module to handle authentication.')
-        except ValueError as e:
+        except (InvalidTokenError or InvalidKeyError) as e:
             raise Unauthorized(e.args[0])
 
 

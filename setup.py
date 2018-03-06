@@ -18,7 +18,7 @@ setup(
             'pycommon-test==1.7.0',
         ],
         'authentication': [
-            'oauth2helper==0.1',
+            'oauth2helper==1.0.0',
         ],
     },
 )

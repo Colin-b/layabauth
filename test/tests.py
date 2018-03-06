@@ -4,6 +4,7 @@ import tempfile
 import unittest
 import logging
 from pycommon_test.flask_restplus_mock import TestAPI
+from werkzeug.exceptions import Unauthorized
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 from pycommon_server import flask_restplus_common, logging_filter
@@ -188,6 +189,42 @@ class FlaskRestPlusTest(unittest.TestCase):
         model = flask_restplus_common.successful_model(TestAPI)
         self.assertEqual('Successful', model.name)
         self.assertEqual({'status': 'Successful'}, model.fields_default)
+
+    def test_authentication_failure_token_not_provided(self):
+        @flask_restplus_common.RequiresAuthentication
+        def get():
+            return 'This should not be called.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'headers')
+        flask.request = TestRequest(headers={})
+        with self.assertRaises(Unauthorized) as cm:
+            get()
+        self.assertEqual('JWT Token is mandatory.', cm.exception.description)
+
+    def test_authentication_failure_fake_token_provided(self):
+        @flask_restplus_common.RequiresAuthentication
+        def get():
+            return 'This should not be called.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'headers')
+        flask.request = TestRequest(headers={'Bearer': 'Fake token'})
+        with self.assertRaises(Unauthorized) as cm:
+            get()
+        self.assertEqual('Invalid JWT Token (header, body and signature must be separated by dots).', cm.exception.description)
+
+    def test_authentication_failure_expired_token_provided(self):
+        @flask_restplus_common.RequiresAuthentication
+        def get():
+            return 'This should not be called.'
+        # Avoid test failure due to decorator being called outside of a Flask request context
+        import flask, collections
+        TestRequest = collections.namedtuple('TestRequest', 'headers')
+        flask.request = TestRequest(headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
+        with self.assertRaises(Unauthorized) as cm:
+            get()
+        self.assertEqual('Signature has expired', cm.exception.description)
 
     def test_log_get_request_details(self):
         @flask_restplus_common.LogRequestDetails
