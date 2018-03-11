@@ -125,14 +125,14 @@ class RequiresAuthentication:
 
         :param scopes: All scopes that should be available (scope_name = 'description as a string').
         """
-        engie_token_id = '24139d14-c62c-4c47-8bdd-ce71ea1d50cf'
+        engie_tenant_id = '24139d14-c62c-4c47-8bdd-ce71ea1d50cf'
         nonce = scopes.pop('nonce', '7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7')
 
         return {
             'oauth2': {
                 'scopes': scopes,
                 'flow': 'implicit',
-                'authorizationUrl': f'https://login.microsoftonline.com/{engie_token_id}/oauth2/authorize?nonce={nonce}',
+                'authorizationUrl': f'https://login.microsoftonline.com/{engie_tenant_id}/oauth2/authorize?nonce={nonce}',
                 'type': 'oauth2'
             }
         }
