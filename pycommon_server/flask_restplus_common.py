@@ -9,6 +9,7 @@ from functools import wraps
 from http import HTTPStatus
 
 import flask
+from flask import request, has_request_context
 from flask_restplus import Resource, fields
 from werkzeug.exceptions import Unauthorized
 
@@ -178,7 +179,6 @@ def requires_authentication(func):
 
 class Statistics:
     def __init__(self, func, *func_args, **func_kwargs):
-        from flask import request, has_request_context
         args_name = list(
             OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
         args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
@@ -196,7 +196,6 @@ class Statistics:
         logger.info(self.stats)
 
     def exception_occurred(self):
-        from flask import request, has_request_context
         if has_request_context():
             self.stats['request.data'] = request.data
         exc_type, exc_value, exc_traceback = sys.exc_info()
