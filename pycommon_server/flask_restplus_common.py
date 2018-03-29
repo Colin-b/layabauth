@@ -181,6 +181,7 @@ def _log_request_details(func):
     def wrapper(*func_args, **func_kwargs):
 
         def extract_request_details():
+            from flask import request, has_request_context
             args_name = list(
                 OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
             args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
@@ -194,6 +195,7 @@ def _log_request_details(func):
             return stats
 
         def add_exception_details(stats):
+            from flask import request, has_request_context
             if has_request_context():
                 stats['request.data'] = request.data
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -209,21 +211,20 @@ def _log_request_details(func):
                 {'error.summary': trace_summary, 'error.class': exc_type.__name__, 'error.msg': str(exc_value),
                  'error.traceback': traceback.format_exc()})
 
-        from flask import request, has_request_context
         if "Health.get" in func.__qualname__:
             return func(*func_args, **func_kwargs)
-        else:
-            statistics = extract_request_details()
-            start = time.perf_counter()
-            try:
-                ret = func(*func_args, **func_kwargs)
-                statistics['request_processing_time'] = time.perf_counter() - start
-                logger.info(statistics)
-                return ret
-            except Exception as e:
-                add_exception_details(statistics)
-                logger.critical(statistics)
-                raise e
+
+        statistics = extract_request_details()
+        start = time.perf_counter()
+        try:
+            ret = func(*func_args, **func_kwargs)
+            statistics['request_processing_time'] = time.perf_counter() - start
+            logger.info(statistics)
+            return ret
+        except Exception as e:
+            add_exception_details(statistics)
+            logger.critical(statistics)
+            raise e
 
     return wrapper
 
