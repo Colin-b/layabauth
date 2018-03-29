@@ -1,13 +1,15 @@
-import logging
-from flask_restplus import Resource, fields
-import time
-from collections import OrderedDict
 import inspect
-import sys
-import traceback
+import logging
 import os
-import flask
+import sys
+import time
+import traceback
+from collections import OrderedDict
+from functools import wraps
 from http import HTTPStatus
+
+import flask
+from flask_restplus import Resource, fields
 from jwt.exceptions import InvalidTokenError, InvalidKeyError
 from werkzeug.exceptions import Unauthorized
 
@@ -172,30 +174,26 @@ class RequiresAuthentication:
             raise Unauthorized(e.args[0])
 
 
-class LogRequestDetails:
-    """
-    Decorator for incoming requests.
-    """
-    def __init__(self, request_method):
-        self.request_method = request_method
-        self.log = "Health.get" not in request_method.__qualname__
-
-    def __call__(self, *func_args, **func_kwargs):
+def log_request_details(func):
+    @wraps(func)
+    def wrapper(*func_args, **func_kwargs):
         from flask import request, has_request_context
-        if not self.log:
-            return self.request_method(*func_args, **func_kwargs)
+        if "Health.get" in func.__qualname__:
+            return func(*func_args, **func_kwargs)
         else:
-            args_name = list(OrderedDict.fromkeys(inspect.getfullargspec(self.request_method)[0] + list(func_kwargs.keys())))
+            args_name = list(
+                OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
             args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
-            stats = {'func_name': '.'.join(self.request_method.__qualname__.rsplit('.',2)[-2:])}
+            stats = {'func_name': '.'.join(func.__qualname__.rsplit('.', 2)[-2:])}
             stats.update(args_dict)
             # add request args
             if has_request_context():
-                stats.update(dict([(f'request_args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
-                stats.update({f'request_headers.{k}':v for k,v in dict(request.headers).items()})
+                stats.update(dict(
+                    [(f'request_args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
+                stats.update({f'request_headers.{k}': v for k, v in dict(request.headers).items()})
             start = time.perf_counter()
             try:
-                ret =  self.request_method(*func_args, **func_kwargs)
+                ret = func(*func_args, **func_kwargs)
             except Exception as e:
                 if has_request_context():
                     stats['request.data'] = request.data
@@ -205,9 +203,12 @@ class LogRequestDetails:
                 if len(trace) > 1:
                     trace = trace[1:]
                 trace.reverse()
-                trace_summary = '/'.join([os.path.splitext(os.path.basename(tr.filename))[0]+'.'+tr.name for tr in trace])
-                tb = [{'line':tr.line,'file': tr.filename, 'lineno':tr.lineno, 'func':tr.name} for tr in trace]
-                stats.update({'error.summary':trace_summary, 'error.class':exc_type.__name__, 'error.msg':str(exc_value), 'error.traceback':traceback.format_exc()})
+                trace_summary = '/'.join(
+                    [os.path.splitext(os.path.basename(tr.filename))[0] + '.' + tr.name for tr in trace])
+                tb = [{'line': tr.line, 'file': tr.filename, 'lineno': tr.lineno, 'func': tr.name} for tr in trace]
+                stats.update(
+                    {'error.summary': trace_summary, 'error.class': exc_type.__name__, 'error.msg': str(exc_value),
+                     'error.traceback': traceback.format_exc()})
                 logger.critical(stats)
                 raise e
 
@@ -215,7 +216,7 @@ class LogRequestDetails:
             logger.info(stats)
             return ret
 
+    return wrapper
 
-# This will log every incoming request (do not use a method to avoid registering it twice by accident)
-Resource.method_decorators.append(LogRequestDetails)
 
+Resource.method_decorators.append(log_request_details)

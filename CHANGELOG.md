@@ -6,6 +6,13 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.2.1 (2018-03-29) ##
+
+### Bug fixes ###
+
+- Convert class LogRequestDetails to method so it is properly used as a decorator by Resource class.
+- As a consequence, model validation done by Flask RestPlus is not bypassed anymore.
+
 ## Version 3.2.0 (2018-03-02) ##
 
 ### Enhancements ###
