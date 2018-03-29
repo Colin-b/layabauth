@@ -179,10 +179,8 @@ def requires_authentication(func):
 def _log_request_details(func):
     @wraps(func)
     def wrapper(*func_args, **func_kwargs):
-        from flask import request, has_request_context
-        if "Health.get" in func.__qualname__:
-            return func(*func_args, **func_kwargs)
-        else:
+
+        def extract_request_details():
             args_name = list(
                 OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
             args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
@@ -193,30 +191,39 @@ def _log_request_details(func):
                 stats.update(dict(
                     [(f'request_args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
                 stats.update({f'request_headers.{k}': v for k, v in dict(request.headers).items()})
+            return stats
+
+        def add_exception_details(stats):
+            if has_request_context():
+                stats['request.data'] = request.data
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            trace = traceback.extract_tb(exc_traceback)
+            # Do not want the current frame in the traceback
+            if len(trace) > 1:
+                trace = trace[1:]
+            trace.reverse()
+            trace_summary = '/'.join(
+                [os.path.splitext(os.path.basename(tr.filename))[0] + '.' + tr.name for tr in trace])
+            tb = [{'line': tr.line, 'file': tr.filename, 'lineno': tr.lineno, 'func': tr.name} for tr in trace]
+            stats.update(
+                {'error.summary': trace_summary, 'error.class': exc_type.__name__, 'error.msg': str(exc_value),
+                 'error.traceback': traceback.format_exc()})
+
+        from flask import request, has_request_context
+        if "Health.get" in func.__qualname__:
+            return func(*func_args, **func_kwargs)
+        else:
+            statistics = extract_request_details()
             start = time.perf_counter()
             try:
                 ret = func(*func_args, **func_kwargs)
+                statistics['request_processing_time'] = time.perf_counter() - start
+                logger.info(statistics)
+                return ret
             except Exception as e:
-                if has_request_context():
-                    stats['request.data'] = request.data
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                trace = traceback.extract_tb(exc_traceback)
-                # Do not want the current frame in the traceback
-                if len(trace) > 1:
-                    trace = trace[1:]
-                trace.reverse()
-                trace_summary = '/'.join(
-                    [os.path.splitext(os.path.basename(tr.filename))[0] + '.' + tr.name for tr in trace])
-                tb = [{'line': tr.line, 'file': tr.filename, 'lineno': tr.lineno, 'func': tr.name} for tr in trace]
-                stats.update(
-                    {'error.summary': trace_summary, 'error.class': exc_type.__name__, 'error.msg': str(exc_value),
-                     'error.traceback': traceback.format_exc()})
-                logger.critical(stats)
+                add_exception_details(statistics)
+                logger.critical(statistics)
                 raise e
-
-            stats['request_processing_time'] = time.perf_counter() - start
-            logger.info(stats)
-            return ret
 
     return wrapper
 
