@@ -191,7 +191,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual({'status': 'Successful'}, model.fields_default)
 
     def test_authentication_failure_token_not_provided(self):
-        @flask_restplus_common.RequiresAuthentication
+        @flask_restplus_common.requires_authentication
         def get():
             return 'This should not be called.'
         # Avoid test failure due to decorator being called outside of a Flask request context
@@ -203,7 +203,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('JWT Token is mandatory.', cm.exception.description)
 
     def test_authentication_failure_fake_token_provided(self):
-        @flask_restplus_common.RequiresAuthentication
+        @flask_restplus_common.requires_authentication
         def get():
             return 'This should not be called.'
         # Avoid test failure due to decorator being called outside of a Flask request context
@@ -215,7 +215,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('Invalid JWT Token (header, body and signature must be separated by dots).', cm.exception.description)
 
     def test_authentication_failure_invalid_key_identifier_in_token(self):
-        @flask_restplus_common.RequiresAuthentication
+        @flask_restplus_common.requires_authentication
         def get():
             return 'This should not be called.'
         # Avoid test failure due to decorator being called outside of a Flask request context

@@ -155,15 +155,8 @@ class RequiresAuthentication:
             ]
         }
 
-    def __init__(self, request_method):
-        self.__doc__ = request_method.__doc__  # Propagate method documentation (used in Swagger description)
-        self.request_method = request_method
-
-    def __call__(self, *func_args, **func_kwargs):
-        flask.g.current_user = self._to_user(flask.request.headers.get('Bearer'))
-        return self.request_method(*func_args, **func_kwargs)
-
-    def _to_user(self, token: str) -> User:
+    @staticmethod
+    def _to_user(token: str) -> User:
         try:
             import oauth2helper.token
             json_header, json_body = oauth2helper.token.validate(token)
@@ -172,6 +165,15 @@ class RequiresAuthentication:
             raise Unauthorized('Server is missing oauth2helper module to handle authentication.')
         except (InvalidTokenError or InvalidKeyError) as e:
             raise Unauthorized(e.args[0])
+
+
+def requires_authentication(func):
+    @wraps(func)
+    def wrapper(*func_args, **func_kwargs):
+        flask.g.current_user = RequiresAuthentication._to_user(flask.request.headers.get('Bearer'))
+        return func(*func_args, **func_kwargs)
+
+    return wrapper
 
 
 def log_request_details(func):
