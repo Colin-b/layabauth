@@ -10,7 +10,6 @@ from http import HTTPStatus
 
 import flask
 from flask_restplus import Resource, fields
-from jwt.exceptions import InvalidTokenError, InvalidKeyError
 from werkzeug.exceptions import Unauthorized
 
 logger = logging.getLogger(__name__)
@@ -114,9 +113,9 @@ class User:
         self.name = oauth2helper.content.user_name(decoded_body)
 
 
-class RequiresAuthentication:
+class Authentication:
     """
-    When added to a Resource method, ensure that proper authentication will succeed.
+    Contains helper to manage authentication.
     """
 
     @staticmethod
@@ -158,6 +157,7 @@ class RequiresAuthentication:
     @staticmethod
     def _to_user(token: str) -> User:
         try:
+            from jwt.exceptions import InvalidTokenError, InvalidKeyError
             import oauth2helper.token
             json_header, json_body = oauth2helper.token.validate(token)
             return User(json_body)
@@ -170,13 +170,13 @@ class RequiresAuthentication:
 def requires_authentication(func):
     @wraps(func)
     def wrapper(*func_args, **func_kwargs):
-        flask.g.current_user = RequiresAuthentication._to_user(flask.request.headers.get('Bearer'))
+        flask.g.current_user = Authentication._to_user(flask.request.headers.get('Bearer'))
         return func(*func_args, **func_kwargs)
 
     return wrapper
 
 
-def log_request_details(func):
+def _log_request_details(func):
     @wraps(func)
     def wrapper(*func_args, **func_kwargs):
         from flask import request, has_request_context
@@ -221,4 +221,4 @@ def log_request_details(func):
     return wrapper
 
 
-Resource.method_decorators.append(log_request_details)
+Resource.method_decorators.append(_log_request_details)

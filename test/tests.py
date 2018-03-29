@@ -227,7 +227,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertRegex(cm.exception.description, "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*")
 
     def test_log_get_request_details(self):
-        @flask_restplus_common.log_request_details
+        @flask_restplus_common._log_request_details
         def get():
             return 'Test get method is still called with decorator.'
         # Avoid test failure due to decorator being called outside of a Flask request context
@@ -237,7 +237,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('Test get method is still called with decorator.', get())
 
     def test_log_delete_request_details(self):
-        @flask_restplus_common.log_request_details
+        @flask_restplus_common._log_request_details
         def delete():
             return 'Test get method is still called with decorator.'
         # Avoid test failure due to decorator being called outside of a Flask request context
@@ -247,7 +247,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('Test get method is still called with decorator.', delete())
 
     def test_log_post_request_details(self):
-        @flask_restplus_common.log_request_details
+        @flask_restplus_common._log_request_details
         def post():
             return 'Test get method is still called with decorator.'
         # Avoid test failure due to decorator being called outside of a Flask request context
@@ -257,7 +257,7 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('Test get method is still called with decorator.', post())
 
     def test_log_put_request_details(self):
-        @flask_restplus_common.log_request_details
+        @flask_restplus_common._log_request_details
         def put():
             return 'Test get method is still called with decorator.'
         # Avoid test failure due to decorator being called outside of a Flask request context
