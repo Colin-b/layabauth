@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.2.2 (2018-05-03) ##
+
+### Bug fixes ###
+
+- Handle token with underscore character.
+
 ## Version 3.2.1 (2018-03-29) ##
 
 ### Bug fixes ###
