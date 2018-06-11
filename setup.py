@@ -15,7 +15,7 @@ setup(
     ],
     extras_require={
         'testing': [
-            'pycommon-test==1.8.0',
+            'pycommon-test==1.8.1',
             'pysmb==1.1.23',
         ],
         'authentication': [
