@@ -360,9 +360,7 @@ class WindowsTest(unittest.TestCase):
     def test_file_retrieval(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
         with tempfile.TemporaryDirectory() as temp_dir:
-            with open(os.path.join(temp_dir, 'distant_file'), mode='w') as distant_file:
-                distant_file.write('Test Content')
-            TestConnection.files_to_retrieve[('TestShare', 'TestFilePath')] = os.path.join(temp_dir, 'distant_file')
+            TestConnection.files_to_retrieve[('TestShare', 'TestFilePath')] = 'Test Content'
 
             windows.get(connection, 'TestShare', 'TestFilePath', os.path.join(temp_dir, 'local_file'))
 
