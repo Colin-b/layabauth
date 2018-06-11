@@ -4,10 +4,11 @@ import tempfile
 import unittest
 import logging
 from pycommon_test.flask_restplus_mock import TestAPI
+from pycommon_test.samba_mock import TestConnection
 from werkzeug.exceptions import Unauthorized
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
-from pycommon_server import flask_restplus_common, logging_filter
+from pycommon_server import flask_restplus_common, logging_filter, windows
 
 logger = logging.getLogger(__name__)
 
@@ -334,6 +335,48 @@ class LoggingFilterTest(unittest.TestCase):
         flask.g = collections.namedtuple('TestGlobals', [])
         logging_filter.UserIdFilter().filter(record)
         self.assertEqual('anonymous', record.user_id)
+
+
+class WindowsTest(unittest.TestCase):
+
+    def setUp(self):
+        logger.info(f'-------------------------------')
+        logger.info(f'Start of {self._testMethodName}')
+
+    def tearDown(self):
+        TestConnection.reset()
+        logger.info(f'End of {self._testMethodName}')
+        logger.info(f'-------------------------------')
+
+    def test_successful_connection(self):
+        self.assertIsNotNone(windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword'))
+
+    def test_connection_failure(self):
+        TestConnection.should_connect = False
+        with self.assertRaises(Exception) as cm:
+            windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        self.assertEqual('Impossible to connect to TestComputer (127.0.0.1:80), check connectivity or TestDomain\TestUser rights.', str(cm.exception))
+
+    def test_file_retrieval(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with open(os.path.join(temp_dir, 'distant_file'), mode='w') as distant_file:
+                distant_file.write('Test Content')
+            TestConnection.files_to_retrieve[('TestShare', 'TestFilePath')] = os.path.join(temp_dir, 'distant_file')
+
+            windows.get(connection, 'TestShare', 'TestFilePath', os.path.join(temp_dir, 'local_file'))
+
+            self.assertEqual(open(os.path.join(temp_dir, 'local_file')).read(), 'Test Content')
+
+    def test_file_move(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with open(os.path.join(temp_dir, 'local_file'), mode='w') as distant_file:
+                distant_file.write('Test Content Move')
+
+            windows.move(connection, 'TestShare', 'TestFilePath', os.path.join(temp_dir, 'local_file'))
+
+            self.assertEqual(TestConnection.stored_files[('TestShare', 'TestFilePath')], 'Test Content Move')
 
 
 if __name__ == '__main__':

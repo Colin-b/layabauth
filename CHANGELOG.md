@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.3.0 (2018-06-08) ##
+
+### Enhancements ###
+
+- Provide a windows module for file handling from GNU/Linux.
+
 ## Version 3.2.2 (2018-05-03) ##
 
 ### Bug fixes ###

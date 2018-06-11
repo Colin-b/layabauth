@@ -15,10 +15,15 @@ setup(
     ],
     extras_require={
         'testing': [
-            'pycommon-test==1.7.0',
+            'pycommon-test==1.8.0',
+            'pysmb==1.1.23',
         ],
         'authentication': [
             'oauth2helper==1.1.0',
+        ],
+        # Used to connect to a Microsoft Windows computer
+        'windows': [
+            'pysmb==1.1.23',
         ],
     },
 )
