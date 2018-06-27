@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.3.1 (2018-06-27) ##
+
+### Bug fixes ###
+
+- Rely on PyYaml instead of pyaml (fix version of PyYaml instead).
+
 ## Version 3.3.0 (2018-06-08) ##
 
 ### Enhancements ###
