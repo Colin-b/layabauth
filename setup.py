@@ -11,7 +11,7 @@ setup(
         # Used to manage endpoints and swagger
         'flask-restplus==0.10.1',
         # Used to parse configurations
-        'pyaml==17.12.1',
+        'PyYAML==4.1',
     ],
     extras_require={
         'testing': [
