@@ -9,21 +9,21 @@ setup(
     ]),
     install_requires=[
         # Used to manage endpoints and swagger
-        'flask-restplus==0.10.1',
+        'flask-restplus==0.11.0',
         # Used to parse configurations
-        'PyYAML==4.1',
+        'PyYAML==3.13',
     ],
     extras_require={
         'testing': [
             'pycommon-test==1.9.0',
-            'pysmb==1.1.23',
+            'pysmb==1.1.25',
         ],
         'authentication': [
-            'oauth2helper==1.1.0',
+            'oauth2helper==1.1.1',
         ],
         # Used to connect to a Microsoft Windows computer
         'windows': [
-            'pysmb==1.1.23',
+            'pysmb==1.1.25',
         ],
     },
 )

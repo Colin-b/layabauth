@@ -38,7 +38,8 @@ def move(connection: SMBConnection, share_folder: str, file_path: str, input_fil
     logger.info(f'Moving {input_file_path} file to \\\\{connection.remote_name}\\{share_folder}{file_path}...')
 
     try:
-        connection.storeFile(share_folder, f'{file_path}{temp_file_suffix}', open(input_file_path, "rb"))
+        with open(input_file_path, "rb") as input_file:
+            connection.storeFile(share_folder, f'{file_path}{temp_file_suffix}', input_file)
     except OperationFailure:
         logger.exception(f'Unable to write \\\\{connection.remote_name}\\{share_folder}{file_path}{temp_file_suffix} file')
         raise Exception(f'Unable to write \\\\{connection.remote_name}\\{share_folder}{file_path}{temp_file_suffix} file')
