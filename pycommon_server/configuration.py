@@ -42,7 +42,7 @@ def _load_logging_configuration(file_path: str) -> str:
     """
     if os.path.isfile(file_path):
         with open(file_path, 'r') as config_file:
-            logging.config.dictConfig(yaml.danger_load(config_file))
+            logging.config.dictConfig(yaml.load(config_file))
         logger.info(f'Logging configuration file ({file_path}) loaded.')
         return file_path
     else:
@@ -72,7 +72,7 @@ def _load_configuration(file_path: str) -> dict:
     """
     if os.path.isfile(file_path):
         with open(file_path, 'r') as config_file:
-            conf = yaml.danger_load(config_file)
+            conf = yaml.load(config_file)
             logger.info(f'Loading configuration from {file_path}.')
             return conf
     else:

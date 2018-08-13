@@ -6,6 +6,15 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.3.2 (2018-08-10) ##
+
+### Bug fixes ###
+
+- Ensure that opened resources are closed (when using move_file).
+- Update PyYAML to latest version (3.13).
+- Update Flask-RestPlus to latest version (0.11.0).
+- Update pysmb to latest version (1.1.25)
+
 ## Version 3.3.1 (2018-06-27) ##
 
 ### Bug fixes ###
