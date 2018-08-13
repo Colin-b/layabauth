@@ -363,8 +363,8 @@ class WindowsTest(unittest.TestCase):
             TestConnection.files_to_retrieve[('TestShare', 'TestFilePath')] = 'Test Content'
 
             windows.get(connection, 'TestShare', 'TestFilePath', os.path.join(temp_dir, 'local_file'))
-
-            self.assertEqual(open(os.path.join(temp_dir, 'local_file')).read(), 'Test Content')
+            with open(os.path.join(temp_dir, 'local_file')) as local_file:
+                self.assertEqual(local_file.read(), 'Test Content')
 
     def test_file_move(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
