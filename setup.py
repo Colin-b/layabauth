@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 
 from pycommon_server._version import __version__
+
 setup(
     name='pycommon_server',
     version=__version__,
@@ -15,8 +16,9 @@ setup(
     ],
     extras_require={
         'testing': [
-            'pycommon-test==1.9.0',
+            'pycommon-test==1.9.1',
             'pysmb==1.1.25',
+            'nose'
         ],
         'authentication': [
             'oauth2helper==1.1.1',

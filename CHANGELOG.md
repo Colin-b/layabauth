@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 3.3.3 (2018-08-20) ##
+
+### Bug fixes ###
+
+- Update dependencies to latest version.
+
 ## Version 3.3.2 (2018-08-10) ##
 
 ### Bug fixes ###
