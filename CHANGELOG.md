@@ -6,6 +6,10 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 4.0.0 (2018-08-23) ##
+
+- Default handler has been extracted to pycommon-error module.
+
 ## Version 3.3.2 (2018-08-10) ##
 
 ### Bug fixes ###
