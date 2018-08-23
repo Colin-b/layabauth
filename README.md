@@ -12,5 +12,13 @@ from pycommon_server.configuration import load
 service_configuration = load('path/to/a/file/in/module/folder')
 ```
 
+## Default behavior ##
+
+Importing pycommon_server.flask_restplus_common will make sure that every flask request is loggued on reception. 
+
+```python
+import pycommon_server.flask_restplus_common
+```
+
 For more information:
 http://guru.trading.gdfsuez.net/confluence/display/ETRMdev/Using+the+INFRA+project+on+Azure
