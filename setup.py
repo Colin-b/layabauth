@@ -16,9 +16,12 @@ setup(
     ],
     extras_require={
         'testing': [
+            # Used to provide testing help
             'pycommon-test==1.9.1',
+            # Used to test Windows-Linux connection
             'pysmb==1.1.25',
-            'nose'
+            # Used to run tests
+            'nose==1.3.7',
         ],
         'authentication': [
             'oauth2helper==1.1.1',

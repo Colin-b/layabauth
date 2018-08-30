@@ -6,7 +6,15 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 4.0.1 (2018-08-30) ##
+
+### Bug fixes ###
+
+- Update dependencies to latest version.
+
 ## Version 4.0.0 (2018-08-23) ##
+
+### Release notes ###
 
 - Default handler has been extracted to pycommon-error module.
 
