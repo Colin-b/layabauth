@@ -5,7 +5,9 @@ import unittest
 import logging
 from pycommon_test.flask_restplus_mock import TestAPI
 from pycommon_test.samba_mock import TestConnection
-from werkzeug.exceptions import Unauthorized
+from pycommon_test.service_tester import JSONTestCase
+from flask import Flask
+from flask_restplus import Resource, Api
 
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 from pycommon_server import flask_restplus_common, logging_filter, windows
@@ -30,6 +32,7 @@ class ConfigurationTest(unittest.TestCase):
         logger.info(f'-------------------------------')
         logger.info(f'Start of {self._testMethodName}')
         os.environ.pop('ENVIRONMENT', None)
+        os.environ.pop('SERVER_ENVIRONMENT', None)
 
     def tearDown(self):
         logger.info(f'End of {self._testMethodName}')
@@ -167,15 +170,49 @@ class ConfigurationTest(unittest.TestCase):
                 load(os.path.join(server_folder, 'server.py')))
 
 
-class FlaskRestPlusTest(unittest.TestCase):
+class FlaskRestPlusTest(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app)
 
-    def setUp(self):
-        logger.info(f'-------------------------------')
-        logger.info(f'Start of {self._testMethodName}')
+        @api.route('/requires_authentication')
+        class RequiresAuthentication(Resource):
+            @flask_restplus_common.requires_authentication
+            def get(self):
+                return ''
 
-    def tearDown(self):
-        logger.info(f'End of {self._testMethodName}')
-        logger.info(f'-------------------------------')
+            @flask_restplus_common.requires_authentication
+            def post(self):
+                return ''
+
+            @flask_restplus_common.requires_authentication
+            def put(self):
+                return ''
+
+            @flask_restplus_common.requires_authentication
+            def delete(self):
+                return ''
+
+        @api.route('/logging')
+        class Logging(Resource):
+            @flask_restplus_common._log_request_details
+            def get(self):
+                return ''
+
+            @flask_restplus_common._log_request_details
+            def post(self):
+                return ''
+
+            @flask_restplus_common._log_request_details
+            def put(self):
+                return ''
+
+            @flask_restplus_common._log_request_details
+            def delete(self):
+                return ''
+
+        return app
 
     def test_successful_return(self):
         self.assertEqual(({'status': 'Successful'}, 200), flask_restplus_common.successful_return)
@@ -191,81 +228,85 @@ class FlaskRestPlusTest(unittest.TestCase):
         self.assertEqual('Successful', model.name)
         self.assertEqual({'status': 'Successful'}, model.fields_default)
 
-    def test_authentication_failure_token_not_provided(self):
-        @flask_restplus_common.requires_authentication
-        def get():
-            return 'This should not be called.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'headers')
-        flask.request = TestRequest(headers={})
-        with self.assertRaises(Unauthorized) as cm:
-            get()
-        self.assertEqual('JWT Token is mandatory.', cm.exception.description)
+    def test_authentication_failure_token_not_provided_on_get(self):
+        response = self.client.get('/requires_authentication')
+        self.assert401(response)
+        self.assert_json(response, {'message': 'JWT Token is mandatory.'})
 
-    def test_authentication_failure_fake_token_provided(self):
-        @flask_restplus_common.requires_authentication
-        def get():
-            return 'This should not be called.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'headers')
-        flask.request = TestRequest(headers={'Bearer': 'Fake token'})
-        with self.assertRaises(Unauthorized) as cm:
-            get()
-        self.assertEqual('Invalid JWT Token (header, body and signature must be separated by dots).', cm.exception.description)
+    def test_authentication_failure_token_not_provided_on_post(self):
+        response = self.client.post('/requires_authentication')
+        self.assert401(response)
+        self.assert_json(response, {'message': 'JWT Token is mandatory.'})
 
-    def test_authentication_failure_invalid_key_identifier_in_token(self):
-        @flask_restplus_common.requires_authentication
-        def get():
-            return 'This should not be called.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'headers')
-        flask.request = TestRequest(headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
-        with self.assertRaises(Unauthorized) as cm:
-            get()
-        self.assertRegex(cm.exception.description, "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*")
+    def test_authentication_failure_token_not_provided_on_put(self):
+        response = self.client.put('/requires_authentication')
+        self.assert401(response)
+        self.assert_json(response, {'message': 'JWT Token is mandatory.'})
+
+    def test_authentication_failure_token_not_provided_on_delete(self):
+        response = self.client.delete('/requires_authentication')
+        self.assert401(response)
+        self.assert_json(response, {'message': 'JWT Token is mandatory.'})
+
+    def test_authentication_failure_fake_token_provided_on_get(self):
+        response = self.client.get('/requires_authentication', headers={'Bearer': 'Fake token'})
+        self.assert401(response)
+        self.assert_json(response, {'message': 'Invalid JWT Token (header, body and signature must be separated by dots).'})
+
+    def test_authentication_failure_fake_token_provided_on_post(self):
+        response = self.client.post('/requires_authentication', headers={'Bearer': 'Fake token'})
+        self.assert401(response)
+        self.assert_json(response, {'message': 'Invalid JWT Token (header, body and signature must be separated by dots).'})
+
+    def test_authentication_failure_fake_token_provided_on_put(self):
+        response = self.client.put('/requires_authentication', headers={'Bearer': 'Fake token'})
+        self.assert401(response)
+        self.assert_json(response, {'message': 'Invalid JWT Token (header, body and signature must be separated by dots).'})
+
+    def test_authentication_failure_fake_token_provided_on_delete(self):
+        response = self.client.delete('/requires_authentication', headers={'Bearer': 'Fake token'})
+        self.assert401(response)
+        self.assert_json(response, {'message': 'Invalid JWT Token (header, body and signature must be separated by dots).'})
+
+    def test_authentication_failure_invalid_key_identifier_in_token_on_get(self):
+        response = self.client.get('/requires_authentication', headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
+        self.assert401(response)
+        self.assert_json_regex(response, "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}")
+
+    def test_authentication_failure_invalid_key_identifier_in_token_on_post(self):
+        response = self.client.post('/requires_authentication', headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
+        self.assert401(response)
+        self.assert_json_regex(response, "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}")
+
+    def test_authentication_failure_invalid_key_identifier_in_token_on_put(self):
+        response = self.client.put('/requires_authentication', headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
+        self.assert401(response)
+        self.assert_json_regex(response, "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}")
+
+    def test_authentication_failure_invalid_key_identifier_in_token_on_delete(self):
+        response = self.client.delete('/requires_authentication', headers={'Bearer': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsImFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkciI6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSIsIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQiOiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcElGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVmM0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhBZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fhb8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfEDoJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg'})
+        self.assert401(response)
+        self.assert_json_regex(response, "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}")
 
     def test_log_get_request_details(self):
-        @flask_restplus_common._log_request_details
-        def get():
-            return 'Test get method is still called with decorator.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'data')
-        flask.request = TestRequest(data=None)
-        self.assertEqual('Test get method is still called with decorator.', get())
+        response = self.client.get('/logging')
+        self.assert200(response)
+        self.assert_json(response, '')
 
     def test_log_delete_request_details(self):
-        @flask_restplus_common._log_request_details
-        def delete():
-            return 'Test get method is still called with decorator.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'data')
-        flask.request = TestRequest(data=None)
-        self.assertEqual('Test get method is still called with decorator.', delete())
+        response = self.client.delete('/logging')
+        self.assert200(response)
+        self.assert_json(response, '')
 
     def test_log_post_request_details(self):
-        @flask_restplus_common._log_request_details
-        def post():
-            return 'Test get method is still called with decorator.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'data')
-        flask.request = TestRequest(data='{}')
-        self.assertEqual('Test get method is still called with decorator.', post())
+        response = self.client.post('/logging')
+        self.assert200(response)
+        self.assert_json(response, '')
 
     def test_log_put_request_details(self):
-        @flask_restplus_common._log_request_details
-        def put():
-            return 'Test get method is still called with decorator.'
-        # Avoid test failure due to decorator being called outside of a Flask request context
-        import flask, collections
-        TestRequest = collections.namedtuple('TestRequest', 'data')
-        flask.request = TestRequest(data='{}')
-        self.assertEqual('Test get method is still called with decorator.', put())
+        response = self.client.put('/logging')
+        self.assert200(response)
+        self.assert_json(response, '')
 
 
 class LoggingFilterTest(unittest.TestCase):
