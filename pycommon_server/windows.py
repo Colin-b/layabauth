@@ -66,12 +66,11 @@ def rename(connection: SMBConnection, share_folder: str, old_file_path: str, new
                                          pattern=os.path.basename(old_file_path))
     except OperationFailure:
         logger.exception(f"{old_file_path} doesn't exist")
+
     try:
         if files_list:
             connection.rename(share_folder, old_file_path, new_file_path)
-
+            logger.info(f'File renamed...')
     except OperationFailure:
         logger.exception(f'Unable to rename {old_file_path} into {new_file_path}')
         raise Exception(f'Unable to rename {old_file_path} into {new_file_path}')
-
-    logger.info(f'File renamed...')
