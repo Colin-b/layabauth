@@ -13,12 +13,11 @@ setup(
         'flask-restplus==0.11.0',
         # Used to parse configurations
         'PyYAML==3.13',
-        'pandas==0.23.0',
     ],
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==1.9.1',
+            'pycommon-test==1.10.0',
             # Used to test Windows-Linux connection
             'pysmb==1.1.25',
             # Used to run tests

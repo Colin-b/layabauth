@@ -417,15 +417,15 @@ class WindowsTest(unittest.TestCase):
 
             self.assertEqual(TestConnection.stored_files[('TestShare', 'TestFilePath')], 'Test Content Move')
 
-    def test_file_list(self):
+    def test_file_rename(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with open(os.path.join(temp_dir, 'local_file'), mode='w') as distant_file:
-                distant_file.write('Test Content Move')
 
-            windows.move(connection, 'TestShare', 'TestFilePath', os.path.join(temp_dir, 'local_file'))
+        TestConnection.stored_files[('TestShare', 'file_to_rename')] = 'Test Rename'
 
-            self.assertEqual(TestConnection.stored_files[('TestShare', 'TestFilePath')], 'Test Content Move')
+        windows.rename(connection, 'TestShare', 'file_to_rename', 'file_new_name')
+
+        self.assertEqual(TestConnection.stored_files[('TestShare', 'file_new_name')], 'Test Rename')
+
 
 if __name__ == '__main__':
     unittest.main()
