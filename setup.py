@@ -13,6 +13,7 @@ setup(
         'flask-restplus==0.11.0',
         # Used to parse configurations
         'PyYAML==3.13',
+        'pandas==0.23.0',
     ],
     extras_require={
         'testing': [

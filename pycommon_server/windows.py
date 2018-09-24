@@ -1,5 +1,6 @@
 import logging
 import os
+import pandas
 from smb.SMBConnection import SMBConnection
 from smb.smb_structs import OperationFailure
 
@@ -55,3 +56,19 @@ def move(connection: SMBConnection, share_folder: str, file_path: str, input_fil
     os.remove(input_file_path)
 
     logger.info(f'{input_file_path} file moved within \\\\{connection.remote_name}\\{share_folder}{file_path}.')
+
+
+def rename(connection: SMBConnection, share_folder: str, folder_path: str, old_file_name: str, new_file_name: str):
+    logger.info(f'Renaming {old_file_name} into {new_file_name}...')
+
+    try:
+        files_list = connection.listPath(share_folder, folder_path, pattern = '*.zip')
+        df = pandas.DataFrame(files_list, columns=['filename'])
+        file_exists = any(df.filename.apply(lambda file: file.filename) == old_file_name)
+        if file_exists:
+            connection.rename(share_folder, f'{folder_path}/{old_file_name}', f'{folder_path}/{new_file_name}')
+    except OperationFailure as e:
+        logger.exception(f'Unable to rename {old_file_name} into {new_file_name}')
+        raise Exception(f'Unable to rename {old_file_name} into {new_file_name}')
+
+    logger.info(f'File renamed...')
