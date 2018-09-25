@@ -55,3 +55,22 @@ def move(connection: SMBConnection, share_folder: str, file_path: str, input_fil
     os.remove(input_file_path)
 
     logger.info(f'{input_file_path} file moved within \\\\{connection.remote_name}\\{share_folder}{file_path}.')
+
+
+def rename(connection: SMBConnection, share_folder: str, old_file_path: str, new_file_path: str):
+    logger.info(f'Renaming \\\\{connection.remote_name}\\{share_folder}{old_file_path} into \\\\{connection.remote_name}\\{share_folder}{new_file_path}...')
+
+    try:
+        files_list = connection.listPath(share_folder, os.path.dirname(old_file_path),
+                                         pattern=os.path.basename(old_file_path))
+    except OperationFailure:
+        files_list = None
+        logger.exception(f"\\\\{connection.remote_name}\\{share_folder}{old_file_path} doesn't exist")
+
+    if files_list:
+        try:
+            connection.rename(share_folder, old_file_path, new_file_path)
+            logger.info(f'File renamed...')
+        except OperationFailure:
+            logger.exception(f'Unable to rename \\\\{connection.remote_name}\\{share_folder}{old_file_path} into \\\\{connection.remote_name}\\{share_folder}{new_file_path}')
+            raise Exception(f'Unable to rename \\\\{connection.remote_name}\\{share_folder}{old_file_path} into \\\\{connection.remote_name}\\{share_folder}{new_file_path}')

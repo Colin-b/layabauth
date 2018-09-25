@@ -417,6 +417,22 @@ class WindowsTest(unittest.TestCase):
 
             self.assertEqual(TestConnection.stored_files[('TestShare', 'TestFilePath')], 'Test Content Move')
 
+    def test_file_rename(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+
+        TestConnection.stored_files[('TestShare', 'file_to_rename')] = 'Test Rename'
+
+        windows.rename(connection, 'TestShare', 'file_to_rename', 'file_new_name')
+
+        self.assertIsNone(TestConnection.stored_files.get(('TestShare', 'file_to_rename'), None))
+        self.assertEqual(TestConnection.stored_files[('TestShare', 'file_new_name')], 'Test Rename')
+
+    def test_file_rename_file_does_not_exist(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+
+        windows.rename(connection, 'TestShare', 'file_to_rename_2', 'file_new_name')
+
+        self.assertIsNone(TestConnection.stored_files.get(('TestShare', 'file_new_name'), None))
 
 if __name__ == '__main__':
     unittest.main()
