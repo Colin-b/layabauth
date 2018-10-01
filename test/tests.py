@@ -420,19 +420,39 @@ class WindowsTest(unittest.TestCase):
     def test_file_rename(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
 
-        TestConnection.stored_files[('TestShare', 'file_to_rename')] = 'Test Rename'
+        TestConnection.stored_files[('TestShare/', 'file_to_rename')] = 'Test Rename'
 
-        windows.rename(connection, 'TestShare', 'file_to_rename', 'file_new_name')
+        windows.rename(connection, 'TestShare/', 'file_to_rename', 'file_new_name')
 
-        self.assertIsNone(TestConnection.stored_files.get(('TestShare', 'file_to_rename'), None))
-        self.assertEqual(TestConnection.stored_files[('TestShare', 'file_new_name')], 'Test Rename')
+        self.assertIsNone(TestConnection.stored_files.get(('TestShare/', 'file_to_rename'), None))
+        self.assertEqual(TestConnection.stored_files[('TestShare/', 'file_new_name')], 'Test Rename')
 
     def test_file_rename_file_does_not_exist(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
 
-        windows.rename(connection, 'TestShare', 'file_to_rename_2', 'file_new_name')
+        with self.assertRaises(FileNotFoundError) as cm:
+            windows.rename(connection, 'TestShare\\', 'file_to_rename_2', 'file_new_name')
 
-        self.assertIsNone(TestConnection.stored_files.get(('TestShare', 'file_new_name'), None))
+        self.assertEqual(str(cm.exception),  r"\\TestComputer\TestShare\file_to_rename_2 doesn't exist")
+
+    def test_get_file_desc_file_exists(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+
+        TestConnection.stored_files[('TestShare/', 'file_to_find')] = 'Test Find'
+
+        founded_file = windows.get_file_desc(connection, 'TestShare/', 'file_to_find')
+
+        self.assertIsNotNone(founded_file)
+        self.assertEqual(founded_file.filename, 'file_to_find')
+
+    def test_get_file_desc_file_does_not_exist(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+
+        TestConnection.stored_files[('TestShare/', 'file_to_find')] = 'Test Find'
+
+        founded_file = windows.get_file_desc(connection, 'TestShare/', 'nonexistent_file_to_find')
+
+        self.assertIsNone(founded_file)
 
 if __name__ == '__main__':
     unittest.main()
