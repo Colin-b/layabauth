@@ -6,6 +6,13 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 4.1.1 (2018-10-01) ##
+
+### Bug fixes ###
+
+- [Windows] refactor rename function.
+- Update dependencies to latest version.
+
 ## Version 4.1.0 (2018-09-24) ##
 
 ### Enhancements ###

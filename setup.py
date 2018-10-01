@@ -10,14 +10,14 @@ setup(
     ]),
     install_requires=[
         # Used to manage endpoints and swagger
-        'flask-restplus==0.11.0',
+        'flask-restplus==0.12.1',
         # Used to parse configurations
         'PyYAML==3.13',
     ],
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==1.10.0',
+            'pycommon-test==1.10.1',
             # Used to test Windows-Linux connection
             'pysmb==1.1.25',
             # Used to run tests
