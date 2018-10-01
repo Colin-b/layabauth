@@ -424,7 +424,7 @@ class WindowsTest(unittest.TestCase):
 
         windows.rename(connection, 'TestShare/', 'file_to_rename', 'file_new_name')
 
-        self.assertIsNone(TestConnection.stored_files.get(('TestShare/', 'file_to_rename'), None))
+        self.assertNotIn(('TestShare/', 'file_to_rename'), TestConnection.stored_files)
         self.assertEqual(TestConnection.stored_files[('TestShare/', 'file_new_name')], 'Test Rename')
 
     def test_file_rename_file_does_not_exist(self):
@@ -442,7 +442,6 @@ class WindowsTest(unittest.TestCase):
 
         founded_file = windows.get_file_desc(connection, 'TestShare/', 'file_to_find')
 
-        self.assertIsNotNone(founded_file)
         self.assertEqual(founded_file.filename, 'file_to_find')
 
     def test_get_file_desc_file_does_not_exist(self):
