@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 4.1.2 (2018-10-01) ##
+
+### Bug fixes ###
+
+- Update dependencies.
+
 ## Version 4.1.1 (2018-10-01) ##
 
 ### Bug fixes ###
