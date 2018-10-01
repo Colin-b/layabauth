@@ -11,7 +11,6 @@ List all changes in various categories:
 ### Bug fixes ###
 
 - [Windows] refactor rename function.
-- Added test cases.
 - Update dependencies to latest version.
 
 ## Version 4.1.0 (2018-09-24) ##

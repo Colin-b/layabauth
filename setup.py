@@ -10,7 +10,7 @@ setup(
     ]),
     install_requires=[
         # Used to manage endpoints and swagger
-        'flask-restplus==0.11.0',
+        'flask-restplus==0.12.1',
         # Used to parse configurations
         'PyYAML==3.13',
     ],
