@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 6.0.0 (2018-10-10) ##
+
+### Release notes ###
+
+- add_monitoring_namespace second parameter is now all the error handlers.
+
 ## Version 5.0.0 (2018-10-10) ##
 
 ### Release notes ###
