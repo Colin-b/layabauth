@@ -3,6 +3,10 @@ import oauth2helper.token
 
 
 def get_user(bearer=None, no_auth=True):
+    """
+    This function is kept for compatibility purposes.
+    Use @requires_authentication decorator and you will get the user via flask.g.current_user
+    """
     # if there is a request_context, we still check
     if no_auth and bearer is None:
         return 'anonymous'

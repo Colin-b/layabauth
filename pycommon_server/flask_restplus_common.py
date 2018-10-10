@@ -117,7 +117,9 @@ class Authentication:
 def requires_authentication(func):
     @wraps(func)
     def wrapper(*func_args, **func_kwargs):
-        flask.g.current_user = Authentication._to_user(flask.request.headers.get('Bearer'))
+        authorization = flask.request.headers.get('Authorization')
+        token = authorization[7:] if authorization and authorization.startswith('Bearer ') else None
+        flask.g.current_user = Authentication._to_user(token)
         return func(*func_args, **func_kwargs)
 
     return wrapper
