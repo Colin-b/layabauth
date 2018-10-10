@@ -16,23 +16,23 @@ from werkzeug.exceptions import Unauthorized
 logger = logging.getLogger(__name__)
 
 
-def add_monitoring_namespace(api, exception_response, health_controller):
+def add_monitoring_namespace(api, error_responses, health_controller):
     """
     Create a monitoring namespace containing the Health check endpoint.
 
     :param api: The root Api
-    :param exception_response: A Flask RestPlus response (usually the return call from add_exception_handler)
+    :param error_responses: All Flask RestPlus error responses (usually the return call from pycommon_error.add_error_handlers)
     :param health_controller: The Health controller (usually located into controllers.Health)
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
-    monitoring_ns = api.namespace('monitoring', path='/', description='Monitoring operations')
-    health_controller.namespace(monitoring_ns)
+    namespace = api.namespace('monitoring', path='/', description='Monitoring operations')
+    health_controller.namespace(namespace)
 
-    @monitoring_ns.route('/health')
+    @namespace.route('/health')
+    @namespace.doc(**error_responses)
     class Health(Resource):
 
-        @monitoring_ns.marshal_with(health_controller.get_response_model, description='Server is in a coherent state.')
-        @monitoring_ns.response(*exception_response)
+        @namespace.marshal_with(health_controller.get_response_model, description='Server is in a coherent state.')
         def get(self):
             """
             Check service health.
@@ -40,7 +40,7 @@ def add_monitoring_namespace(api, exception_response, health_controller):
             """
             return health_controller().get()
 
-    return monitoring_ns
+    return namespace
 
 
 successful_return = {'status': 'Successful'}, HTTPStatus.OK
