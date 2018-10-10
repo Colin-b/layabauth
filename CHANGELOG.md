@@ -6,6 +6,16 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 5.0.0 (2018-10-10) ##
+
+### Release notes ###
+
+- OAuth2 authentication token is now extracted from Authorization header (Bearer {token}).
+
+### Bug fixes ###
+
+- Update dependencies to latest version.
+
 ## Version 4.1.2 (2018-10-01) ##
 
 ### Bug fixes ###
