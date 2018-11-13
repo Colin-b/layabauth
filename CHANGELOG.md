@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 6.1.0 (2018-11-13) ##
+
+### Enhancements ###
+
+- Add celery request id if available (and flask request id is not)
+
 ## Version 6.0.1 (2018-10-30) ##
 
 ### Bug fixes ###
