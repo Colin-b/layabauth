@@ -3,6 +3,11 @@ import uuid
 import flask
 from pycommon_server.jwt_checker import get_user
 
+try:
+    from celery import current_task
+except Exception as e:
+    current_task = None
+
 
 def _request_id():
     """
@@ -47,10 +52,13 @@ def _user_id():
 class RequestIdFilter(logging.Filter):
     """
     This is a logging filter that makes the request identifier available for use in the logging format.
+    This filter support lookup in flask context for the request id or in a celery context
     Note that we are checking if we are in a request context, as we may want to log things before Flask is fully loaded.
     """
+
     def filter(self, record):
-        record.request_id = _request_id() if flask.has_request_context() else ''
+        record.request_id = _request_id() if flask.has_request_context() else current_task.request.id if current_task and hasattr(
+            current_task, 'request') and hasattr(current_task.request, 'id') else ''
         return True
 
 
@@ -59,6 +67,7 @@ class UserIdFilter(logging.Filter):
     This is a logging filter that makes the user identifier available for use in the logging format.
     Note that we are checking if we are in a request context, as we may want to log things before Flask is fully loaded.
     """
+
     def filter(self, record):
         if flask.has_request_context():
             if getattr(flask.g, 'user_id', None):

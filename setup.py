@@ -30,5 +30,9 @@ setup(
         'windows': [
             'pysmb==1.1.25',
         ],
+        # Async task execution using celery
+        'celery': [
+            'celery==4.1.1',
+        ],
     },
 )
