@@ -24,7 +24,7 @@ setup(
             'nose==1.3.7',
         ],
         'authentication': [
-            'oauth2helper==1.2.0',
+            'oauth2helper==1.3.0',
         ],
         # Used to connect to a Microsoft Windows computer
         'windows': [

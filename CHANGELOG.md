@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 6.2.0 (2018-11-16) ##
+
+### Enhancements ###
+
+- Upgrade oauth2helper to 1.3.0
+
 ## Version 6.1.0 (2018-11-13) ##
 
 ### Enhancements ###
