@@ -17,14 +17,14 @@ setup(
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==1.15.2',
+            'pycommon-test==2.0.0',
             # Used to test Windows-Linux connection
             'pysmb==1.1.25',
             # Used to run tests
             'nose==1.3.7',
         ],
         'authentication': [
-            'oauth2helper==1.2.0',
+            'oauth2helper==1.3.0',
         ],
         # Used to connect to a Microsoft Windows computer
         'windows': [
@@ -32,7 +32,7 @@ setup(
         ],
         # Async task execution using celery
         'celery': [
-            'celery==4.1.1',
+            'celery==4.2.1',
         ],
     },
 )
