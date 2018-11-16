@@ -12,6 +12,10 @@ List all changes in various categories:
 
 - Update dependencies to latest version (celery 4.2.1, pycommon_test 2.0.0 and oauth2helper 1.3.0)
 
+### Bug fixes ###
+
+- Add oauth2helper dependency to testing.
+
 ## Version 6.1.0 (2018-11-13) ##
 
 ### Enhancements ###
