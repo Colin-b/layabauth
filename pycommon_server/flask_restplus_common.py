@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 def add_monitoring_namespace(api, error_responses, health_controller):
     """
     Create a monitoring namespace containing the Health check endpoint.
-
     :param api: The root Api
     :param error_responses: All Flask RestPlus error responses (usually the return call from pycommon_error.add_error_handlers)
     :param health_controller: The Health controller (usually located into controllers.Health)

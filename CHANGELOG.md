@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 7.0.1 (2018-11-16) ##
+
+### Bug fixes ###
+
+- Avoid useless new line character in description of health endpoint.
+
 ## Version 7.0.0 (2018-11-16) ##
 
 ### Release notes ###
