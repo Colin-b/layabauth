@@ -24,12 +24,11 @@ def load(server_file_path: str) -> dict:
 
 def load_logging_configuration(configuration_folder: str) -> str:
     """
-    Load logging configuration according to ENVIRONMENT environment variable.
+    Load logging configuration according to SERVER_ENVIRONMENT environment variable.
     If file is not found, then logging will be performed as INFO into stdout.
     Return loaded configuration file path. None if not loaded.
     """
-    environment = os.environ.get('ENVIRONMENT', 'default')
-    environment = os.environ.get('SERVER_ENVIRONMENT', environment)
+    environment = os.environ.get('SERVER_ENVIRONMENT', 'default')
 
     file_path = os.path.join(configuration_folder, f'logging_{environment}.yml')
     return _load_logging_configuration(file_path)
