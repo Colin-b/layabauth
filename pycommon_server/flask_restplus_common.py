@@ -36,8 +36,8 @@ def add_monitoring_namespace(api, error_responses, health_controller):
             """
             Check service health.
             This endpoint perform a quick server state check.
-            TODO follow https://inadarei.github.io/rfc-healthcheck/
             """
+            # TODO follow https://inadarei.github.io/rfc-healthcheck/
             return health_controller.get()
 
     return namespace
