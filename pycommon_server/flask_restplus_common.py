@@ -37,8 +37,9 @@ def add_monitoring_namespace(api, error_responses, health_controller):
             """
             Check service health.
             This endpoint perform a quick server state check.
+            TODO follow https://inadarei.github.io/rfc-healthcheck/
             """
-            return health_controller().get()
+            return health_controller.get()
 
     return namespace
 
@@ -127,15 +128,17 @@ def requires_authentication(func):
 
 class Statistics:
     def __init__(self, func, *func_args, **func_kwargs):
-        args_name = list(
-            OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
+        args_name = list(OrderedDict.fromkeys(inspect.getfullargspec(func)[0] + list(func_kwargs.keys())))
         args_dict = OrderedDict(list(zip(args_name, func_args)) + list(func_kwargs.items()))
         self.stats = {'func_name': '.'.join(func.__qualname__.rsplit('.', 2)[-2:])}
         self.stats.update(args_dict)
         # add request args
         if has_request_context():
-            self.stats.update(dict(
-                [(f'request_args.{k}', v[0]) if len(v) == 1 else (k, v) for k, v in dict(request.args).items()]))
+            self.stats.update({
+                # TODO Explain why the key name should change if v length is not 1
+                f'request_args.{k}' if len(v) == 1 else k: v[0] if len(v) == 1 else v
+                for k, v in dict(request.args).items()
+            })
             self.stats.update({f'request_headers.{k}': v for k, v in dict(request.headers).items()})
         self.start = time.perf_counter()
 
@@ -152,12 +155,13 @@ class Statistics:
         if len(trace) > 1:
             trace = trace[1:]
         trace.reverse()
-        trace_summary = '/'.join(
-            [os.path.splitext(os.path.basename(tr.filename))[0] + '.' + tr.name for tr in trace])
-        tb = [{'line': tr.line, 'file': tr.filename, 'lineno': tr.lineno, 'func': tr.name} for tr in trace]
-        self.stats.update(
-            {'error.summary': trace_summary, 'error.class': exc_type.__name__, 'error.msg': str(exc_value),
-             'error.traceback': traceback.format_exc()})
+        trace_summary = '/'.join([os.path.splitext(os.path.basename(tr.filename))[0] + '.' + tr.name for tr in trace])
+        self.stats.update({
+            'error.summary': trace_summary,
+            'error.class': exc_type.__name__,
+            'error.msg': str(exc_value),
+            'error.traceback': traceback.format_exc(),
+        })
         logger.critical(self.stats)
 
 

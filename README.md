@@ -4,7 +4,6 @@ Provide helper to manipulate server.
 
 ## Loading configuration ## 
 
-
 ```python
 from pycommon_server.configuration import load
 
