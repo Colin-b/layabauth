@@ -31,7 +31,6 @@ class ConfigurationTest(unittest.TestCase):
     def setUp(self):
         logger.info(f'-------------------------------')
         logger.info(f'Start of {self._testMethodName}')
-        os.environ.pop('ENVIRONMENT', None)
         os.environ.pop('SERVER_ENVIRONMENT', None)
 
     def tearDown(self):
@@ -48,18 +47,6 @@ class ConfigurationTest(unittest.TestCase):
             self.assertEqual(
                 {
                     'section_default': {
-                        'key': 'value'
-                    }
-                },
-                load_configuration(tmp_dir))
-
-    def test_environment_configuration_loaded(self):
-        os.environ['ENVIRONMENT'] = 'test'
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            _add_file(tmp_dir, 'configuration_test.yml', 'section_test:', '  key: value')
-            self.assertEqual(
-                {
-                    'section_test': {
                         'key': 'value'
                     }
                 },
@@ -98,8 +85,8 @@ class ConfigurationTest(unittest.TestCase):
                       '  handlers: [standard_output]')
             self.assertEqual(os.path.join(tmp_dir, 'logging_default.yml'), load_logging_configuration(tmp_dir))
 
-    def test_environment_logging_configuration_loaded(self):
-        os.environ['ENVIRONMENT'] = 'test'
+    def test_server_environment_logging_configuration_loaded(self):
+        os.environ['SERVER_ENVIRONMENT'] = 'test'
         with tempfile.TemporaryDirectory() as tmp_dir:
             _add_file(tmp_dir, 'logging_test.yml',
                       'version: 1',
@@ -142,8 +129,8 @@ class ConfigurationTest(unittest.TestCase):
                 },
                 load(os.path.join(server_folder, 'server.py')))
 
-    def test_all_environment_configurations_loaded(self):
-        os.environ['ENVIRONMENT'] = 'test'
+    def test_all_server_environment_configurations_loaded(self):
+        os.environ['SERVER_ENVIRONMENT'] = 'test'
         with tempfile.TemporaryDirectory() as tmp_dir:
             configuration_folder = _add_dir(tmp_dir, 'configuration')
             server_folder = _add_dir(tmp_dir, 'my_server')
