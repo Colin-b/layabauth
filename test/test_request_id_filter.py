@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from pycommon_server import logging_filter
 
+
 class RequestIdFilterTest(unittest.TestCase):
 
     def setUp(self):
@@ -37,3 +38,7 @@ class RequestIdFilterTest(unittest.TestCase):
         dummy_record = namedtuple('Record', 'request_id')
         req_filter.filter(dummy_record)
         self.assertEqual('bite my shiny metal ass', dummy_record.request_id)
+
+
+if __name__ == '__main__':
+    unittest.main()
