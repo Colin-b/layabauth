@@ -6,6 +6,18 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 7.0.0 (2018-11-16) ##
+
+### Release notes ###
+
+- Health controller is not instantiated anymore before calling get method. To upgrade to this version you will need to:
+  Switch your controllers.Health.get method to a classmethod or instantiate controllers.Health when providing it to
+  add_monitoring_namespace method
+ 
+- Configuration is not loaded based on ENVIRONMENT environment variable anymore. It is only loaded based on 
+  SERVER_ENVIRONMENT environment variable. It should not impact anyone but clients relying on old deployment scripts
+  or source docker image might want to ensure they set this variable properly.
+
 ## Version 6.2.0 (2018-11-16) ##
 
 ### Enhancements ###
