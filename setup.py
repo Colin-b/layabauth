@@ -32,7 +32,10 @@ setup(
         ],
         # Async task execution using celery
         'celery': [
-            'celery==4.2.1',
+            # redis freeze. Beware, as other newer version are very buggy
+            'redis==2.10.6',
+            # Used to process requests asynchronously
+            'celery[redis]==4.2.1',
         ],
     },
 )
