@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 7.1.0 (2018-11-25) ##
+
+### Enhancements ###
+
+- Add celery support via celery_common module
+
 ## Version 7.0.1 (2018-11-16) ##
 
 ### Bug fixes ###
