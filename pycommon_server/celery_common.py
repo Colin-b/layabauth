@@ -8,12 +8,19 @@ from celery import Celery
 from celery import result as celery_results
 from flask_restplus import Resource
 
-BASE_END_POINT = '/tasks'
+
+_STATUS_ENDPOINT = '/status'
+_RESULT_ENDPOINT = '/result'
 
 logger = logging.getLogger('celery_server')
 
 
-class NamespaceProxy:
+class AsyncNamespaceProxy:
+    """
+    Flask rest-plus Namespace proxy.
+    This proxy namespace add a decorator 'async_route' that will generate 2 extra endpoint : /status and /result
+    to query the status or the result of the celery task
+    """
 
     def __init__(self, namespace, celery_app, exception_response):
         self.__namespace = namespace
@@ -63,8 +70,8 @@ def base_url():
 def how_to_get_celery_status(celery_task):
     status = flask.Response()
     status.status_code = 202
-    status.headers['location'] = f'{base_url()}/status/{celery_task.id}'
-    status.data = f'Computation status can be found using this URL: {base_url()}/status/{celery_task.id}'
+    status.headers['location'] = f'{base_url()}{_STATUS_ENDPOINT}/{celery_task.id}'
+    status.data = f'Computation status can be found using this URL: {base_url()}{_STATUS_ENDPOINT}/{celery_task.id}'
     return status
 
 
@@ -77,7 +84,7 @@ def get_celery_status(celery_task_id: str, celery_app):
     if celery_task.ready():
         status = flask.Response()
         status.status_code = 303
-        status.headers['location'] = base_url().replace('/status/', '/result/')
+        status.headers['location'] = base_url().replace(f'{_STATUS_ENDPOINT}/', f'{_RESULT_ENDPOINT}/')
         return status
 
     return flask.jsonify({'state': celery_task.state})
@@ -90,7 +97,7 @@ def get_celery_result(celery_app, celery_task_id: str):
 
 def build_result_endpoints(base_clazz, endpoint_root, namespace, celery_application, response_model,
                            exception_response):
-    @namespace.route(f'{endpoint_root}/result/<string:celery_task_id>')
+    @namespace.route(f'{endpoint_root}{_RESULT_ENDPOINT}/<string:celery_task_id>')
     @namespace.doc(**exception_response)
     class CeleryTaskResult(Resource):
 
@@ -102,7 +109,7 @@ def build_result_endpoints(base_clazz, endpoint_root, namespace, celery_applicat
             """
             return get_celery_result(celery_application, celery_task_id)
 
-    @namespace.route(f'{endpoint_root}/status/<string:celery_task_id>')
+    @namespace.route(f'{endpoint_root}{_STATUS_ENDPOINT}/<string:celery_task_id>')
     @namespace.doc(**exception_response)
     class CeleryTaskStatus(Resource):
         @namespace.doc(f'get_{snake_case(base_clazz)}_status')
