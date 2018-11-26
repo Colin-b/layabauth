@@ -1,3 +1,4 @@
+import importlib
 import inspect
 import logging
 import os
@@ -214,9 +215,9 @@ class _ReverseProxied:
         return self.app(environ, start_response)
 
 
-def create_api(version: str, title: str, cors: bool = True, compress_mimetypes: List[str] = [],
+def create_api(name: str, title: str, cors: bool = True, compress_mimetypes: List[str] = [],
                reverse_proxy: bool = True, **kwargs):
-    application = Flask(__name__)
+    application = Flask(__name__.split('.')[0])
 
     if cors:
         CORS(application)
@@ -231,7 +232,7 @@ def create_api(version: str, title: str, cors: bool = True, compress_mimetypes: 
 
     api = Api(
         application,
-        version=version,
+        version=importlib.import_module('test._version').__version__,
         title=title,
         **kwargs
     )
