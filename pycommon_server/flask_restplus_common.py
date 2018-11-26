@@ -1,3 +1,4 @@
+import importlib
 import inspect
 import logging
 import os
@@ -7,10 +8,13 @@ import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
+from typing import List
 import json
 import flask
-from flask import request, has_request_context, make_response
-from flask_restplus import Resource, fields
+from flask import request, has_request_context, make_response, Flask
+from flask_compress import Compress
+from flask_cors import CORS
+from flask_restplus import Resource, fields, Api
 from werkzeug.exceptions import Unauthorized
 
 logger = logging.getLogger(__name__)
@@ -214,6 +218,66 @@ def _log_request_details(func):
             raise
 
     return wrapper
+
+
+class _ReverseProxied:
+    '''
+    Wrap the application in this middleware and configure the
+    front-end server to add these headers, to let you quietly bind
+    this to a URL other than / and to an HTTP scheme that is
+    different than what is used locally.
+
+    :param app: the WSGI application
+    '''
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        original_url = environ.get('HTTP_X_ORIGINAL_REQUEST_URI', '')
+        if original_url:
+            script_name = '/' + original_url.split('/', maxsplit=2)[1]
+            environ['SCRIPT_NAME'] = script_name
+
+            path_info = environ.get('PATH_INFO', '')
+            if path_info.startswith(script_name):
+                environ['PATH_INFO'] = path_info[len(script_name):]
+
+            scheme = environ.get('HTTP_X_SCHEME', '')
+            if scheme:
+                environ['wsgi.url_scheme'] = scheme
+        return self.app(environ, start_response)
+
+
+def create_api(name: str, cors: bool = True, compress_mimetypes: List[str] = None, reverse_proxy: bool = True,
+               **kwargs) -> (Flask, Api):
+    """
+    Create Flask application and related Flask-RestPlus API instance.
+
+    :param name: server.py __name__ variable.
+    :param cors: If CORS (Cross Resource) should be enabled. Activated by default.
+    :param compress_mimetypes: List of mime-types that should be compressed. No compression by default.
+    :param reverse_proxy: If server should handle reverse-proxy configuration. Enabled by default.
+    :param kwargs: Additional Flask-RestPlus API arguments.
+    :return: A tuple with 2 elements: Flask application, Flask-RestPlus API
+    """
+    service_package = name.split('.')[0]
+    application = Flask(service_package)
+
+    if cors:
+        CORS(application)
+
+    if compress_mimetypes:
+        compress = Compress()
+        compress.init_app(application)
+        application.config['COMPRESS_MIMETYPES'] = compress_mimetypes
+
+    if reverse_proxy:
+        application.wsgi_app = _ReverseProxied(application.wsgi_app)
+
+    version = importlib.import_module(f'{service_package}._version').__version__
+
+    return application, Api(application, version=version, **kwargs)
 
 
 Resource.method_decorators.append(_log_request_details)
