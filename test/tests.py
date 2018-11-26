@@ -569,7 +569,7 @@ class CreateNewApi(unittest.TestCase):
                                                   'tags': [], 'responses': {
                     'ParseError': {'description': "When a mask can't be parsed"},
                     'MaskError': {'description': 'When any error occurs on mask'}}})
-            self.assertEquals(response.headers.get('Access-Control-Allow-Origin'), '*')
+            self.assertEqual(response.headers.get('Access-Control-Allow-Origin'), '*')
 
     def test_compress_api(self):
         import test.test_get_user as fake_service
