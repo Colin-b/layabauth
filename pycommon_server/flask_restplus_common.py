@@ -215,7 +215,7 @@ class _ReverseProxied:
         return self.app(environ, start_response)
 
 
-def create_api(name: str, title: str, cors: bool = True, compress_mimetypes: List[str] = [],
+def create_api(name: str, title: str, cors: bool = True, compress_mimetypes: List[str] = None,
                reverse_proxy: bool = True, **kwargs):
     application = Flask(__name__.split('.')[0])
 
