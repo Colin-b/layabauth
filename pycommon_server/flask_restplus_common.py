@@ -8,19 +8,21 @@ import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
-from typing import List
+from typing import List, Dict
 import json
 import flask
 from flask import request, has_request_context, make_response, Flask
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_restplus import Resource, fields, Api
+from flask_restplus import Resource, fields, Api, Namespace
 from werkzeug.exceptions import Unauthorized
+from urllib.parse import urlparse
+
 
 logger = logging.getLogger(__name__)
 
 
-def add_monitoring_namespace(api, health_details):
+def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     """
     Create a monitoring namespace containing the Health check endpoint.
     This endpoint implements https://inadarei.github.io/rfc-healthcheck/
@@ -34,7 +36,7 @@ def add_monitoring_namespace(api, health_details):
     release_id = api.version
 
     @namespace.route('/health')
-    @namespace.doc(response={
+    @namespace.doc(responses={
         200: ('Server is in a coherent state.', namespace.model('HealthPass', {
             'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='pass', enum=['pass', 'warn']),
             'version': fields.String(description='Public version of the service.', required=True, example='1'),
@@ -69,7 +71,8 @@ def add_monitoring_namespace(api, health_details):
             except Exception as e:
                 return self._send_status('fail', 400, details, output=str(e))
 
-        def _send_status(self, status: str, code: int, details: dict, **kwargs):
+        @staticmethod
+        def _send_status(status: str, code: int, details: dict, **kwargs):
             body = {
                 'status': status,
                 'version': version,
@@ -84,15 +87,69 @@ def add_monitoring_namespace(api, health_details):
     return namespace
 
 
-successful_return = {'status': 'Successful'}, HTTPStatus.OK
+def base_path() -> str:
+    """
+    Return service base path (handle the fact that client may be behind a reverse proxy).
+    """
+    if 'X-Original-Request-Uri' in flask.request.headers:
+        service_path = '/' + flask.request.headers['X-Original-Request-Uri'].split('/', maxsplit=2)[1]
+        return f'http://{flask.request.headers["Host"]}{service_path}'
+    parsed = urlparse(flask.request.base_url)
+    return f'{parsed.scheme}://{parsed.netloc}'
 
 
-def successful_model(api):
-    return api.model('Successful', {'status': fields.String(default='Successful')})
+def created_response(url: str) -> flask.Response:
+    """
+    Create a response to return to the client in case of a successful POST request.
+
+    :param url: Server relative URL returning the created resource(s).
+    :return: Response containing the location of the new resource.
+    """
+    response = make_response(json.dumps({'status': 'Successful'}), HTTPStatus.CREATED)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['location'] = f'{base_path()}{url}'
+    return response
 
 
-successful_deletion_return = '', HTTPStatus.NO_CONTENT
-successful_deletion_response = HTTPStatus.NO_CONTENT, 'Sample deleted'
+def created_response_doc(api: Namespace) -> Dict[str, dict]:
+    return {
+        'responses': {
+            HTTPStatus.CREATED.value: (
+                'Created',
+                api.model('Created', {'status': fields.String(default='Successful')}),
+                {'headers': {'location': 'Location of created resource.'}}
+            ),
+        },
+    }
+
+
+def updated_response(url: str) -> flask.Response:
+    """
+    Create a response to return to the client in case of a successful PUT request.
+
+    :param url: Server relative URL returning the updated resource(s).
+    :return: Response containing the location of the updated resource.
+    """
+    response = make_response(json.dumps({'status': 'Successful'}), HTTPStatus.CREATED)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['location'] = f'{base_path()}{url}'
+    return response
+
+
+def updated_response_doc(api: Namespace) -> Dict[str, dict]:
+    return {
+        'responses': {
+            HTTPStatus.CREATED.value: (
+                'Updated',
+                api.model('Updated', {'status': fields.String(default='Successful')}),
+                {'headers': {'location': 'Location of updated resource.'}}
+            ),
+        },
+    }
+
+
+deleted_response = '', HTTPStatus.NO_CONTENT
+deleted_response_doc = HTTPStatus.NO_CONTENT, 'Deleted'
 
 
 class User:

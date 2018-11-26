@@ -256,6 +256,63 @@ class HealthCheckWithPassDetails(JSONTestCase):
             'version': '3',
         })
 
+    def test_generated_swagger(self):
+        response = self.client.get('/swagger.json')
+        self.assert200(response)
+        self.assert_swagger(response, {
+            'swagger': '2.0',
+            'basePath': '/',
+            'paths': {
+                '/health': {
+                    'get': {
+                        'responses': {
+                            '200': {
+                                'description': 'Server is in a coherent state.',
+                                'schema': {'$ref': '#/definitions/HealthPass'}
+                            },
+                            '400': {
+                                'description': 'Server is not in a coherent state.',
+                                'schema': {'$ref': '#/definitions/HealthFail'}
+                            }
+                        },
+                        'summary': 'Check service health',
+                        'description': 'This endpoint perform a quick server state check.',
+                        'operationId': 'get_health',
+                        'tags': ['monitoring']
+                    }
+                }
+            },
+            'info': {'title': 'API', 'version': '3.2.1'},
+            'produces': ['application/json'],
+            'consumes': ['application/json'],
+            'tags': [{'name': 'monitoring', 'description': 'Monitoring operations'}],
+            'definitions': {
+                'HealthPass': {
+                    'required': ['details', 'releaseId', 'status', 'version'],
+                    'properties': {
+                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'pass', 'enum': ['pass', 'warn']},
+                        'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
+                        'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
+                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'}
+                    }, 'type': 'object'
+                },
+                'HealthFail': {
+                    'required': ['details', 'releaseId', 'status', 'version'],
+                    'properties': {
+                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'fail', 'enum': ['fail']},
+                        'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
+                        'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
+                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'},
+                        'output': {'type': 'string', 'description': 'Raw error output.'}
+                    }, 'type': 'object'
+                }
+            },
+            'responses': {
+                'ParseError': {'description': "When a mask can't be parsed"},
+                'MaskError': {'description': 'When any error occurs on mask'}
+            }
+        })
+
 
 class FlaskRestPlusTest(JSONTestCase):
     def create_app(self):
@@ -299,21 +356,92 @@ class FlaskRestPlusTest(JSONTestCase):
             def delete(self):
                 return ''
 
+        @api.route('/standard_responses')
+        class StandardResponses(Resource):
+            @api.doc(**flask_restplus_common.created_response_doc(api))
+            def post(self):
+                return flask_restplus_common.created_response('/standard_responses?id=42')
+
+            @api.doc(**flask_restplus_common.updated_response_doc(api))
+            def put(self):
+                return flask_restplus_common.updated_response('/standard_responses?id=43')
+
+            @api.response(*flask_restplus_common.deleted_response_doc)
+            def delete(self):
+                return flask_restplus_common.deleted_response
+
         return app
 
-    def test_successful_return(self):
-        self.assertEqual(({'status': 'Successful'}, 200), flask_restplus_common.successful_return)
+    def test_standard_post_response_without_reverse_proxy(self):
+        response = self.post_json('/standard_responses', {})
+        self.assertStatus(response, 201)
+        self.assert_json(response, {'status': 'Successful'})
+        self.assertEqual(response.headers['location'], 'http://localhost/standard_responses?id=42')
 
-    def test_successful_deletion_return(self):
-        self.assertEqual(('', 204), flask_restplus_common.successful_deletion_return)
+    def test_standard_post_response_with_reverse_proxy(self):
+        response = self.post_json('/standard_responses', {}, headers={
+            'X-Original-Request-Uri': '/reverse/standard_responses',
+            'Host': 'localhost',
+        })
+        self.assertStatus(response, 201)
+        self.assert_json(response, {'status': 'Successful'})
+        self.assertEqual(response.headers['location'], 'http://localhost/reverse/standard_responses?id=42')
 
-    def test_successful_deletion_response(self):
-        self.assertEqual((204, 'Sample deleted'), flask_restplus_common.successful_deletion_response)
+    def test_standard_put_response_without_reverse_proxy(self):
+        response = self.put_json('/standard_responses', {})
+        self.assertStatus(response, 201)
+        self.assert_json(response, {'status': 'Successful'})
+        self.assertEqual(response.headers['location'], 'http://localhost/standard_responses?id=43')
 
-    def test_successful_model(self):
-        model = flask_restplus_common.successful_model(TestAPI)
-        self.assertEqual('Successful', model.name)
-        self.assertEqual({'status': 'Successful'}, model.fields_default)
+    def test_standard_put_response_with_reverse_proxy(self):
+        response = self.put_json('/standard_responses', {}, headers={
+            'X-Original-Request-Uri': '/reverse/standard_responses',
+            'Host': 'localhost',
+        })
+        self.assertStatus(response, 201)
+        self.assert_json(response, {'status': 'Successful'})
+        self.assertEqual(response.headers['location'], 'http://localhost/reverse/standard_responses?id=43')
+
+    def test_standard_delete_response(self):
+        response = self.client.delete('/standard_responses')
+        self.assertStatus(response, 204)
+
+    def test_generated_swagger(self):
+        response = self.client.get('/swagger.json')
+        self.assert200(response)
+        self.assert_swagger(response, {
+            'swagger': '2.0', 'basePath': '/', 'paths': {
+                '/logging': {
+                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_logging', 'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_logging', 'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_logging', 'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_logging', 'tags': ['default']}
+                },
+                '/requires_authentication': {
+                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_requires_authentication', 'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_requires_authentication', 'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_requires_authentication', 'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_requires_authentication', 'tags': ['default']}
+                },
+                '/standard_responses': {
+                    'delete': {'responses': {'204': {'description': 'Deleted'}}, 'operationId': 'delete_standard_responses', 'tags': ['default']},
+                    'post': {'responses': {'201': {'description': 'Created', 'headers': {'location': {'description': 'Location of created resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Created'}}}, 'operationId': 'post_standard_responses', 'tags': ['default']},
+                    'put': {'responses': {'201': {'description': 'Updated', 'headers': {'location': {'description': 'Location of updated resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Updated'}}}, 'operationId': 'put_standard_responses', 'tags': ['default']}
+                }
+            },
+            'info': {'title': 'API', 'version': '1.0'},
+            'produces': ['application/json'],
+            'consumes': ['application/json'],
+            'tags': [{'name': 'default', 'description': 'Default namespace'}],
+            'responses': {
+                'ParseError': {'description': "When a mask can't be parsed"},
+                'MaskError': {'description': 'When any error occurs on mask'}
+            },
+            'definitions': {
+                'Created': {'properties': {'status': {'default': 'Successful', 'type': 'string'}}, 'type': 'object'},
+                'Updated': {'properties': {'status': {'default': 'Successful', 'type': 'string'}}, 'type': 'object'},
+            },
+        })
 
     def test_authentication_failure_token_not_provided_on_get(self):
         response = self.client.get('/requires_authentication')

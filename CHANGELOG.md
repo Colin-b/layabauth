@@ -11,6 +11,14 @@ List all changes in various categories:
 ### Release notes ###
 
 - add_monitoring_namespace no longer takes a controller. You need to provide two parameters instead of 3. The API and the function returning details.
+- Default post, put and delete responses do not exists anymore. Replaced by 
+  * created_response(url)
+  * updated_response(url)
+  * deleted_response
+- Default models for post, put, delete responses do not exists anymore. Replaced by
+  * created_response_doc(api)
+  * updated_response_doc(api)
+  * deleted_response_doc
 
 ### Enhancements ###
 
