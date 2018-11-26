@@ -6,6 +6,15 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 7.1.0 (2018-11-26) ##
+
+### Enhancements ###
+
+- Add method to create Flask Application / Flask RestPlus API with additional options:
+    * HTTP Gzip Compression (defaulted to false, provide list of mimetype to compress to enable)
+    * Reverse Proxy (defaulted to true, allow Swagger UI behind reverse proxy)
+    * Cors (defaulted to true, allow cross origin)
+
 ## Version 7.0.1 (2018-11-16) ##
 
 ### Bug fixes ###

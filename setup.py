@@ -13,6 +13,10 @@ setup(
         'flask-restplus==0.12.1',
         # Used to parse configurations
         'PyYAML==3.13',
+        # Cross Origin handling
+        'flask_cors==3.0.7',
+        # Used to gz compress http output
+        'flask_compress==1.4.0',
     ],
     extras_require={
         'testing': [
