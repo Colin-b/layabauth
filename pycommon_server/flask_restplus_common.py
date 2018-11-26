@@ -215,12 +215,8 @@ class ReverseProxied:
 
 
 def create_api(version: str, title: str, cors: bool = True, compress_mimetypes: List[str] = [],
-               reverse_proxy: bool = True, testing: bool = False,
-               **kwargs):
+               reverse_proxy: bool = True, **kwargs):
     application = Flask(__name__)
-
-    if testing:
-        application.config['TESTING'] = True
 
     if cors:
         CORS(application)
