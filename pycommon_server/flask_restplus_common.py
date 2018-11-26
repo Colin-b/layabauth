@@ -7,10 +7,13 @@ import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
+from typing import List
 
 import flask
-from flask import request, has_request_context
-from flask_restplus import Resource, fields
+from flask import request, has_request_context, Flask
+from flask_compress import Compress
+from flask_cors import CORS
+from flask_restplus import Resource, fields, Api
 from werkzeug.exceptions import Unauthorized
 
 logger = logging.getLogger(__name__)
@@ -180,6 +183,62 @@ def _log_request_details(func):
             raise
 
     return wrapper
+
+
+class ReverseProxied:
+    '''
+    Wrap the application in this middleware and configure the
+    front-end server to add these headers, to let you quietly bind
+    this to a URL other than / and to an HTTP scheme that is
+    different than what is used locally.
+
+    :param app: the WSGI application
+    '''
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        original_url = environ.get('HTTP_X_ORIGINAL_REQUEST_URI', '')
+        if original_url:
+            script_name = '/' + original_url.split('/', maxsplit=2)[1]
+            environ['SCRIPT_NAME'] = script_name
+
+            path_info = environ['PATH_INFO']
+            if path_info.startswith(script_name):
+                environ['PATH_INFO'] = path_info[len(script_name):]
+
+            scheme = environ.get('HTTP_X_SCHEME', '')
+            if scheme:
+                environ['wsgi.url_scheme'] = scheme
+        return self.app(environ, start_response)
+
+
+def create_api(version: str, title: str, description: str, cors: bool = True, compress_mimetypes: List[str] = [],
+               reverse_proxy: bool = True,
+               **api_extras):
+    application = Flask(__name__)
+
+    if cors:
+        CORS(application)
+
+    if compress_mimetypes:
+        compress = Compress()
+        compress.init_app(application)
+        application.config['COMPRESS_MIMETYPES'] = compress_mimetypes
+
+    if reverse_proxy:
+        application.wsgi_app = ReverseProxied(application.wsgi_app)
+
+    api = Api(
+        application,
+        version=version,
+        title=title,
+        description=description,
+        **api_extras
+    )
+
+    return application, api
 
 
 Resource.method_decorators.append(_log_request_details)
