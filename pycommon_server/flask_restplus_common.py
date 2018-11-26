@@ -204,7 +204,7 @@ class ReverseProxied:
             script_name = '/' + original_url.split('/', maxsplit=2)[1]
             environ['SCRIPT_NAME'] = script_name
 
-            path_info = environ['PATH_INFO']
+            path_info = environ.get('PATH_INFO', '')
             if path_info.startswith(script_name):
                 environ['PATH_INFO'] = path_info[len(script_name):]
 
