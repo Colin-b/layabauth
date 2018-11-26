@@ -20,33 +20,36 @@ from werkzeug.exceptions import Unauthorized
 logger = logging.getLogger(__name__)
 
 
-def add_monitoring_namespace(api, error_responses, health_details):
+def add_monitoring_namespace(api, health_details):
     """
     Create a monitoring namespace containing the Health check endpoint.
     This endpoint implements https://inadarei.github.io/rfc-healthcheck/
 
     :param api: The root Api
-    :param error_responses: All Flask RestPlus error responses (usually the return call from pycommon_error.add_error_handlers)
     :param health_details: Function returning a tuple with 3 dictionaries: pass details, warn details and error details
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
     namespace = api.namespace('monitoring', path='/', description='Monitoring operations')
-    get_response_model = namespace.model('Health', {
-        'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='pass', enum=['pass', 'fail', 'warn']),
-        'version': fields.String(description='Public version of the service.', required=True, example='1'),
-        'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
-        'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
-        'output': fields.String(description='Raw error output.', required=False),
-    })
-
     version = api.version.split('.', maxsplit=1)[0]
     release_id = api.version
 
     @namespace.route('/health')
-    @namespace.doc(**error_responses)
+    @namespace.doc(response={
+        200: ('Server is in a coherent state.', namespace.model('HealthPass', {
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='pass', enum=['pass', 'warn']),
+            'version': fields.String(description='Public version of the service.', required=True, example='1'),
+            'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
+            'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
+        })),
+        400: ('Server is not in a coherent state.', namespace.model('HealthFail', {
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='fail', enum=['fail']),
+            'version': fields.String(description='Public version of the service.', required=True, example='1'),
+            'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
+            'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
+            'output': fields.String(description='Raw error output.', required=False),
+        }))
+    })
     class Health(Resource):
-
-        @namespace.marshal_with(get_response_model, description='Server is in a coherent state.')
         def get(self):
             """
             Check service health.

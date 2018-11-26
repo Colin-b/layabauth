@@ -6,7 +6,11 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 7.1.0 (2018-11-26) ##
+## Version 8.0.0 (2018-11-26) ##
+
+### Release notes ###
+
+- add_monitoring_namespace no longer takes a controller. You need to provide two parameters instead of 3. The API and the function returning details.
 
 ### Enhancements ###
 

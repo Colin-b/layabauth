@@ -160,6 +160,103 @@ class ConfigurationTest(unittest.TestCase):
                 load(os.path.join(server_folder, 'server.py')))
 
 
+class HealthCheckWithException(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app, version='3.2.1')
+
+        def throw_exception():
+            raise Exception('This is the error message.')
+
+        flask_restplus_common.add_monitoring_namespace(api, throw_exception)
+
+        return app
+
+    def test_health_check_response_on_exception(self):
+        response = self.client.get('/health')
+        self.assert400(response)
+        self.assert_json(response, {
+            'details': {},
+            'output': 'This is the error message.',
+            'releaseId': '3.2.1',
+            'status': 'fail',
+            'version': '3',
+        })
+
+
+class HealthCheckWithFailureDetails(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app, version='3.2.1')
+
+        def failure_details():
+            return None, {'toto': {'status': 'warn'}}, {'toto2': {'status': 'fail'}}
+
+        flask_restplus_common.add_monitoring_namespace(api, failure_details)
+
+        return app
+
+    def test_health_check_response_on_exception(self):
+        response = self.client.get('/health')
+        self.assert400(response)
+        self.assert_json(response, {
+            'details': {'toto': {'status': 'warn'}, 'toto2': {'status': 'fail'}},
+            'releaseId': '3.2.1',
+            'status': 'fail',
+            'version': '3',
+        })
+
+
+class HealthCheckWithWarnDetails(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app, version='3.2.1')
+
+        def warning_details():
+            return {'toto2': {'status': 'pass'}}, {'toto': {'status': 'warn'}}, None
+
+        flask_restplus_common.add_monitoring_namespace(api, warning_details)
+
+        return app
+
+    def test_health_check_response_on_warning(self):
+        response = self.client.get('/health')
+        self.assert200(response)
+        self.assert_json(response, {
+            'details': {'toto2': {'status': 'pass'}, 'toto': {'status': 'warn'}},
+            'releaseId': '3.2.1',
+            'status': 'warn',
+            'version': '3',
+        })
+
+
+class HealthCheckWithPassDetails(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app, version='3.2.1')
+
+        def pass_details():
+            return {'toto2': {'status': 'pass'}}, None, None
+
+        flask_restplus_common.add_monitoring_namespace(api, pass_details)
+
+        return app
+
+    def test_health_check_response_on_pass(self):
+        response = self.client.get('/health')
+        self.assert200(response)
+        self.assert_json(response, {
+            'details': {'toto2': {'status': 'pass'}},
+            'releaseId': '3.2.1',
+            'status': 'pass',
+            'version': '3',
+        })
+
+
 class FlaskRestPlusTest(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
