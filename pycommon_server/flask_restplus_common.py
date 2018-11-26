@@ -8,7 +8,7 @@ import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
-from typing import List, Dict
+from typing import List, Dict, Union
 import json
 import flask
 from flask import request, has_request_context, make_response, Flask
@@ -111,7 +111,7 @@ def created_response(url: str) -> flask.Response:
     return response
 
 
-def created_response_doc(api: Namespace) -> Dict[str, dict]:
+def created_response_doc(api: Union[Api, Namespace]) -> Dict[str, dict]:
     return {
         'responses': {
             HTTPStatus.CREATED.value: (
@@ -136,7 +136,7 @@ def updated_response(url: str) -> flask.Response:
     return response
 
 
-def updated_response_doc(api: Namespace) -> Dict[str, dict]:
+def updated_response_doc(api: Union[Api, Namespace]) -> Dict[str, dict]:
     return {
         'responses': {
             HTTPStatus.CREATED.value: (
