@@ -185,7 +185,7 @@ def _log_request_details(func):
     return wrapper
 
 
-class ReverseProxied:
+class _ReverseProxied:
     '''
     Wrap the application in this middleware and configure the
     front-end server to add these headers, to let you quietly bind
@@ -227,7 +227,7 @@ def create_api(version: str, title: str, cors: bool = True, compress_mimetypes: 
         application.config['COMPRESS_MIMETYPES'] = compress_mimetypes
 
     if reverse_proxy:
-        application.wsgi_app = ReverseProxied(application.wsgi_app)
+        application.wsgi_app = _ReverseProxied(application.wsgi_app)
 
     api = Api(
         application,
