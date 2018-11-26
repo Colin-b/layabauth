@@ -37,6 +37,7 @@ class AsyncNamespaceProxy:
                                     self.__exception_response)
             self.__namespace.route(endpoint)(cls)
             return cls
+
         return wrapper
 
 
