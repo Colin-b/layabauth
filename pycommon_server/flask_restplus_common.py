@@ -214,10 +214,13 @@ class ReverseProxied:
         return self.app(environ, start_response)
 
 
-def create_api(version: str, title: str, description: str, cors: bool = True, compress_mimetypes: List[str] = [],
-               reverse_proxy: bool = True,
-               **api_extras):
+def create_api(version: str, title: str, cors: bool = True, compress_mimetypes: List[str] = [],
+               reverse_proxy: bool = True, testing: bool = False,
+               **kwargs):
     application = Flask(__name__)
+
+    if testing:
+        application.config['TESTING'] = True
 
     if cors:
         CORS(application)
@@ -234,8 +237,7 @@ def create_api(version: str, title: str, description: str, cors: bool = True, co
         application,
         version=version,
         title=title,
-        description=description,
-        **api_extras
+        **kwargs
     )
 
     return application, api

@@ -1,16 +1,19 @@
+import gzip
+import logging
 import os
 import os.path
 import tempfile
 import unittest
-import logging
+from unittest.mock import Mock
+
+from flask import Flask, Response, json
+from flask_restplus import Resource, Api
 from pycommon_test.flask_restplus_mock import TestAPI
 from pycommon_test.samba_mock import TestConnection
 from pycommon_test.service_tester import JSONTestCase
-from flask import Flask
-from flask_restplus import Resource, Api
 
-from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 from pycommon_server import flask_restplus_common, logging_filter, windows
+from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 
 logger = logging.getLogger(__name__)
 
@@ -513,7 +516,7 @@ class WindowsTest(unittest.TestCase):
         with self.assertRaises(FileNotFoundError) as cm:
             windows.rename(connection, 'TestShare\\', 'file_to_rename_2', 'file_new_name')
 
-        self.assertEqual(str(cm.exception),  r"\\TestComputer\TestShare\file_to_rename_2 doesn't exist")
+        self.assertEqual(str(cm.exception), r"\\TestComputer\TestShare\file_to_rename_2 doesn't exist")
 
     def test_get_file_desc_file_exists(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
@@ -532,6 +535,92 @@ class WindowsTest(unittest.TestCase):
         founded_file = windows.get_file_desc(connection, 'TestShare/', 'nonexistent_file_to_find')
 
         self.assertIsNone(founded_file)
+
+
+class CreateNewApi(unittest.TestCase):
+    def test_basic_api(self):
+        app, api = flask_restplus_common.create_api('1.0.0', 'TestApi', description='Testing API', testing=True,
+                                                    cors=False, reverse_proxy=False)
+
+        with app.test_client() as client:
+            response = client.get('/swagger.json')
+            JSONTestCase().assert_200(response)
+            JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
+                                                  'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'description': 'Testing API'},
+                                                  'produces': ['application/json'], 'consumes': ['application/json'],
+                                                  'tags': [], 'responses': {
+                    'ParseError': {'description': "When a mask can't be parsed"},
+                    'MaskError': {'description': 'When any error occurs on mask'}}})
+
+    def test_cors_api(self):
+        app, api = flask_restplus_common.create_api('1.0.0', 'TestApi', description='Testing API', testing=True,
+                                                    reverse_proxy=False)
+
+        with app.test_client() as client:
+            response = client.get('/swagger.json')
+            JSONTestCase().assert_200(response)
+            JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
+                                                  'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'description': 'Testing API'},
+                                                  'produces': ['application/json'], 'consumes': ['application/json'],
+                                                  'tags': [], 'responses': {
+                    'ParseError': {'description': "When a mask can't be parsed"},
+                    'MaskError': {'description': 'When any error occurs on mask'}}})
+            self.assertEquals(response.headers.get('Access-Control-Allow-Origin'), '*')
+
+    def test_compress_api(self):
+        app, api = flask_restplus_common.create_api('1.0.0', 'TestApi', description='Testing API', testing=True,
+                                                    cors=False,
+                                                    reverse_proxy=False,
+                                                    compress_mimetypes=['application/json'])
+
+        heavy_answer = {'test': 1000 * 'A'}
+
+        @api.route('/test')
+        class TestRoute(Resource):
+            def get(self):
+                return Response(response=json.dumps(heavy_answer), mimetype='application/json')
+
+        with app.test_client() as client:
+            response = client.get('/test', headers=[('Accept-Encoding', 'gzip')])
+            JSONTestCase().assert_200(response)
+            self.assertEquals(response.content_encoding, 'gzip')
+            mock_response = Mock(data=gzip.decompress(response.data))
+            JSONTestCase().assert_json(mock_response, heavy_answer)
+
+    def test_reverse_proxy_api(self):
+        app, api = flask_restplus_common.create_api('1.0.0', 'TestApi', description='Testing API', testing=True,
+                                                    cors=False)
+
+        with app.test_client() as client:
+            response = client.get('/swagger.json', headers=[('X-Original-Request-Uri', '/behind_reverse_proxy')])
+            JSONTestCase().assert_200(response)
+            JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/behind_reverse_proxy', 'paths': {},
+                                                  'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'description': 'Testing API'},
+                                                  'produces': ['application/json'], 'consumes': ['application/json'],
+                                                  'tags': [], 'responses': {
+                    'ParseError': {'description': "When a mask can't be parsed"},
+                    'MaskError': {'description': 'When any error occurs on mask'}}})
+
+    def test_extra_parameters_api(self):
+        app, api = flask_restplus_common.create_api('1.0.0', 'TestApi', description='Testing API', testing=True,
+                                                    cors=False,
+                                                    reverse_proxy=False, license_url='engie.license.com',
+                                                    license='engie')
+
+        with app.test_client() as client:
+            response = client.get('/swagger.json', headers=[('X-Original-Request-Uri', '/behind_reverse_proxy')])
+            JSONTestCase().assert_200(response)
+            JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
+                                                  'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'description': 'Testing API',
+                                                           'license': {'name': 'engie', 'url': 'engie.license.com'}},
+                                                  'produces': ['application/json'], 'consumes': ['application/json'],
+                                                  'tags': [], 'responses': {
+                    'ParseError': {'description': "When a mask can't be parsed"},
+                    'MaskError': {'description': 'When any error occurs on mask'}}})
 
 
 if __name__ == '__main__':
