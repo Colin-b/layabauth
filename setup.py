@@ -13,11 +13,15 @@ setup(
         'flask-restplus==0.12.1',
         # Used to parse configurations
         'PyYAML==3.13',
+        # Cross Origin handling
+        'flask_cors==3.0.7',
+        # Used to gz compress http output
+        'flask_compress==1.4.0',
     ],
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==2.1.0',
+            'pycommon-test==3.0.1',
             # Used to test authentication handling
             'oauth2helper==1.3.0',
             # Used to test Windows-Linux connection

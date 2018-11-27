@@ -6,11 +6,33 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 7.1.0 (2018-11-25) ##
+## Version 8.1.0 (2018-11-25) ##
 
 ### Enhancements ###
 
 - Add celery support via celery_common module
+
+## Version 8.0.0 (2018-11-26) ##
+
+### Release notes ###
+
+- add_monitoring_namespace no longer takes a controller. You need to provide two parameters instead of 3. The API and the function returning details.
+- Default post, put and delete responses do not exists anymore. Replaced by 
+  * created_response(url)
+  * updated_response(url)
+  * deleted_response
+- Default models for post, put, delete responses do not exists anymore. Replaced by
+  * created_response_doc(api)
+  * updated_response_doc(api)
+  * deleted_response_doc
+
+### Enhancements ###
+
+- Add method to create Flask Application / Flask RestPlus API with additional options:
+    * HTTP Gzip Compression (defaulted to false, provide list of mimetype to compress to enable)
+    * Reverse Proxy (defaulted to true, allow Swagger UI behind reverse proxy)
+    * Cors (defaulted to true, allow cross origin)
+>>>>>>> development
 
 ## Version 7.0.1 (2018-11-16) ##
 
