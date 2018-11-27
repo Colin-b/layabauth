@@ -8,54 +8,148 @@ import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
-from typing import List
-
+from typing import List, Dict, Union
+import json
 import flask
-from flask import request, has_request_context, Flask
+from flask import request, has_request_context, make_response, Flask
 from flask_compress import Compress
 from flask_cors import CORS
-from flask_restplus import Resource, fields, Api
+from flask_restplus import Resource, fields, Api, Namespace
 from werkzeug.exceptions import Unauthorized
+from urllib.parse import urlparse
+
 
 logger = logging.getLogger(__name__)
 
 
-def add_monitoring_namespace(api, error_responses, health_controller):
+def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     """
     Create a monitoring namespace containing the Health check endpoint.
+    This endpoint implements https://inadarei.github.io/rfc-healthcheck/
+
     :param api: The root Api
-    :param error_responses: All Flask RestPlus error responses (usually the return call from pycommon_error.add_error_handlers)
-    :param health_controller: The Health controller (usually located into controllers.Health)
+    :param health_details: Function returning a tuple with 3 dictionaries: pass details, warn details and error details
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
     namespace = api.namespace('monitoring', path='/', description='Monitoring operations')
-    health_controller.namespace(namespace)
+    version = api.version.split('.', maxsplit=1)[0]
+    release_id = api.version
 
     @namespace.route('/health')
-    @namespace.doc(**error_responses)
+    @namespace.doc(responses={
+        200: ('Server is in a coherent state.', namespace.model('HealthPass', {
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='pass', enum=['pass', 'warn']),
+            'version': fields.String(description='Public version of the service.', required=True, example='1'),
+            'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
+            'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
+        })),
+        400: ('Server is not in a coherent state.', namespace.model('HealthFail', {
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='fail', enum=['fail']),
+            'version': fields.String(description='Public version of the service.', required=True, example='1'),
+            'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
+            'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
+            'output': fields.String(description='Raw error output.', required=False),
+        }))
+    })
     class Health(Resource):
-
-        @namespace.marshal_with(health_controller.get_response_model, description='Server is in a coherent state.')
         def get(self):
             """
             Check service health.
             This endpoint perform a quick server state check.
             """
-            # TODO follow https://inadarei.github.io/rfc-healthcheck/
-            return health_controller.get()
+            details = {}
+            try:
+                pass_details, warn_details, fail_details = health_details()
+                details.update(pass_details or {})
+                details.update(warn_details or {})
+                details.update(fail_details or {})
+                if fail_details:
+                    return self._send_status('fail', 400, details)
+                if warn_details:
+                    return self._send_status('warn', 200, details)
+                return self._send_status('pass', 200, details)
+            except Exception as e:
+                return self._send_status('fail', 400, details, output=str(e))
+
+        @staticmethod
+        def _send_status(status: str, code: int, details: dict, **kwargs):
+            body = {
+                'status': status,
+                'version': version,
+                'releaseId': release_id,
+                'details': details,
+            }
+            body.update(kwargs)
+            response = make_response(json.dumps(body), code)
+            response.headers['Content-Type'] = 'application/health+json'
+            return response
 
     return namespace
 
 
-successful_return = {'status': 'Successful'}, HTTPStatus.OK
+def base_path() -> str:
+    """
+    Return service base path (handle the fact that client may be behind a reverse proxy).
+    """
+    if 'X-Original-Request-Uri' in flask.request.headers:
+        service_path = '/' + flask.request.headers['X-Original-Request-Uri'].split('/', maxsplit=2)[1]
+        return f'http://{flask.request.headers["Host"]}{service_path}'
+    parsed = urlparse(flask.request.base_url)
+    return f'{parsed.scheme}://{parsed.netloc}'
 
 
-def successful_model(api):
-    return api.model('Successful', {'status': fields.String(default='Successful')})
+def created_response(url: str) -> flask.Response:
+    """
+    Create a response to return to the client in case of a successful POST request.
+
+    :param url: Server relative URL returning the created resource(s).
+    :return: Response containing the location of the new resource.
+    """
+    response = make_response(json.dumps({'status': 'Successful'}), HTTPStatus.CREATED)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['location'] = f'{base_path()}{url}'
+    return response
 
 
-successful_deletion_return = '', HTTPStatus.NO_CONTENT
-successful_deletion_response = HTTPStatus.NO_CONTENT, 'Sample deleted'
+def created_response_doc(api: Union[Api, Namespace]) -> Dict[str, dict]:
+    return {
+        'responses': {
+            HTTPStatus.CREATED.value: (
+                'Created',
+                api.model('Created', {'status': fields.String(default='Successful')}),
+                {'headers': {'location': 'Location of created resource.'}}
+            ),
+        },
+    }
+
+
+def updated_response(url: str) -> flask.Response:
+    """
+    Create a response to return to the client in case of a successful PUT request.
+
+    :param url: Server relative URL returning the updated resource(s).
+    :return: Response containing the location of the updated resource.
+    """
+    response = make_response(json.dumps({'status': 'Successful'}), HTTPStatus.CREATED)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['location'] = f'{base_path()}{url}'
+    return response
+
+
+def updated_response_doc(api: Union[Api, Namespace]) -> Dict[str, dict]:
+    return {
+        'responses': {
+            HTTPStatus.CREATED.value: (
+                'Updated',
+                api.model('Updated', {'status': fields.String(default='Successful')}),
+                {'headers': {'location': 'Location of updated resource.'}}
+            ),
+        },
+    }
+
+
+deleted_response = '', HTTPStatus.NO_CONTENT
+deleted_response_doc = HTTPStatus.NO_CONTENT, 'Deleted'
 
 
 class User:
@@ -215,9 +309,20 @@ class _ReverseProxied:
         return self.app(environ, start_response)
 
 
-def create_api(name: str, cors: bool = True, compress_mimetypes: List[str] = None,
-               reverse_proxy: bool = True, **kwargs):
-    application = Flask(__name__.split('.')[0])
+def create_api(name: str, cors: bool = True, compress_mimetypes: List[str] = None, reverse_proxy: bool = True,
+               **kwargs) -> (Flask, Api):
+    """
+    Create Flask application and related Flask-RestPlus API instance.
+
+    :param name: server.py __name__ variable.
+    :param cors: If CORS (Cross Resource) should be enabled. Activated by default.
+    :param compress_mimetypes: List of mime-types that should be compressed. No compression by default.
+    :param reverse_proxy: If server should handle reverse-proxy configuration. Enabled by default.
+    :param kwargs: Additional Flask-RestPlus API arguments.
+    :return: A tuple with 2 elements: Flask application, Flask-RestPlus API
+    """
+    service_package = name.split('.')[0]
+    application = Flask(service_package)
 
     if cors:
         CORS(application)
@@ -230,13 +335,9 @@ def create_api(name: str, cors: bool = True, compress_mimetypes: List[str] = Non
     if reverse_proxy:
         application.wsgi_app = _ReverseProxied(application.wsgi_app)
 
-    api = Api(
-        application,
-        version=importlib.import_module('test._version').__version__,
-        **kwargs
-    )
+    version = importlib.import_module(f'{service_package}._version').__version__
 
-    return application, api
+    return application, Api(application, version=version, **kwargs)
 
 
 Resource.method_decorators.append(_log_request_details)
