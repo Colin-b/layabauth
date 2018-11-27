@@ -6,7 +6,7 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 8.1.0 (2018-11-25) ##
+## Version 8.1.0 (2018-11-27) ##
 
 ### Enhancements ###
 
