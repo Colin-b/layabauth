@@ -31,7 +31,13 @@ class AsyncNamespaceProxy:
     def __getattr__(self, name):
         return getattr(self.__namespace, name)
 
-    def async_route(self, endpoint, serializer):
+    def async_route(self, endpoint: str, serializer):
+        """
+        Add an async route endpoint.
+        :param endpoint: value of the exposes endpoint ex: /foo
+        :param serializer: a single model or a list of model. If a list is given, the output will be treated (serialized) and documented as a list
+        :return:
+        """
         def wrapper(cls):
             ## 1st create the one requested
             self.__namespace.route(endpoint)(cls)

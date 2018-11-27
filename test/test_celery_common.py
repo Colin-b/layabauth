@@ -1,15 +1,18 @@
 import unittest
 
 from flask import Flask
-from flask_restplus import Api, Resource
+from flask_restplus import Api, Resource, fields
 from pycommon_test.service_tester import JSONTestCase
 
 from pycommon_server.celery_common import AsyncNamespaceProxy, _snake_case, how_to_get_celery_status
-from pycommon_server.flask_restplus_common import successful_model
 
 
 class CeleryTaskStub:
     id = 'idtest'
+
+
+def successful_model(api):
+    return api.model('Successful', {'status': fields.String(default='Successful')})
 
 
 class AsyncRouteTest(JSONTestCase):
@@ -17,30 +20,51 @@ class AsyncRouteTest(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
         app.config['TESTING'] = True
+        app.config['DEBUG'] = True
         self.api = Api(app)
 
         return app
 
     def test_aysnc_ns_proxy_should_create_2extra_endpoints(self):
-        namespace = AsyncNamespaceProxy(
+        ns = AsyncNamespaceProxy(
             self.api.namespace('Test Namespace', path='/foo', description='Test namespace operations'), None, {})
 
-        @namespace.async_route('/bar', successful_model)
+        @ns.async_route('/bar', successful_model(self.api))
         class TestEndpoint(Resource):
-            pass
+            def get(self):
+                return "ok"
 
-        ## contains 2 namespace : / and /foo
-        self.assertEqual(2, len(self.api.namespaces))
-        ## Test will check only our ns
-        ns = self.api.namespaces[1]
-        self.assertEqual(3, len(ns.resources))
-        regular_endpoint = ns.resources[0]
-        self.assertEqual('/bar', regular_endpoint[1][0])
-        self.assertEqual(TestEndpoint, regular_endpoint[0])
-        result_endpoint = ns.resources[1]
-        self.assertEqual('/bar/result/<string:celery_task_id>', result_endpoint[1][0])
-        status_endpoint = ns.resources[2]
-        self.assertEqual('/bar/status/<string:celery_task_id>', status_endpoint[1][0])
+        response = self.client.get('/swagger.json')
+        self.assert200(response)
+        self.assert_swagger(response, {
+            'swagger': '2.0',
+            'basePath': '/',
+            'paths': {
+                '/foo/bar': {
+                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_test_endpoint',
+                            'tags': ['Test Namespace']}},
+                '/foo/bar/result/{celery_task_id}': {
+                    'parameters': [{'name': 'celery_task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                    'get': {
+                        'responses': {
+                            '200': {'description': 'Success', 'schema': {'$ref': '#/definitions/Successful'}}},
+                        'summary': 'Query the result of Celery Async Task', 'operationId': 'get_test_endpoint_result',
+                        'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask',
+                                        'description': 'An optional fields mask'}], 'tags': ['Test Namespace']}},
+                '/foo/bar/status/{celery_task_id}': {
+                    'parameters': [{'name': 'celery_task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                    'get': {'responses': {'200': {'description': 'Success'}},
+                            'summary': 'Get the status of Celery Async Task',
+                            'operationId': 'get_test_endpoint_status', 'tags': ['Test Namespace']}}},
+            'info': {'title': 'API', 'version': '1.0'},
+            'produces': ['application/json'],
+            'consumes': ['application/json'],
+            'tags': [{'name': 'Test Namespace', 'description': 'Test namespace operations'}],
+            'definitions': {'Successful': {'properties': {'status': {'type': 'string', 'default': 'Successful'}},
+                                           'type': 'object'}},
+            'responses': {'ParseError': {'description': "When a mask can't be parsed"},
+                          'MaskError': {'description': 'When any error occurs on mask'}}
+        })
 
 
 class TestSnakeCase(unittest.TestCase):
