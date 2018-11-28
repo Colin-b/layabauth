@@ -87,7 +87,7 @@ def _base_url():
 
 
 def how_to_get_celery_status(celery_task):
-    url = f'{_base_url()}{_STATUS_ENDPOINT}/{celery_task.id}'
+    url = f'{_base_url()}/{_STATUS_ENDPOINT}/{celery_task.id}'
     status = flask.Response()
     status.status_code = 202
     status.headers['location'] = url
