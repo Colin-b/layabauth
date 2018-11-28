@@ -21,12 +21,15 @@ setup(
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==3.0.1',
+            'pycommon-test==3.0.2',
             # Used to test authentication handling
             'oauth2helper==1.3.0',
             # Used to test Windows-Linux connection
             'pysmb==1.1.25',
+            # Used to test REST API connection
+            'requests==2.20.1',
         ],
+        # Used to manage authentication
         'authentication': [
             'oauth2helper==1.3.0',
         ],
@@ -37,6 +40,10 @@ setup(
         # Async task execution using celery
         'celery': [
             'celery==4.2.1',
+        ],
+        # Used to connect to another REST API
+        'rest': [
+            'requests==2.20.1',
         ],
     },
 )
