@@ -5,14 +5,14 @@ import os.path
 import tempfile
 import unittest
 from unittest.mock import Mock
-
+import responses
 from flask import Flask, Response, json
 from flask_restplus import Resource, Api
-from pycommon_test.flask_restplus_mock import TestAPI
+from pycommon_test import mock_now, revert_now
 from pycommon_test.samba_mock import TestConnection
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server import flask_restplus_common, logging_filter, windows
+from pycommon_server import flask_restplus_common, logging_filter, windows, rest_helper
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 
 logger = logging.getLogger(__name__)
@@ -185,6 +185,30 @@ class HealthCheckWithException(JSONTestCase):
         })
 
 
+class HealthCheckWithoutFailureDetails(JSONTestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        api = Api(app, version='3.2.1')
+
+        def failure_details():
+            return 'fail', None
+
+        flask_restplus_common.add_monitoring_namespace(api, failure_details)
+
+        return app
+
+    def test_health_check_response_on_exception(self):
+        response = self.client.get('/health')
+        self.assert400(response)
+        self.assert_json(response, {
+            'details': None,
+            'releaseId': '3.2.1',
+            'status': 'fail',
+            'version': '3',
+        })
+
+
 class HealthCheckWithFailureDetails(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
@@ -192,7 +216,7 @@ class HealthCheckWithFailureDetails(JSONTestCase):
         api = Api(app, version='3.2.1')
 
         def failure_details():
-            return None, {'toto': {'status': 'warn'}}, {'toto2': {'status': 'fail'}}
+            return 'fail', {'toto': {'status': 'warn'}, 'toto2': {'status': 'fail'}}
 
         flask_restplus_common.add_monitoring_namespace(api, failure_details)
 
@@ -216,7 +240,7 @@ class HealthCheckWithWarnDetails(JSONTestCase):
         api = Api(app, version='3.2.1')
 
         def warning_details():
-            return {'toto2': {'status': 'pass'}}, {'toto': {'status': 'warn'}}, None
+            return 'warn', {'toto2': {'status': 'pass'}, 'toto': {'status': 'warn'}}
 
         flask_restplus_common.add_monitoring_namespace(api, warning_details)
 
@@ -240,7 +264,7 @@ class HealthCheckWithPassDetails(JSONTestCase):
         api = Api(app, version='3.2.1')
 
         def pass_details():
-            return {'toto2': {'status': 'pass'}}, None, None
+            return 'pass', {'toto2': {'status': 'pass'}}
 
         flask_restplus_common.add_monitoring_namespace(api, pass_details)
 
@@ -706,6 +730,29 @@ class WindowsTest(unittest.TestCase):
         self.assertEqual('Impossible to connect to TestComputer (127.0.0.1:80), '
                          'check connectivity or TestDomain\TestUser rights.', str(cm.exception))
 
+    def test_pass_health_check(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        TestConnection.echo_responses[b''] = b''
+        self.assertEqual(('pass', {
+            'test:echo': {
+                'componentType': 'TestComputer',
+                'observedValue': '',
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979',
+            }
+        }), windows.health_details('test', connection))
+
+    def test_fail_health_check(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        self.assertEqual(('fail', {
+            'test:echo': {
+                'componentType': 'TestComputer',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979',
+                'output': '',
+            }
+        }), windows.health_details('test', connection))
+
     def test_file_retrieval(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -848,6 +895,187 @@ class CreateNewApi(unittest.TestCase):
                                                   'tags': [], 'responses': {
                     'ParseError': {'description': "When a mask can't be parsed"},
                     'MaskError': {'description': 'When any error occurs on mask'}}})
+
+
+class RestHelperTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        mock_now()
+
+    @classmethod
+    def tearDownClass(cls):
+        revert_now()
+
+    def setUp(self):
+        logger.info(f'-------------------------------')
+        logger.info(f'Start of {self._testMethodName}')
+
+    def tearDown(self):
+        logger.info(f'End of {self._testMethodName}')
+        logger.info(f'-------------------------------')
+
+    @responses.activate
+    def test_exception_health_check(self):
+        self.assertEqual(('fail', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'output': 'Connection refused: GET http://test/health',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/health'))
+
+    @responses.activate
+    def test_error_health_check(self):
+        responses.add(
+            url='http://test/health',
+            method=responses.GET,
+            status=500,
+            json={
+                'message': 'An error occurred',
+            }
+        )
+        self.assertEqual(('fail', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'output': '{"message": "An error occurred"}',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/health'))
+
+    @responses.activate
+    def test_pass_status_health_check(self):
+        responses.add(
+            url='http://test/health',
+            method=responses.GET,
+            status=200,
+            json={
+                'status': 'pass',
+                'version': '1',
+                'releaseId': '1.2.3',
+                'details': {'toto': 'tata'},
+            }
+        )
+        self.assertEqual(('pass', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'observedValue': {
+                    'details': {'toto': 'tata'},
+                    'releaseId': '1.2.3',
+                    'status': 'pass',
+                    'version': '1'
+                },
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/health'))
+
+    @responses.activate
+    def test_pass_status_custom_health_check(self):
+        responses.add(
+            url='http://test/status',
+            method=responses.GET,
+            status=200,
+            body='pong'
+        )
+        self.assertEqual(('pass', {
+            'test:health': {
+                'componentType': 'http://test/status',
+                'observedValue': 'pong',
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'pass'))
+
+    @responses.activate
+    def test_warn_status_health_check(self):
+        responses.add(
+            url='http://test/health',
+            method=responses.GET,
+            status=200,
+            json={
+                'status': 'warn',
+                'version': '1',
+                'releaseId': '1.2.3',
+                'details': {'toto': 'tata'},
+            }
+        )
+        self.assertEqual(('warn', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'observedValue': {
+                    'details': {'toto': 'tata'},
+                    'releaseId': '1.2.3',
+                    'status': 'warn',
+                    'version': '1'
+                },
+                'status': 'warn',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/health'))
+
+    @responses.activate
+    def test_pass_status_custom_health_check(self):
+        responses.add(
+            url='http://test/status',
+            method=responses.GET,
+            status=200,
+            body='pong'
+        )
+        self.assertEqual(('warn', {
+            'test:health': {
+                'componentType': 'http://test/status',
+                'observedValue': 'pong',
+                'status': 'warn',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'warn'))
+
+    @responses.activate
+    def test_fail_status_health_check(self):
+        responses.add(
+            url='http://test/health',
+            method=responses.GET,
+            status=200,
+            json={
+                'status': 'fail',
+                'version': '1',
+                'releaseId': '1.2.3',
+                'details': {'toto': 'tata'},
+            }
+        )
+        self.assertEqual(('fail', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'observedValue': {
+                    'details': {'toto': 'tata'},
+                    'releaseId': '1.2.3',
+                    'status': 'fail',
+                    'version': '1'
+                },
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/health'))
+
+    @responses.activate
+    def test_fail_status_custom_health_check(self):
+        responses.add(
+            url='http://test/status',
+            method=responses.GET,
+            status=200,
+            body='pong'
+        )
+        self.assertEqual(('fail', {
+            'test:health': {
+                'componentType': 'http://test/status',
+                'observedValue': 'pong',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'fail'))
 
 
 if __name__ == '__main__':
