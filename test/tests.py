@@ -714,8 +714,10 @@ class WindowsTest(unittest.TestCase):
     def setUp(self):
         logger.info(f'-------------------------------')
         logger.info(f'Start of {self._testMethodName}')
+        mock_now()
 
     def tearDown(self):
+        revert_now()
         TestConnection.reset()
         logger.info(f'End of {self._testMethodName}')
         logger.info(f'-------------------------------')
@@ -749,7 +751,7 @@ class WindowsTest(unittest.TestCase):
                 'componentType': 'TestComputer',
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979',
-                'output': '',
+                'output': 'Mock for echo failure.\r\n',
             }
         }), windows.health_details('test', connection))
 

@@ -104,7 +104,7 @@ def health_details(computer_name: str, connection: SMBConnection) -> (str, dict)
         return 'pass', {
             f'{computer_name}:echo': {
                 'componentType': connection.remote_name,
-                'observedValue': str(response),
+                'observedValue': response.decode(),
                 'status': 'pass',
                 'time': datetime.datetime.utcnow().isoformat(),
             }

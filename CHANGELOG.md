@@ -6,7 +6,7 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 9.0.0 (2018-11-28) ##
+## Version 9.0.0 (2018-11-29) ##
 
 ### Release notes ###
 
