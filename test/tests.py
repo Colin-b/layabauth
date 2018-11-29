@@ -730,6 +730,29 @@ class WindowsTest(unittest.TestCase):
         self.assertEqual('Impossible to connect to TestComputer (127.0.0.1:80), '
                          'check connectivity or TestDomain\TestUser rights.', str(cm.exception))
 
+    def test_pass_health_check(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        TestConnection.echo_responses[b''] = b''
+        self.assertEqual(('pass', {
+            'test:echo': {
+                'componentType': 'TestComputer',
+                'observedValue': '',
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979',
+            }
+        }), windows.health_details('test', connection))
+
+    def test_fail_health_check(self):
+        connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
+        self.assertEqual(('fail', {
+            'test:echo': {
+                'componentType': 'TestComputer',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979',
+                'output': '',
+            }
+        }), windows.health_details('test', connection))
+
     def test_file_retrieval(self):
         connection = windows.connect('TestComputer', '127.0.0.1', 80, 'TestDomain', 'TestUser', 'TestPassword')
         with tempfile.TemporaryDirectory() as temp_dir:
