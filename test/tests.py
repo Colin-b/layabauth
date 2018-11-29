@@ -5,14 +5,13 @@ import os.path
 import tempfile
 import unittest
 from unittest.mock import Mock
-import responses
+
 from flask import Flask, Response, json
 from flask_restplus import Resource, Api
-from pycommon_test import mock_now, revert_now
 from pycommon_test.samba_mock import TestConnection
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server import flask_restplus_common, logging_filter, windows, rest_helper
+from pycommon_server import flask_restplus_common, logging_filter, windows
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 
 logger = logging.getLogger(__name__)
@@ -290,19 +289,25 @@ class HealthCheckWithPassDetails(JSONTestCase):
                 'HealthPass': {
                     'required': ['details', 'releaseId', 'status', 'version'],
                     'properties': {
-                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'pass', 'enum': ['pass', 'warn']},
+                        'status': {'type': 'string',
+                                   'description': 'Indicates whether the service status is acceptable or not.',
+                                   'example': 'pass', 'enum': ['pass', 'warn']},
                         'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
                         'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'}
+                        'details': {'type': 'object',
+                                    'description': 'Provides more details about the status of the service.'}
                     }, 'type': 'object'
                 },
                 'HealthFail': {
                     'required': ['details', 'releaseId', 'status', 'version'],
                     'properties': {
-                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'fail', 'enum': ['fail']},
+                        'status': {'type': 'string',
+                                   'description': 'Indicates whether the service status is acceptable or not.',
+                                   'example': 'fail', 'enum': ['fail']},
                         'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
                         'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'},
+                        'details': {'type': 'object',
+                                    'description': 'Provides more details about the status of the service.'},
                         'output': {'type': 'string', 'description': 'Raw error output.'}
                     }, 'type': 'object'
                 }
@@ -412,21 +417,36 @@ class FlaskRestPlusTest(JSONTestCase):
         self.assert_swagger(response, {
             'swagger': '2.0', 'basePath': '/', 'paths': {
                 '/logging': {
-                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_logging', 'tags': ['default']},
-                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_logging', 'tags': ['default']},
-                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_logging', 'tags': ['default']},
-                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_logging', 'tags': ['default']}
+                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_logging',
+                               'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_logging',
+                            'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_logging',
+                             'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_logging',
+                            'tags': ['default']}
                 },
                 '/requires_authentication': {
-                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_requires_authentication', 'tags': ['default']},
-                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_requires_authentication', 'tags': ['default']},
-                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_requires_authentication', 'tags': ['default']},
-                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_requires_authentication', 'tags': ['default']}
+                    'delete': {'responses': {'200': {'description': 'Success'}},
+                               'operationId': 'delete_requires_authentication', 'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}},
+                            'operationId': 'get_requires_authentication', 'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}},
+                             'operationId': 'post_requires_authentication', 'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}},
+                            'operationId': 'put_requires_authentication', 'tags': ['default']}
                 },
                 '/standard_responses': {
-                    'delete': {'responses': {'204': {'description': 'Deleted'}}, 'operationId': 'delete_standard_responses', 'tags': ['default']},
-                    'post': {'responses': {'201': {'description': 'Created', 'headers': {'location': {'description': 'Location of created resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Created'}}}, 'operationId': 'post_standard_responses', 'tags': ['default']},
-                    'put': {'responses': {'201': {'description': 'Updated', 'headers': {'location': {'description': 'Location of updated resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Updated'}}}, 'operationId': 'put_standard_responses', 'tags': ['default']}
+                    'delete': {'responses': {'204': {'description': 'Deleted'}},
+                               'operationId': 'delete_standard_responses', 'tags': ['default']},
+                    'post': {'responses': {'201': {'description': 'Created', 'headers': {
+                        'location': {'description': 'Location of created resource.', 'type': 'string'}},
+                                                   'schema': {'$ref': '#/definitions/Created'}}},
+                             'operationId': 'post_standard_responses', 'tags': ['default']},
+                    'put': {'responses': {'201': {'description': 'Updated', 'headers': {
+                        'location': {'description': 'Location of updated resource.', 'type': 'string'}},
+                                                  'schema': {'$ref': '#/definitions/Updated'}}},
+                            'operationId': 'put_standard_responses', 'tags': ['default']}
                 }
             },
             'info': {'title': 'API', 'version': '1.0'},
@@ -765,7 +785,8 @@ class WindowsTest(unittest.TestCase):
 class CreateNewApi(unittest.TestCase):
     def test_basic_api(self):
         import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API',
+                                                    cors=False,
                                                     reverse_proxy=False)
 
         with app.test_client() as client:
@@ -798,7 +819,8 @@ class CreateNewApi(unittest.TestCase):
 
     def test_compress_api(self):
         import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API',
+                                                    cors=False,
                                                     reverse_proxy=False,
                                                     compress_mimetypes=['application/json'])
 
@@ -818,7 +840,8 @@ class CreateNewApi(unittest.TestCase):
 
     def test_reverse_proxy_api(self):
         import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False)
+        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API',
+                                                    cors=False)
 
         with app.test_client() as client:
             response = client.get('/swagger.json', headers=[('X-Original-Request-Uri', '/behind_reverse_proxy')])
@@ -833,7 +856,8 @@ class CreateNewApi(unittest.TestCase):
 
     def test_extra_parameters_api(self):
         import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API',
+                                                    cors=False,
                                                     reverse_proxy=False, license_url='engie.license.com',
                                                     license='engie')
 

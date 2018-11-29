@@ -1,4 +1,5 @@
 import datetime
+
 import requests
 
 
@@ -6,7 +7,7 @@ def _pycommon_status(health_response: dict):
     return health_response.get('status', 'pass')
 
 
-def health_details(service_name: str, url: str, status_extracting: callable=None, **requests_args) -> (str, dict):
+def health_details(service_name: str, url: str, status_extracting: callable = None, **requests_args) -> (str, dict):
     """
     Return Health details for an external service connection.
 

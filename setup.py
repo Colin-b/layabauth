@@ -15,7 +15,9 @@ extra_requirements = {
     ],
     # Async task execution using celery
     'celery': [
-        'celery==4.2.1',
+        'redis==2.10.6',
+        # Used to process requests asynchronously
+        'celery[redis]==4.2.1',
     ],
     # Used to connect to another REST API
     'rest': [
@@ -50,27 +52,5 @@ setup(
         # Used to gz compress http output
         'flask_compress==1.4.0',
     ],
-    extras_require={
-        'testing': [
-            # Used to provide testing help
-            'pycommon-test==3.0.1',
-            # Used to test authentication handling
-            'oauth2helper==1.3.0',
-            # Used to test Windows-Linux connection
-            'pysmb==1.1.25',
-        ],
-        'authentication': [
-            'oauth2helper==1.3.0',
-        ],
-        # Used to connect to a Microsoft Windows computer
-        'windows': [
-            'pysmb==1.1.25',
-        ],
-        # Async task execution using celery
-        'celery': [
-            'redis==2.10.6',
-            # Used to process requests asynchronously
-            'celery[redis]==4.2.1',
-        ],
-    },
+    extras_require=extra_requirements,
 )

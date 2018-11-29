@@ -1,10 +1,11 @@
+import datetime
 import logging
 import os
-from smb.SMBConnection import SMBConnection
-from smb.smb_structs import OperationFailure
-from smb.base import SharedFile
 from typing import Optional
-import datetime
+
+from smb.SMBConnection import SMBConnection
+from smb.base import SharedFile
+from smb.smb_structs import OperationFailure
 
 logger = logging.getLogger(__name__)
 
