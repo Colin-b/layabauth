@@ -751,7 +751,7 @@ class WindowsTest(unittest.TestCase):
                 'componentType': 'TestComputer',
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979',
-                'output': 'Mock for echo failure.\r\n',
+                'output': f'Mock for echo failure.{os.linesep}',
             }
         }), windows.health_details('test', connection))
 
