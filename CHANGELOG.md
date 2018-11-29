@@ -6,6 +6,16 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 9.0.0 (2018-11-29) ##
+
+### Release notes ###
+
+- The function used by add_monitoring_namespace now expect a tuple bool, dict instead of 3 dicts.
+
+### Enhancements ###
+
+- Add a new rest_helper to retrieve details from another API.
+
 ## Version 8.0.0 (2018-11-26) ##
 
 ### Release notes ###
