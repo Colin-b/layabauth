@@ -2,9 +2,11 @@ import unittest
 
 from flask import Flask
 from flask_restplus import Api, Resource, fields
+from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server.celery_common import AsyncNamespaceProxy, _snake_case, how_to_get_celery_status
+from pycommon_server.celery_common import AsyncNamespaceProxy, _snake_case, how_to_get_celery_status, \
+    build_celery_application
 
 
 class CeleryTaskStub:
@@ -22,18 +24,27 @@ class AsyncRouteTest(JSONTestCase):
         app.config['TESTING'] = True
         app.config['DEBUG'] = True
         self.api = Api(app)
+        config = {'celery': {'namespace': 'test-celery', 'broker': 'memory://localhost/',
+                             'backend': 'memory://localhost/'}}
+        celery_application = TestCeleryAppProxy(build_celery_application(config))
 
-        return app
-
-    def test_aysnc_ns_proxy_should_create_2extra_endpoints(self):
         ns = AsyncNamespaceProxy(
-            self.api.namespace('Test Namespace', path='/foo', description='Test namespace operations'), None, {})
+            self.api.namespace('Test Namespace', path='/foo', description='Test namespace operations'),
+            celery_application, {})
 
         @ns.async_route('/bar', successful_model(self.api))
         class TestEndpoint(Resource):
             def get(self):
-                return "ok"
+                @celery_application.task(queue=celery_application.namespace)
+                def fetch_the_answer():
+                    return {"status": "why not", "foo": "bar"}
 
+                celery_task = fetch_the_answer.apply_async()
+                return how_to_get_celery_status(celery_task)
+
+        return app
+
+    def test_aysnc_ns_proxy_should_create_2extra_endpoints(self):
         response = self.client.get('/swagger.json')
         self.assert200(response)
         self.assert_swagger(response, {
@@ -65,6 +76,14 @@ class AsyncRouteTest(JSONTestCase):
             'responses': {'ParseError': {'description': "When a mask can't be parsed"},
                           'MaskError': {'description': 'When any error occurs on mask'}}
         })
+
+    def test_aysnc_call_task(self):
+        response = self.client.get('/foo/bar')
+        status_url = response.headers['location'].replace('http://localhost', '')
+        status_reply = self.client.get(status_url)
+        result_url = status_reply.location.replace('http://localhost', '')
+        result_reply = self.client.get(result_url)
+        self.assert_json(result_reply, {"status": "why not"})
 
 
 class TestSnakeCase(unittest.TestCase):
