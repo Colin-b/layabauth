@@ -813,8 +813,7 @@ class WindowsTest(unittest.TestCase):
 
 class CreateNewApi(unittest.TestCase):
     def test_basic_api(self):
-        import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(__file__, title='TestApi', description='Testing API', cors=False,
                                                     reverse_proxy=False)
 
         with app.test_client() as client:
@@ -829,8 +828,7 @@ class CreateNewApi(unittest.TestCase):
                     'MaskError': {'description': 'When any error occurs on mask'}}})
 
     def test_cors_api(self):
-        import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API',
+        app, api = flask_restplus_common.create_api(__file__, title='TestApi', description='Testing API',
                                                     reverse_proxy=False)
 
         with app.test_client() as client:
@@ -846,8 +844,7 @@ class CreateNewApi(unittest.TestCase):
             self.assertEqual(response.headers.get('Access-Control-Allow-Origin'), '*')
 
     def test_compress_api(self):
-        import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(__file__, title='TestApi', description='Testing API', cors=False,
                                                     reverse_proxy=False,
                                                     compress_mimetypes=['application/json'])
 
@@ -866,8 +863,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_json(mock_response, heavy_answer)
 
     def test_reverse_proxy_api(self):
-        import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False)
+        app, api = flask_restplus_common.create_api(__file__, title='TestApi', description='Testing API', cors=False)
 
         with app.test_client() as client:
             response = client.get('/swagger.json', headers=[('X-Original-Request-Uri', '/behind_reverse_proxy')])
@@ -881,8 +877,7 @@ class CreateNewApi(unittest.TestCase):
                     'MaskError': {'description': 'When any error occurs on mask'}}})
 
     def test_extra_parameters_api(self):
-        import test.test_get_user as fake_service
-        app, api = flask_restplus_common.create_api(fake_service.__name__, title='TestApi', description='Testing API', cors=False,
+        app, api = flask_restplus_common.create_api(__file__, title='TestApi', description='Testing API', cors=False,
                                                     reverse_proxy=False, license_url='engie.license.com',
                                                     license='engie')
 
