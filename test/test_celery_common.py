@@ -85,6 +85,9 @@ class AsyncRouteTest(JSONTestCase):
         result_reply = self.client.get(result_url)
         self.assert_json(result_reply, {"status": "why not"})
 
+    def test_aysnc_call_task_without_endpoint_call(self):
+        status_reply = self.client.get('/foo/bar/status/42')
+        self.assert_json(status_reply, {"state": "PENDING"})
 
 class TestSnakeCase(unittest.TestCase):
 
