@@ -28,7 +28,8 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     This endpoint implements https://inadarei.github.io/rfc-healthcheck/
 
     :param api: The root Api
-    :param health_details: Function returning a tuple with 3 dictionaries: pass details, warn details and error details
+    :param health_details: Function returning a tuple with a string providing the status (pass, warn, fail)
+    and the details
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
     namespace = api.namespace('monitoring', path='/', description='Monitoring operations')
@@ -59,19 +60,11 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
             Check service health.
             This endpoint perform a quick server state check.
             """
-            details = {}
             try:
-                pass_details, warn_details, fail_details = health_details()
-                details.update(pass_details or {})
-                details.update(warn_details or {})
-                details.update(fail_details or {})
-                if fail_details:
-                    return self._send_status('fail', 400, details)
-                if warn_details:
-                    return self._send_status('warn', 200, details)
-                return self._send_status('pass', 200, details)
+                status, details = health_details()
+                return self._send_status(status, 400 if 'fail' == status else 200, details)
             except Exception as e:
-                return self._send_status('fail', 400, details, output=str(e))
+                return self._send_status('fail', 400, {}, output=str(e))
 
         @staticmethod
         def _send_status(status: str, code: int, details: dict, **kwargs):

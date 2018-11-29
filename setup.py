@@ -1,5 +1,37 @@
 from setuptools import setup, find_packages
 
+extra_requirements = {
+    'testing': [
+        # Used to provide testing help
+        'pycommon-test==3.0.2',
+    ],
+    # Used to manage authentication
+    'authentication': [
+        'oauth2helper==1.3.0',
+    ],
+    # Used to connect to a Microsoft Windows computer
+    'windows': [
+        'pysmb==1.1.25',
+    ],
+    # Async task execution using celery
+    'celery': [
+        'celery==4.2.1',
+    ],
+    # Used to connect to another REST API
+    'rest': [
+        'requests==2.20.1',
+    ],
+}
+
+# Add all extra requirements to testing
+extra_requirements['testing'] += [
+    extra
+    for extra_name, extra_list in extra_requirements.items()
+    if extra_name != 'testing'
+    for extra in extra_list
+]
+
+
 from pycommon_server._version import __version__
 
 setup(
@@ -21,7 +53,7 @@ setup(
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==3.1.0',
+            'pycommon-test==3.0.1',
             # Used to test authentication handling
             'oauth2helper==1.3.0',
             # Used to test Windows-Linux connection
@@ -36,7 +68,6 @@ setup(
         ],
         # Async task execution using celery
         'celery': [
-            # redis freeze. Beware, as other newer version are very buggy
             'redis==2.10.6',
             # Used to process requests asynchronously
             'celery[redis]==4.2.1',

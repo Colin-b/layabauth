@@ -6,12 +6,22 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 8.1.0 (2018-11-27) ##
+## Version 9.1.0 (2018-11-29) ##
 
 ### Enhancements ###
 
 - Add celery support via celery_common module
 - New version of pycommon-test with celery_mock
+
+## Version 9.0.0 (2018-11-28) ##
+
+### Release notes ###
+
+- The function used by add_monitoring_namespace now expect a tuple bool, dict instead of 3 dicts.
+
+### Enhancements ###
+
+- Add a new rest_helper to retrieve details from another API.
 
 ## Version 8.0.0 (2018-11-26) ##
 
