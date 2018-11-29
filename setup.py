@@ -21,7 +21,7 @@ setup(
     extras_require={
         'testing': [
             # Used to provide testing help
-            'pycommon-test==3.0.1',
+            'pycommon-test==3.1.0',
             # Used to test authentication handling
             'oauth2helper==1.3.0',
             # Used to test Windows-Linux connection

@@ -11,6 +11,7 @@ List all changes in various categories:
 ### Enhancements ###
 
 - Add celery support via celery_common module
+- New version of pycommon-test with celery_mock
 
 ## Version 8.0.0 (2018-11-26) ##
 
@@ -32,7 +33,6 @@ List all changes in various categories:
     * HTTP Gzip Compression (defaulted to false, provide list of mimetype to compress to enable)
     * Reverse Proxy (defaulted to true, allow Swagger UI behind reverse proxy)
     * Cors (defaulted to true, allow cross origin)
->>>>>>> development
 
 ## Version 7.0.1 (2018-11-16) ##
 
