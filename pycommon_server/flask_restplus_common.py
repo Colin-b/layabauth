@@ -32,7 +32,7 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     and the details
     :return: The monitoring namespace (you can use it to add additional endpoints)
     """
-    namespace = api.namespace('monitoring', path='/', description='Monitoring operations')
+    namespace = api.namespace('Monitoring', path='/', description='Monitoring operations')
     version = api.version.split('.', maxsplit=1)[0]
     release_id = api.version
 
