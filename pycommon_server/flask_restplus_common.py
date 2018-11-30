@@ -304,19 +304,19 @@ class _ReverseProxied:
         return self.app(environ, start_response)
 
 
-def create_api(name: str, cors: bool = True, compress_mimetypes: List[str] = None, reverse_proxy: bool = True,
+def create_api(file_path: str, cors: bool = True, compress_mimetypes: List[str] = None, reverse_proxy: bool = True,
                **kwargs) -> (Flask, Api):
     """
     Create Flask application and related Flask-RestPlus API instance.
 
-    :param name: server.py __name__ variable.
+    :param file_path: server.py __file__ variable.
     :param cors: If CORS (Cross Resource) should be enabled. Activated by default.
     :param compress_mimetypes: List of mime-types that should be compressed. No compression by default.
     :param reverse_proxy: If server should handle reverse-proxy configuration. Enabled by default.
     :param kwargs: Additional Flask-RestPlus API arguments.
     :return: A tuple with 2 elements: Flask application, Flask-RestPlus API
     """
-    service_package = name.split('.')[0]
+    service_package = os.path.basename(os.path.dirname(file_path))
     application = Flask(service_package)
 
     if cors:

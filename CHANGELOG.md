@@ -6,14 +6,20 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 9.1.0 (2018-11-29) ##
+## Version 10.1.0 (2018-11-29) ##
 
 ### Enhancements ###
 
 - Add celery support via celery_common module
 - New version of pycommon-test with celery_mock
 
-## Version 9.0.0 (2018-11-28) ##
+## Version 10.0.0 (2018-11-29) ##
+
+### Release notes ###
+
+- create_api now expect a file path as first parameter instead of the file name.
+
+## Version 9.0.0 (2018-11-29) ##
 
 ### Release notes ###
 

@@ -36,7 +36,7 @@ class AsyncNamespaceProxy:
         Add an async route endpoint.
         :param endpoint: value of the exposes endpoint ex: /foo
         :param serializer: a single model or a list of model. If a list is given, the output will be treated (serialized) and documented as a list
-        :return:
+        :return: route decorator
         """
         def wrapper(cls):
             ## 1st create the one requested
