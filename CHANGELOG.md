@@ -6,6 +6,20 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 11.0.0 (2018-11-30) ##
+
+### Release notes ###
+
+- Rename how_to_get_celery_status into how_to_get_async_status
+
+### Enhancements ###
+
+- how_to_get_async_status_doc is now available to properly document asynchronous endpoints
+
+### Bug fixes ###
+
+- OpenAPI definition now return an accurate description of async tasks.
+
 ## Version 10.1.1 (2018-11-30) ##
 
 ### Bug fixes ###
