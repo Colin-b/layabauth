@@ -4,15 +4,12 @@ from flask_restplus import Api, Resource, fields
 from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server.celery_common import AsyncNamespaceProxy, how_to_get_celery_status, build_celery_application
-
-
-class CeleryTaskStub:
-    id = 'idtest'
-
-
-def successful_model(api):
-    return api.model('Successful', {'status': fields.String(default='Successful')})
+from pycommon_server.celery_common import (
+    AsyncNamespaceProxy,
+    how_to_get_async_status,
+    build_celery_application,
+    how_to_get_async_status_doc
+)
 
 
 class AsyncRouteTest(JSONTestCase):
@@ -26,65 +23,177 @@ class AsyncRouteTest(JSONTestCase):
                              'backend': 'memory://localhost/'}}
         celery_application = TestCeleryAppProxy(build_celery_application(config))
 
-        ns = AsyncNamespaceProxy(
-            self.api.namespace('Test Namespace', path='/foo', description='Test namespace operations'),
-            celery_application, {})
+        ns = AsyncNamespaceProxy(self.api.namespace('Test space', path='/foo', description='Test'), celery_application)
 
-        @ns.async_route('/bar', successful_model(self.api))
+        @ns.async_route('/bar', self.api.model('BarModel', {'status': fields.String, 'foo': fields.String}))
         class TestEndpoint(Resource):
+            @ns.doc(**how_to_get_async_status_doc)
             def get(self):
                 @celery_application.task(queue=celery_application.namespace)
                 def fetch_the_answer():
                     return {"status": "why not", "foo": "bar"}
 
                 celery_task = fetch_the_answer.apply_async()
-                return how_to_get_celery_status(celery_task)
+                return how_to_get_async_status(celery_task)
+
+        @ns.async_route('/bar2', [self.api.model('Bar2Model', {'status2': fields.String, 'foo2': fields.String})])
+        class TestEndpoint2(Resource):
+            @ns.doc(**how_to_get_async_status_doc)
+            def get(self):
+                @celery_application.task(queue=celery_application.namespace)
+                def fetch_the_answer():
+                    return [{"status2": "why not2", "foo2": "bar2"}]
+
+                celery_task = fetch_the_answer.apply_async()
+                return how_to_get_async_status(celery_task)
 
         return app
 
-    def test_async_ns_proxy_should_create_2extra_endpoints(self):
+    def test_async_ns_proxy_should_create_2_extra_endpoints(self):
         response = self.client.get('/swagger.json')
         self.assert200(response)
         self.assert_swagger(response, {
             'swagger': '2.0',
             'basePath': '/',
             'paths': {
-                '/foo/bar': {
-                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_test_endpoint',
-                            'tags': ['Test Namespace']}},
-                '/foo/bar/result/{celery_task_id}': {
-                    'parameters': [{'name': 'celery_task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                '/foo/bar': {'get': {
+                    'responses': {
+                        '202': {
+                            'description': 'Computation started.',
+                            'schema': {'type': 'string'},
+                            'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}
+                        }
+                    },
+                    'operationId': 'get_test_endpoint',
+                    'tags': ['Test space']
+                }},
+                '/foo/bar/result/{task_id}': {
+                    'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}],
                     'get': {
                         'responses': {
-                            '200': {'description': 'Success', 'schema': {'$ref': '#/definitions/Successful'}}},
-                        'summary': 'Query the result of Celery Async Task', 'operationId': 'get_test_endpoint_result',
-                        'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask',
-                                        'description': 'An optional fields mask'}], 'tags': ['Test Namespace']}},
-                '/foo/bar/status/{celery_task_id}': {
-                    'parameters': [{'name': 'celery_task_id', 'in': 'path', 'required': True, 'type': 'string'}],
-                    'get': {'responses': {'200': {'description': 'Success'}},
-                            'summary': 'Get the status of Celery Async Task',
-                            'operationId': 'get_test_endpoint_status', 'tags': ['Test Namespace']}}},
+                            '200': {
+                                'description': 'Success',
+                                'schema': {'$ref': '#/definitions/BarModel'}
+                            }
+                        },
+                        'summary': 'Retrieve result for provided task',
+                        'operationId': 'get_test_endpoint_result',
+                        'parameters': [
+                            {'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}
+                        ],
+                        'tags': ['Test space']
+                    }
+                },
+                '/foo/bar/status/{task_id}': {
+                    'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                    'get': {
+                        'responses': {
+                            '200': {
+                                'description': 'Task is still computing.',
+                                'schema': {'$ref': '#/definitions/CurrentAsyncState'}
+                            },
+                            '303': {
+                                'description': 'Result is available.',
+                                'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}
+                            },
+                            '500': {
+                                'description': 'An unexpected error occurred.',
+                                'schema': {'type': 'string', 'description': 'Stack trace.'}
+                            }
+                        },
+                        'summary': 'Retrieve status for provided task',
+                        'operationId': 'get_test_endpoint_status',
+                        'tags': ['Test space']
+                    }
+                },
+                '/foo/bar2': {
+                    'get': {
+                        'responses': {
+                            '202': {
+                                'description': 'Computation started.',
+                                'schema': {'type': 'string'},
+                                'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}
+                            }
+                        },
+                        'operationId': 'get_test_endpoint2',
+                        'tags': ['Test space']
+                    }
+                },
+                '/foo/bar2/result/{task_id}': {
+                    'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                    'get': {
+                        'responses': {
+                            '200': {
+                                'description': 'Success',
+                                'schema': {'type': 'array', 'items': {'$ref': '#/definitions/Bar2Model'}}
+                            }
+                        },
+                        'summary': 'Retrieve result for provided task',
+                        'operationId': 'get_test_endpoint2_result',
+                        'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}],
+                        'tags': ['Test space']
+                    }
+                },
+                '/foo/bar2/status/{task_id}': {
+                    'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}],
+                    'get': {
+                        'responses': {
+                            '200': {
+                                'description': 'Task is still computing.',
+                                'schema': {'$ref': '#/definitions/CurrentAsyncState'}
+                            },
+                            '303': {
+                                'description': 'Result is available.',
+                                'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}
+                            },
+                            '500': {
+                                'description': 'An unexpected error occurred.',
+                                'schema': {'type': 'string', 'description': 'Stack trace.'}
+                            }
+                        },
+                        'summary': 'Retrieve status for provided task',
+                        'operationId': 'get_test_endpoint2_status',
+                        'tags': ['Test space']
+                    }
+                }
+            },
             'info': {'title': 'API', 'version': '1.0'},
             'produces': ['application/json'],
             'consumes': ['application/json'],
-            'tags': [{'name': 'Test Namespace', 'description': 'Test namespace operations'}],
-            'definitions': {'Successful': {'properties': {'status': {'type': 'string', 'default': 'Successful'}},
-                                           'type': 'object'}},
-            'responses': {'ParseError': {'description': "When a mask can't be parsed"},
-                          'MaskError': {'description': 'When any error occurs on mask'}}
+            'tags': [
+                {'name': 'Test space', 'description': 'Test'}
+            ],
+            'definitions': {
+                'BarModel': {'properties': {'status': {'type': 'string'}, 'foo': {'type': 'string'}}, 'type': 'object'},
+                'CurrentAsyncState': {'required': ['state'], 'properties': {'state': {'type': 'string', 'description': 'Indicates current computation state.', 'example': 'PENDING'}}, 'type': 'object'},
+                'Bar2Model': {'properties': {'status2': {'type': 'string'}, 'foo2': {'type': 'string'}}, 'type': 'object'}
+            },
+            'responses': {
+                'ParseError': {'description': "When a mask can't be parsed"},
+                'MaskError': {'description': 'When any error occurs on mask'}
+            }
         })
 
     def test_async_call_task(self):
         response = self.client.get('/foo/bar')
-        self.assertStatus(response, 202)
-        status_url = response.headers['location'].replace('http://localhost', '')
+        status_url = self.assert_202_regex(response, 'http://localhost/foo/bar/status/.*')
+        self.assert_text_regex(response,
+                               'Computation status can be found using this URL: http://localhost/foo/bar/status/.*')
         status_reply = self.client.get(status_url)
-        self.assertStatus(status_reply, 303)
-        result_url = status_reply.location.replace('http://localhost', '')
+        result_url = self.assert_303_regex(status_reply, 'http://localhost/foo/bar/result/.*')
         result_reply = self.client.get(result_url)
         self.assert200(result_reply)
-        self.assert_json(result_reply, {"status": "why not"})
+        self.assert_json(result_reply, {"status": "why not", "foo": "bar"})
+
+        response = self.client.get('/foo/bar2')
+        status_url = self.assert_202_regex(response, 'http://localhost/foo/bar2/status/.*')
+        self.assert_text_regex(response,
+                               'Computation status can be found using this URL: http://localhost/foo/bar2/status/.*')
+        status_reply = self.client.get(status_url)
+        result_url = self.assert_303_regex(status_reply, 'http://localhost/foo/bar2/result/.*')
+        result_reply = self.client.get(result_url)
+        self.assert200(result_reply)
+        self.assert_json(result_reply, [{"status2": "why not2", "foo2": "bar2"}])
 
     def test_async_call_task_without_endpoint_call(self):
         status_reply = self.client.get('/foo/bar/status/42')
@@ -97,14 +206,14 @@ class TestGetCeleryStatus(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
         app.config['TESTING'] = True
-        self.api = Api(app)
-
         return app
 
-    def test_get_celery_status(self):
+    def test_get_async_status(self):
+        class CeleryTaskStub:
+            id = 'idtest'
+
         celery_task = CeleryTaskStub()
         flask.request.base_url = 'http://localhost/foo'
-        response = how_to_get_celery_status(celery_task)
-        self.assertEqual('http://localhost/foo/status/idtest', response.headers['location'])
-        self.assertEqual(b'Computation status can be found using this URL: http://localhost/foo/status/idtest',
-                         response.data)
+        response = how_to_get_async_status(celery_task)
+        self.assert_202_regex(response, 'http://localhost/foo/status/idtest')
+        self.assert_text(response, 'Computation status can be found using this URL: http://localhost/foo/status/idtest')
