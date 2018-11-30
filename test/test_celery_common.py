@@ -1,13 +1,10 @@
-import unittest
-
 import flask
 from flask import Flask
 from flask_restplus import Api, Resource, fields
 from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server.celery_common import AsyncNamespaceProxy, _snake_case, how_to_get_celery_status, \
-    build_celery_application
+from pycommon_server.celery_common import AsyncNamespaceProxy, how_to_get_celery_status, build_celery_application
 
 
 class CeleryTaskStub:
@@ -45,7 +42,7 @@ class AsyncRouteTest(JSONTestCase):
 
         return app
 
-    def test_aysnc_ns_proxy_should_create_2extra_endpoints(self):
+    def test_async_ns_proxy_should_create_2extra_endpoints(self):
         response = self.client.get('/swagger.json')
         self.assert200(response)
         self.assert_swagger(response, {
@@ -78,32 +75,21 @@ class AsyncRouteTest(JSONTestCase):
                           'MaskError': {'description': 'When any error occurs on mask'}}
         })
 
-    def test_aysnc_call_task(self):
+    def test_async_call_task(self):
         response = self.client.get('/foo/bar')
+        self.assertStatus(response, 202)
         status_url = response.headers['location'].replace('http://localhost', '')
         status_reply = self.client.get(status_url)
+        self.assertStatus(status_reply, 303)
         result_url = status_reply.location.replace('http://localhost', '')
         result_reply = self.client.get(result_url)
+        self.assert200(result_reply)
         self.assert_json(result_reply, {"status": "why not"})
 
-    def test_aysnc_call_task_without_endpoint_call(self):
+    def test_async_call_task_without_endpoint_call(self):
         status_reply = self.client.get('/foo/bar/status/42')
+        self.assertStatus(status_reply, 200)
         self.assert_json(status_reply, {"state": "PENDING"})
-
-class TestSnakeCase(unittest.TestCase):
-
-    def test_camel_case_to_snake_case(self):
-        snaked_string = _snake_case('TestMe')
-        self.assertEqual('test_me', snaked_string)
-
-    def test_snake_case_withoutunderscore(self):
-        snaked_string = _snake_case('testme')
-        self.assertEqual('testme', snaked_string)
-
-    def test_malformed_camel(self):
-        with self.assertRaises(ValueError) as context:
-            _snake_case('Test_Me')
-        self.assertTrue('Test_Me should be Camel Case and should not contain any _' in str(context.exception))
 
 
 class TestGetCeleryStatus(JSONTestCase):
@@ -122,4 +108,3 @@ class TestGetCeleryStatus(JSONTestCase):
         self.assertEqual('http://localhost/foo/status/idtest', response.headers['location'])
         self.assertEqual(b'Computation status can be found using this URL: http://localhost/foo/status/idtest',
                          response.data)
-        print(response)

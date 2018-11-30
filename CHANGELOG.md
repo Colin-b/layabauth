@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 10.1.1 (2018-11-30) ##
+
+### Bug fixes ###
+
+- Upgrade pycommon-test to bug fix 3.2.1
+
 ## Version 10.1.0 (2018-11-29) ##
 
 ### Enhancements ###
