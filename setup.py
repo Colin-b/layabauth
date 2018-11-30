@@ -15,7 +15,9 @@ extra_requirements = {
     ],
     # Async task execution using celery
     'celery': [
-        'celery==4.2.1',
+        'redis==2.10.6',
+        # Used to process requests asynchronously
+        'celery[redis]==4.2.1',
     ],
     # Used to connect to another REST API
     'rest': [

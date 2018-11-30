@@ -5,6 +5,7 @@ import os.path
 import tempfile
 import unittest
 from unittest.mock import Mock
+
 import responses
 from flask import Flask, Response, json
 from flask_restplus import Resource, Api
@@ -314,19 +315,25 @@ class HealthCheckWithPassDetails(JSONTestCase):
                 'HealthPass': {
                     'required': ['details', 'releaseId', 'status', 'version'],
                     'properties': {
-                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'pass', 'enum': ['pass', 'warn']},
+                        'status': {'type': 'string',
+                                   'description': 'Indicates whether the service status is acceptable or not.',
+                                   'example': 'pass', 'enum': ['pass', 'warn']},
                         'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
                         'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'}
+                        'details': {'type': 'object',
+                                    'description': 'Provides more details about the status of the service.'}
                     }, 'type': 'object'
                 },
                 'HealthFail': {
                     'required': ['details', 'releaseId', 'status', 'version'],
                     'properties': {
-                        'status': {'type': 'string', 'description': 'Indicates whether the service status is acceptable or not.', 'example': 'fail', 'enum': ['fail']},
+                        'status': {'type': 'string',
+                                   'description': 'Indicates whether the service status is acceptable or not.',
+                                   'example': 'fail', 'enum': ['fail']},
                         'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
                         'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object', 'description': 'Provides more details about the status of the service.'},
+                        'details': {'type': 'object',
+                                    'description': 'Provides more details about the status of the service.'},
                         'output': {'type': 'string', 'description': 'Raw error output.'}
                     }, 'type': 'object'
                 }
@@ -436,21 +443,36 @@ class FlaskRestPlusTest(JSONTestCase):
         self.assert_swagger(response, {
             'swagger': '2.0', 'basePath': '/', 'paths': {
                 '/logging': {
-                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_logging', 'tags': ['default']},
-                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_logging', 'tags': ['default']},
-                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_logging', 'tags': ['default']},
-                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_logging', 'tags': ['default']}
+                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_logging',
+                               'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_logging',
+                            'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_logging',
+                             'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_logging',
+                            'tags': ['default']}
                 },
                 '/requires_authentication': {
-                    'delete': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'delete_requires_authentication', 'tags': ['default']},
-                    'get': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'get_requires_authentication', 'tags': ['default']},
-                    'post': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'post_requires_authentication', 'tags': ['default']},
-                    'put': {'responses': {'200': {'description': 'Success'}}, 'operationId': 'put_requires_authentication', 'tags': ['default']}
+                    'delete': {'responses': {'200': {'description': 'Success'}},
+                               'operationId': 'delete_requires_authentication', 'tags': ['default']},
+                    'get': {'responses': {'200': {'description': 'Success'}},
+                            'operationId': 'get_requires_authentication', 'tags': ['default']},
+                    'post': {'responses': {'200': {'description': 'Success'}},
+                             'operationId': 'post_requires_authentication', 'tags': ['default']},
+                    'put': {'responses': {'200': {'description': 'Success'}},
+                            'operationId': 'put_requires_authentication', 'tags': ['default']}
                 },
                 '/standard_responses': {
-                    'delete': {'responses': {'204': {'description': 'Deleted'}}, 'operationId': 'delete_standard_responses', 'tags': ['default']},
-                    'post': {'responses': {'201': {'description': 'Created', 'headers': {'location': {'description': 'Location of created resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Created'}}}, 'operationId': 'post_standard_responses', 'tags': ['default']},
-                    'put': {'responses': {'201': {'description': 'Updated', 'headers': {'location': {'description': 'Location of updated resource.', 'type': 'string'}}, 'schema': {'$ref': '#/definitions/Updated'}}}, 'operationId': 'put_standard_responses', 'tags': ['default']}
+                    'delete': {'responses': {'204': {'description': 'Deleted'}},
+                               'operationId': 'delete_standard_responses', 'tags': ['default']},
+                    'post': {'responses': {'201': {'description': 'Created', 'headers': {
+                        'location': {'description': 'Location of created resource.', 'type': 'string'}},
+                                                   'schema': {'$ref': '#/definitions/Created'}}},
+                             'operationId': 'post_standard_responses', 'tags': ['default']},
+                    'put': {'responses': {'201': {'description': 'Updated', 'headers': {
+                        'location': {'description': 'Location of updated resource.', 'type': 'string'}},
+                                                  'schema': {'$ref': '#/definitions/Updated'}}},
+                            'operationId': 'put_standard_responses', 'tags': ['default']}
                 }
             },
             'info': {'title': 'API', 'version': '1.0'},
