@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import json
 import logging
 import os
 import sys
@@ -9,15 +10,14 @@ from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
 from typing import List, Dict, Union
-import json
+from urllib.parse import urlparse
+
 import flask
 from flask import request, has_request_context, make_response, Flask
 from flask_compress import Compress
 from flask_cors import CORS
 from flask_restplus import Resource, fields, Api, Namespace
 from werkzeug.exceptions import Unauthorized
-from urllib.parse import urlparse
-
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +39,15 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     @namespace.route('/health')
     @namespace.doc(responses={
         200: ('Server is in a coherent state.', namespace.model('HealthPass', {
-            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='pass', enum=['pass', 'warn']),
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.',
+                                    required=True, example='pass', enum=['pass', 'warn']),
             'version': fields.String(description='Public version of the service.', required=True, example='1'),
             'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
             'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
         })),
         400: ('Server is not in a coherent state.', namespace.model('HealthFail', {
-            'status': fields.String(description='Indicates whether the service status is acceptable or not.', required=True, example='fail', enum=['fail']),
+            'status': fields.String(description='Indicates whether the service status is acceptable or not.',
+                                    required=True, example='fail', enum=['fail']),
             'version': fields.String(description='Public version of the service.', required=True, example='1'),
             'releaseId': fields.String(description='Version of the service.', required=True, example='1.0.0'),
             'details': fields.Raw(description='Provides more details about the status of the service.', required=True),
@@ -86,7 +88,7 @@ def base_path() -> str:
     """
     if 'X-Original-Request-Uri' in flask.request.headers:
         service_path = '/' + flask.request.headers['X-Original-Request-Uri'].split('/', maxsplit=2)[1]
-        return f'http://{flask.request.headers["Host"]}{service_path}'
+        return f'{flask.request.scheme}://{flask.request.headers["Host"]}{service_path}'
     parsed = urlparse(flask.request.base_url)
     return f'{parsed.scheme}://{parsed.netloc}'
 
