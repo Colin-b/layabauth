@@ -1,5 +1,6 @@
 import unittest
 
+import flask
 from flask import Flask
 from flask_restplus import Api, Resource, fields
 from pycommon_test.celery_mock import TestCeleryAppProxy
@@ -116,8 +117,9 @@ class TestGetCeleryStatus(JSONTestCase):
 
     def test_get_celery_status(self):
         celery_task = CeleryTaskStub()
+        flask.request.base_url = 'http://localhost/foo'
         response = how_to_get_celery_status(celery_task)
-        self.assertEqual('http://localhost/status/idtest', response.headers['location'])
-        self.assertEqual(b'Computation status can be found using this URL: http://localhost/status/idtest',
+        self.assertEqual('http://localhost/foo/status/idtest', response.headers['location'])
+        self.assertEqual(b'Computation status can be found using this URL: http://localhost/foo/status/idtest',
                          response.data)
         print(response)
