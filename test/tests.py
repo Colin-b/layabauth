@@ -284,65 +284,50 @@ class HealthCheckWithPassDetails(JSONTestCase):
     def test_generated_swagger(self):
         response = self.client.get('/swagger.json')
         self.assert200(response)
-        self.assert_swagger(response, {
-            'swagger': '2.0',
-            'basePath': '/',
-            'paths': {
-                '/health': {
-                    'get': {
-                        'responses': {
-                            '200': {
-                                'description': 'Server is in a coherent state.',
-                                'schema': {'$ref': '#/definitions/HealthPass'}
-                            },
-                            '400': {
-                                'description': 'Server is not in a coherent state.',
-                                'schema': {'$ref': '#/definitions/HealthFail'}
-                            }
-                        },
-                        'summary': 'Check service health',
-                        'description': 'This endpoint perform a quick server state check.',
-                        'operationId': 'get_health',
-                        'tags': ['monitoring']
-                    }
-                }
-            },
-            'info': {'title': 'API', 'version': '3.2.1'},
-            'produces': ['application/json'],
-            'consumes': ['application/json'],
-            'tags': [{'name': 'monitoring', 'description': 'Monitoring operations'}],
-            'definitions': {
-                'HealthPass': {
-                    'required': ['details', 'releaseId', 'status', 'version'],
-                    'properties': {
-                        'status': {'type': 'string',
-                                   'description': 'Indicates whether the service status is acceptable or not.',
-                                   'example': 'pass', 'enum': ['pass', 'warn']},
-                        'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
-                        'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object',
-                                    'description': 'Provides more details about the status of the service.'}
-                    }, 'type': 'object'
-                },
-                'HealthFail': {
-                    'required': ['details', 'releaseId', 'status', 'version'],
-                    'properties': {
-                        'status': {'type': 'string',
-                                   'description': 'Indicates whether the service status is acceptable or not.',
-                                   'example': 'fail', 'enum': ['fail']},
-                        'version': {'type': 'string', 'description': 'Public version of the service.', 'example': '1'},
-                        'releaseId': {'type': 'string', 'description': 'Version of the service.', 'example': '1.0.0'},
-                        'details': {'type': 'object',
-                                    'description': 'Provides more details about the status of the service.'},
-                        'output': {'type': 'string', 'description': 'Raw error output.'}
-                    }, 'type': 'object'
-                }
-            },
-            'responses': {
-                'ParseError': {'description': "When a mask can't be parsed"},
-                'MaskError': {'description': 'When any error occurs on mask'}
-            }
-        })
+        self.assert_swagger(response, {'swagger': '2.0', 'basePath': '/', 'paths': {'/health': {'get': {'responses': {
+            '200': {'description': 'Server is in a coherent state.', 'schema': {'$ref': '#/definitions/HealthPass'}},
+            '400': {'description': 'Server is not in a coherent state.',
+                    'schema': {'$ref': '#/definitions/HealthFail'}}}, 'summary': 'Check service health',
+            'description': 'This endpoint perform a quick server state check.',
+            'operationId': 'get_health',
+            'tags': [
+                'Monitoring']}}},
+                                       'info': {'title': 'API', 'version': '3.2.1'}, 'produces': ['application/json'],
+                                       'consumes': ['application/json'],
+                                       'tags': [{'name': 'Monitoring', 'description': 'Monitoring operations'}],
+                                       'definitions': {
+                                           'HealthPass': {'required': ['details', 'releaseId', 'status', 'version'],
+                                                          'properties': {'status': {'type': 'string',
+                                                                                    'description': 'Indicates whether the service status is acceptable or not.',
+                                                                                    'example': 'pass',
+                                                                                    'enum': ['pass', 'warn']},
+                                                                         'version': {'type': 'string',
+                                                                                     'description': 'Public version of the service.',
+                                                                                     'example': '1'},
+                                                                         'releaseId': {'type': 'string',
+                                                                                       'description': 'Version of the service.',
+                                                                                       'example': '1.0.0'},
+                                                                         'details': {'type': 'object',
+                                                                                     'description': 'Provides more details about the status of the service.'}},
+                                                          'type': 'object'},
+                                           'HealthFail': {'required': ['details', 'releaseId', 'status', 'version'],
+                                                          'properties': {'status': {'type': 'string',
+                                                                                    'description': 'Indicates whether the service status is acceptable or not.',
+                                                                                    'example': 'fail',
+                                                                                    'enum': ['fail']},
+                                                                         'version': {'type': 'string',
+                                                                                     'description': 'Public version of the service.',
+                                                                                     'example': '1'},
+                                                                         'releaseId': {'type': 'string',
+                                                                                       'description': 'Version of the service.',
+                                                                                       'example': '1.0.0'},
+                                                                         'details': {'type': 'object',
+                                                                                     'description': 'Provides more details about the status of the service.'},
+                                                                         'output': {'type': 'string',
+                                                                                    'description': 'Raw error output.'}},
+                                                          'type': 'object'}},
+                                       'responses': {'ParseError': {'description': "When a mask can't be parsed"},
+                                                     'MaskError': {'description': 'When any error occurs on mask'}}})
 
 
 class FlaskRestPlusTest(JSONTestCase):
