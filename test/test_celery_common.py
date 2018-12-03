@@ -61,7 +61,9 @@ class AsyncRouteTest(JSONTestCase):
                         '202': {
                             'description': 'Computation started.',
                             'schema': {'type': 'string'},
-                            'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}
+                            'headers': {
+                                'location': {
+                                    'description': 'URL to fetch computation status from.', 'type': 'string'}}
                         }
                     },
                     'operationId': 'get_test_endpoint',
@@ -79,7 +81,8 @@ class AsyncRouteTest(JSONTestCase):
                         'summary': 'Retrieve result for provided task',
                         'operationId': 'get_test_endpoint_result',
                         'parameters': [
-                            {'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}
+                            {'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask',
+                             'description': 'An optional fields mask'}
                         ],
                         'tags': ['Test space']
                     }
@@ -112,7 +115,9 @@ class AsyncRouteTest(JSONTestCase):
                             '202': {
                                 'description': 'Computation started.',
                                 'schema': {'type': 'string'},
-                                'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}
+                                'headers': {
+                                    'location': {
+                                        'description': 'URL to fetch computation status from.', 'type': 'string'}}
                             }
                         },
                         'operationId': 'get_test_endpoint2',
@@ -130,7 +135,9 @@ class AsyncRouteTest(JSONTestCase):
                         },
                         'summary': 'Retrieve result for provided task',
                         'operationId': 'get_test_endpoint2_result',
-                        'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}],
+                        'parameters': [{
+                            'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask',
+                            'description': 'An optional fields mask'}],
                         'tags': ['Test space']
                     }
                 },
@@ -165,8 +172,13 @@ class AsyncRouteTest(JSONTestCase):
             ],
             'definitions': {
                 'BarModel': {'properties': {'status': {'type': 'string'}, 'foo': {'type': 'string'}}, 'type': 'object'},
-                'CurrentAsyncState': {'required': ['state'], 'properties': {'state': {'type': 'string', 'description': 'Indicates current computation state.', 'example': 'PENDING'}}, 'type': 'object'},
-                'Bar2Model': {'properties': {'status2': {'type': 'string'}, 'foo2': {'type': 'string'}}, 'type': 'object'}
+                'CurrentAsyncState': {'required': ['state'], 'properties': {
+                    'state': {'type': 'string', 'description': 'Indicates current computation state.',
+                              'example': 'PENDING'}}, 'type': 'object'},
+                'Bar2Model': {'properties': {
+                    'status2': {'type': 'string'},
+                    'foo2': {'type': 'string'}
+                }, 'type': 'object'}
             },
             'responses': {
                 'ParseError': {'description': "When a mask can't be parsed"},
@@ -176,21 +188,21 @@ class AsyncRouteTest(JSONTestCase):
 
     def test_async_call_task(self):
         response = self.client.get('/foo/bar')
-        status_url = self.assert_202_regex(response, 'http://localhost/foo/bar/status/.*')
+        status_url = self.assert_202_regex(response, '/foo/bar/status/.*')
         self.assert_text_regex(response,
                                'Computation status can be found using this URL: http://localhost/foo/bar/status/.*')
         status_reply = self.client.get(status_url)
-        result_url = self.assert_303_regex(status_reply, 'http://localhost/foo/bar/result/.*')
+        result_url = self.assert_303_regex(status_reply, '/foo/bar/result/.*')
         result_reply = self.client.get(result_url)
         self.assert200(result_reply)
         self.assert_json(result_reply, {"status": "why not", "foo": "bar"})
 
         response = self.client.get('/foo/bar2')
-        status_url = self.assert_202_regex(response, 'http://localhost/foo/bar2/status/.*')
+        status_url = self.assert_202_regex(response, '/foo/bar2/status/.*')
         self.assert_text_regex(response,
                                'Computation status can be found using this URL: http://localhost/foo/bar2/status/.*')
         status_reply = self.client.get(status_url)
-        result_url = self.assert_303_regex(status_reply, 'http://localhost/foo/bar2/result/.*')
+        result_url = self.assert_303_regex(status_reply, '/foo/bar2/result/.*')
         result_reply = self.client.get(result_url)
         self.assert200(result_reply)
         self.assert_json(result_reply, [{"status2": "why not2", "foo2": "bar2"}])
@@ -215,5 +227,5 @@ class TestGetCeleryStatus(JSONTestCase):
         celery_task = CeleryTaskStub()
         flask.request.base_url = 'http://localhost/foo'
         response = how_to_get_async_status(celery_task)
-        self.assert_202_regex(response, 'http://localhost/foo/status/idtest')
+        self.assert_202_regex(response, '/foo/status/idtest')
         self.assert_text(response, 'Computation status can be found using this URL: http://localhost/foo/status/idtest')
