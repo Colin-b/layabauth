@@ -1,8 +1,20 @@
 # Python Common Server Module #
 
-Provide helper to manipulate server.
+This package provides the following features:
 
-## Loading configuration ## 
+## Asynchronous REST API ##
+
+Thanks to Celery, your REST API can now expose asynchronous endpoints.
+
+You will find more details in pycommon_server.celery_common module.
+
+## YAML Configuration ##
+
+API configuration and logging configuration can be standardized.
+
+You will find more details in pycommon_server.configuration module.
+
+### Loading configuration ###
 
 ```python
 from pycommon_server.configuration import load
@@ -11,7 +23,13 @@ from pycommon_server.configuration import load
 service_configuration = load('path/to/a/file/in/module/folder')
 ```
 
-## Default behavior ##
+## Flask RestPlus ##
+
+The way your REST API behaves can be standardized.
+
+You will find more details in pycommon_server.flask_restplus_common module.
+
+### Default behavior ###
 
 Importing pycommon_server.flask_restplus_common will make sure that every flask request is loggued on reception. 
 
@@ -19,5 +37,15 @@ Importing pycommon_server.flask_restplus_common will make sure that every flask 
 import pycommon_server.flask_restplus_common
 ```
 
-For more information:
-http://guru.trading.gdfsuez.net/confluence/display/ETRMdev/Using+the+INFRA+project+on+Azure
+## Health check ##
+
+If your REST API is calling other REST API(s) then your health check should ensure that those APIs can be reached.
+
+You will find more details in pycommon_server.rest_helper module.
+
+## Accessing Windows from Linux ##
+
+If you need to access Windows computers from your REST API hosted on Linux.
+
+You will find more details in pycommon_server.windows module.
+
