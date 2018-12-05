@@ -6,6 +6,17 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.0.0 (2018-12-04) ##
+
+### Release notes ###
+
+- Rename rest_helper module into health
+- Rename rest_helper.health_details into health.http_details
+
+### Enhancements ###
+
+- Add a new health.status function returning status according to a list of statuses.
+
 ## Version 11.2.0 (2018-12-04) ##
 
 ### Enhancements ###
