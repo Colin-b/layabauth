@@ -13,7 +13,7 @@ from pycommon_test import mock_now, revert_now
 from pycommon_test.samba_mock import TestConnection
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server import flask_restplus_common, logging_filter, windows, rest_helper
+from pycommon_server import flask_restplus_common, logging_filter, windows, health
 from pycommon_server.configuration import load_configuration, load_logging_configuration, load
 
 logger = logging.getLogger(__name__)
@@ -901,7 +901,7 @@ class CreateNewApi(unittest.TestCase):
                     'MaskError': {'description': 'When any error occurs on mask'}}})
 
 
-class RestHelperTest(unittest.TestCase):
+class HealthTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -928,7 +928,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/health'))
+        }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
     def test_error_health_check(self):
@@ -947,7 +947,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/health'))
+        }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
     def test_pass_status_health_check(self):
@@ -974,7 +974,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'pass',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/health'))
+        }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
     def test_pass_status_custom_health_check(self):
@@ -991,7 +991,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'pass',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'pass'))
+        }), health.http_details('test', 'http://test/status', lambda resp: 'pass'))
 
     @responses.activate
     def test_warn_status_health_check(self):
@@ -1018,7 +1018,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'warn',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/health'))
+        }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
     def test_pass_status_custom_health_check(self):
@@ -1035,7 +1035,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'warn',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'warn'))
+        }), health.http_details('test', 'http://test/status', lambda resp: 'warn'))
 
     @responses.activate
     def test_fail_status_health_check(self):
@@ -1062,7 +1062,7 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/health'))
+        }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
     def test_fail_status_custom_health_check(self):
@@ -1079,8 +1079,16 @@ class RestHelperTest(unittest.TestCase):
                 'status': 'fail',
                 'time': '2018-10-11T15:05:05.663979'
             }
-        }), rest_helper.health_details('test', 'http://test/status', lambda resp: 'fail'))
+        }), health.http_details('test', 'http://test/status', lambda resp: 'fail'))
 
+    def test_status_aggregation_with_failure(self):
+        self.assertEqual('fail', health.status('pass', 'fail', 'warn'))
+
+    def test_status_aggregation_with_warning(self):
+        self.assertEqual('warn', health.status('pass', 'warn', 'pass'))
+
+    def test_status_aggregation_with_pass(self):
+        self.assertEqual('pass', health.status('pass', 'pass', 'pass'))
 
 if __name__ == '__main__':
     unittest.main()
