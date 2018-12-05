@@ -41,7 +41,7 @@ import pycommon_server.flask_restplus_common
 
 If your REST API is calling other REST API(s) then your health check should ensure that those APIs can be reached.
 
-You will find more details in pycommon_server.rest_helper module.
+You will find more details in pycommon_server.health module.
 
 ## Accessing Windows from Linux ##
 
