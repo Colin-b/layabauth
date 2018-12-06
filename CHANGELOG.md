@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.0.0 (2018-12-06) ##
+
+### Release notes ###
+
+- Response Model is now optional on asynchronous route
+
 ## Version 12.0.0 (2018-12-05) ##
 
 ### Release notes ###

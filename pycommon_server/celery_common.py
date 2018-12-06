@@ -28,13 +28,15 @@ class AsyncNamespaceProxy:
     def __getattr__(self, name):
         return getattr(self.__namespace, name)
 
-    def async_route(self, endpoint: str, serializer):
+    def async_route(self, endpoint: str, serializer=None):
         """
         Add an async route endpoint.
         :param endpoint: value of the exposes endpoint ex: /foo
-        :param serializer: a single model or a list of model. If a list is given, the output will be treated (serialized) and documented as a list
+        :param serializer: In case the response needs serialization, a single model or a list of model.
+        If a list is given, the output will be treated (serialized) and documented as a list
         :return: route decorator
         """
+
         def wrapper(cls):
             # Create the requested route
             self.__namespace.route(endpoint)(cls)
@@ -122,11 +124,20 @@ def _get_celery_result(celery_app: Celery, celery_task_id: str):
     return celery_task.get()
 
 
+def _conditionnal_marshalling(namespace, response_model):
+    def wrapper(func):
+        if response_model is not None:
+            return namespace.marshal_with(response_model[0] if isinstance(response_model, list) else response_model,
+                                          as_list=isinstance(response_model, list))(func)
+        return func
+
+    return wrapper
+
+
 def _build_result_endpoints(base_clazz, endpoint_root: str, namespace, celery_application: Celery, response_model):
     @namespace.route(f'{endpoint_root}/{_RESULT_ENDPOINT}/<string:task_id>')
     class AsyncTaskResult(Resource):
-        @namespace.marshal_with(response_model[0] if isinstance(response_model, list) else response_model,
-                                as_list=isinstance(response_model, list))
+        @_conditionnal_marshalling(namespace, response_model)
         @namespace.doc(f'get_{_snake_case(base_clazz)}_result')
         def get(self, task_id: str):
             """
@@ -137,7 +148,8 @@ def _build_result_endpoints(base_clazz, endpoint_root: str, namespace, celery_ap
     @namespace.route(f'{endpoint_root}/{_STATUS_ENDPOINT}/<string:task_id>')
     @namespace.doc(responses={
         200: ('Task is still computing.', namespace.model('CurrentAsyncState', {
-            'state': fields.String(description='Indicates current computation state.', required=True, example='PENDING'),
+            'state': fields.String(description='Indicates current computation state.', required=True,
+                                   example='PENDING'),
         })),
         303: ('Result is available.', None, {'headers': {'location': 'URL to fetch results from.'}}),
         500: ('An unexpected error occurred.', fields.String(description='Stack trace.', required=True))
