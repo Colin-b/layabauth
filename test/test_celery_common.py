@@ -37,7 +37,7 @@ class AsyncRouteTest(JSONTestCase):
                 return how_to_get_async_status(celery_task)
 
         @ns.async_route('/bar2',
-                        serializer=[self.api.model('Bar2Model', {'status2': fields.String, 'foo2': fields.String})])
+                        [self.api.model('Bar2Model', {'status2': fields.String, 'foo2': fields.String})])
         class TestEndpoint2(Resource):
             @ns.doc(**how_to_get_async_status_doc)
             def get(self):
