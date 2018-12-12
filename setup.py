@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     'testing': [
         # Used to provide testing help
-        'pycommon-test==4.1.0',
+        'pycommon-test==4.3.0',
     ],
     # Used to manage authentication
     'authentication': [
@@ -21,7 +21,7 @@ extra_requirements = {
     ],
     # Used to connect to another REST API
     'rest': [
-        'requests==2.20.1',
+        'requests==2.21.0',
     ],
 }
 

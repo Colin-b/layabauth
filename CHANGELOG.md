@@ -6,18 +6,24 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.2.0 (2018-12-12) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pycommon_test 4.3.0, requests 2.21.0)
+
 ## Version 12.1.0 (2018-12-06) ##
 
 ### Enhancements ###
 
-- Response Model is now optional on asynchronous route
+- Response Model is now optional on asynchronous route.
 
 ## Version 12.0.0 (2018-12-05) ##
 
 ### Release notes ###
 
-- Rename rest_helper module into health
-- Rename rest_helper.health_details into health.http_details
+- Rename rest_helper module into health.
+- Rename rest_helper.health_details into health.http_details.
 
 ### Enhancements ###
 
