@@ -18,7 +18,7 @@ def http_details(service_name: str, url: str, status_extracting: callable = None
     Details are based on https://inadarei.github.io/rfc-healthcheck/
     """
     try:
-        response = requests.get(url, **requests_args)
+        response = requests.get(url, timeout=requests_args.pop('timeout', (1, 5)), **requests_args)
         if response:
             if not status_extracting:
                 status_extracting = _pycommon_status

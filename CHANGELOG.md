@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.4.1 (2018-12-13) ##
+
+### Bug fixes ###
+
+- Ensure that health check is performed in less than 6 seconds (1 second to connect at max and 5 second to retrieve data at max).
+
 ## Version 12.4.0 (2018-12-13) ##
 
 ### Enhancements ###
