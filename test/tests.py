@@ -1081,6 +1081,17 @@ class HealthTest(unittest.TestCase):
             }
         }), health.http_details('test', 'http://test/status', lambda resp: 'fail'))
 
+    @responses.activate
+    def test_fail_status_when_server_is_down(self):
+        self.assertEqual(('fail', {
+            'test:health': {
+                'componentType': 'http://test/status',
+                'output': 'Connection refused: GET http://test/status',
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), health.http_details('test', 'http://test/status'))
+
     def test_status_aggregation_with_failure(self):
         self.assertEqual('fail', health.status('pass', 'fail', 'warn'))
 
