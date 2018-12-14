@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.5.0 (2018-12-14) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pycommon_test 4.6.0, oauth2helper 1.4.0)
+
 ## Version 12.4.1 (2018-12-13) ##
 
 ### Bug fixes ###

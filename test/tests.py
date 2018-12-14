@@ -164,7 +164,7 @@ class ConfigurationTest(unittest.TestCase):
 class HealthCheckWithException(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app, version='3.2.1')
 
         def throw_exception():
@@ -189,7 +189,7 @@ class HealthCheckWithException(JSONTestCase):
 class HealthCheckWithoutFailureDetails(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app, version='3.2.1')
 
         def failure_details():
@@ -213,7 +213,7 @@ class HealthCheckWithoutFailureDetails(JSONTestCase):
 class HealthCheckWithFailureDetails(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app, version='3.2.1')
 
         def failure_details():
@@ -237,7 +237,7 @@ class HealthCheckWithFailureDetails(JSONTestCase):
 class HealthCheckWithWarnDetails(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app, version='3.2.1')
 
         def warning_details():
@@ -261,7 +261,7 @@ class HealthCheckWithWarnDetails(JSONTestCase):
 class HealthCheckWithPassDetails(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app, version='3.2.1')
 
         def pass_details():
@@ -333,7 +333,7 @@ class HealthCheckWithPassDetails(JSONTestCase):
 class FlaskRestPlusTest(JSONTestCase):
     def create_app(self):
         app = Flask(__name__)
-        app.config['TESTING'] = True
+        app.testing = True
         api = Api(app)
 
         @api.route('/requires_authentication')
