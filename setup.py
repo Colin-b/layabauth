@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 extra_requirements = {
     'testing': [
         # Used to provide testing help
-        'pycommon-test==4.5.0',
+        'pycommon-test==4.6.0',
     ],
     # Used to manage authentication
     'authentication': [
-        'oauth2helper==1.3.0',
+        'oauth2helper==1.4.0',
     ],
     # Used to connect to a Microsoft Windows computer
     'windows': [
