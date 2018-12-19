@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import flask
 from celery import Celery
 from celery import result as celery_results
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, Namespace
 
 _STATUS_ENDPOINT = 'status'
 _RESULT_ENDPOINT = 'result'
@@ -21,19 +21,22 @@ class AsyncNamespaceProxy:
     to query the status or the result of the celery task
     """
 
-    def __init__(self, namespace, celery_app):
+    def __init__(self, namespace: Namespace, celery_app: Celery):
         self.__namespace = namespace
         self.__celery_app = celery_app
 
     def __getattr__(self, name):
         return getattr(self.__namespace, name)
 
-    def async_route(self, endpoint: str, serializer=None):
+    def async_route(self, endpoint: str, serializer=None, to_response=None):
         """
         Add an async route endpoint.
         :param endpoint: value of the exposes endpoint ex: /foo
         :param serializer: In case the response needs serialization, a single model or a list of model.
         If a list is given, the output will be treated (serialized) and documented as a list
+        :param to_response: In case the task result needs to be processed before returning it to client.
+        This is a function taking the task result as parameter and returning a result.
+        Default to returning unmodified task result.
         :return: route decorator
         """
 
@@ -41,7 +44,7 @@ class AsyncNamespaceProxy:
             # Create the requested route
             self.__namespace.route(endpoint)(cls)
             # Create two additional endpoints to retrieve status and result
-            _build_result_endpoints(cls.__name__, endpoint, self.__namespace, self.__celery_app, serializer)
+            _build_result_endpoints(cls.__name__, endpoint, self.__namespace, self.__celery_app, serializer, to_response)
             return cls
 
         return wrapper
@@ -60,6 +63,8 @@ def build_celery_application(config: dict, *apps, **kwargs) -> Celery:
     }
     :param apps: celery application modules
     :param kwargs: Additional Celery arguments
+    To add celery configuration parameter, you should provide a dictionary named changes with those parameters.
+    As in changes={'task_serializer': 'pickle'}
     :return: Celery Application
     """
     namespace = os.getenv('CONTAINER_NAME', config['celery']['namespace'])
@@ -124,7 +129,7 @@ def _get_celery_result(celery_app: Celery, celery_task_id: str):
     return celery_task.get()
 
 
-def _conditionnal_marshalling(namespace, response_model):
+def _conditional_marshalling(namespace: Namespace, response_model):
     def wrapper(func):
         if response_model is not None:
             return namespace.marshal_with(response_model[0] if isinstance(response_model, list) else response_model,
@@ -134,16 +139,24 @@ def _conditionnal_marshalling(namespace, response_model):
     return wrapper
 
 
-def _build_result_endpoints(base_clazz, endpoint_root: str, namespace, celery_application: Celery, response_model):
+def _build_result_endpoints(
+        base_clazz,
+        endpoint_root: str,
+        namespace: Namespace,
+        celery_application: Celery,
+        response_model,
+        to_response: callable):
+
     @namespace.route(f'{endpoint_root}/{_RESULT_ENDPOINT}/<string:task_id>')
     class AsyncTaskResult(Resource):
-        @_conditionnal_marshalling(namespace, response_model)
+        @_conditional_marshalling(namespace, response_model)
         @namespace.doc(f'get_{_snake_case(base_clazz)}_result')
         def get(self, task_id: str):
             """
             Retrieve result for provided task.
             """
-            return _get_celery_result(celery_application, task_id)
+            result = _get_celery_result(celery_application, task_id)
+            return to_response(result) if to_response else result
 
     @namespace.route(f'{endpoint_root}/{_STATUS_ENDPOINT}/<string:task_id>')
     @namespace.doc(responses={

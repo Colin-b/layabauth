@@ -48,6 +48,20 @@ class AsyncRouteTest(JSONTestCase):
                 celery_task = fetch_the_answer.apply_async()
                 return how_to_get_async_status(celery_task)
 
+        def modify_response(task_result: int) -> int:
+            return task_result * 2
+
+        @ns.async_route('/modified_task_result', to_response=modify_response)
+        class TestEndpointModifiedTaskResult(Resource):
+            @ns.doc(**how_to_get_async_status_doc)
+            def get(self):
+                @celery_application.task(queue=celery_application.namespace)
+                def fetch_the_answer():
+                    return 3
+
+                celery_task = fetch_the_answer.apply_async()
+                return how_to_get_async_status(celery_task)
+
         @ns.async_route('/csv')
         class TestEndpointNoSerialization(Resource):
             @ns.doc(**how_to_get_async_status_doc)
@@ -61,176 +75,10 @@ class AsyncRouteTest(JSONTestCase):
 
         return app
 
-    def test_async_ns_proxy_should_create_2_extra_endpoints(self):
+    def test_async_ns_proxy_creates_2_extra_endpoints_per_declared_endpoint(self):
         response = self.client.get('/swagger.json')
         self.assert200(response)
-        self.assert_swagger(response, {'swagger': '2.0', 'basePath': '/', 'paths': {'/foo/bar': {'get': {'responses': {
-            '202': {'description': 'Computation started.', 'schema': {'type': 'string'}, 'headers': {
-                'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}}},
-            'operationId': 'get_test_endpoint',
-            'tags': [
-                'Test space']}},
-            '/foo/bar/result/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Success',
-                    'schema': {
-                        '$ref': '#/definitions/BarModel'}}},
-                    'summary': 'Retrieve result for provided task',
-                    'operationId': 'get_test_endpoint_result',
-                    'parameters': [
-                        {'name': 'X-Fields',
-                         'in': 'header',
-                         'type': 'string',
-                         'format': 'mask',
-                         'description': 'An optional fields mask'}],
-                    'tags': [
-                        'Test space']}},
-            '/foo/bar/status/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Task is still computing.',
-                    'schema': {
-                        '$ref': '#/definitions/CurrentAsyncState'}},
-                    '303': {
-                        'description': 'Result is available.',
-                        'headers': {
-                            'location': {
-                                'description': 'URL to fetch results from.',
-                                'type': 'string'}}},
-                    '500': {
-                        'description': 'An unexpected error occurred.',
-                        'schema': {
-                            'type': 'string',
-                            'description': 'Stack trace.'}}},
-                    'summary': 'Retrieve status for provided task',
-                    'operationId': 'get_test_endpoint_status',
-                    'tags': [
-                        'Test space']}},
-            '/foo/bar2': {'get': {'responses': {
-                '202': {
-                    'description': 'Computation started.',
-                    'schema': {
-                        'type': 'string'},
-                    'headers': {'location': {
-                        'description': 'URL to fetch computation status from.',
-                        'type': 'string'}}}},
-                'operationId': 'get_test_endpoint2',
-                'tags': [
-                    'Test space']}},
-            '/foo/bar2/result/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Success',
-                    'schema': {'type': 'array',
-                               'items': {
-                                   '$ref': '#/definitions/Bar2Model'}}}},
-                    'summary': 'Retrieve result for provided task',
-                    'operationId': 'get_test_endpoint2_result',
-                    'parameters': [
-                        {'name': 'X-Fields',
-                         'in': 'header',
-                         'type': 'string',
-                         'format': 'mask',
-                         'description': 'An optional fields mask'}],
-                    'tags': [
-                        'Test space']}},
-            '/foo/bar2/status/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Task is still computing.',
-                    'schema': {
-                        '$ref': '#/definitions/CurrentAsyncState'}},
-                    '303': {
-                        'description': 'Result is available.',
-                        'headers': {
-                            'location': {
-                                'description': 'URL to fetch results from.',
-                                'type': 'string'}}},
-                    '500': {
-                        'description': 'An unexpected error occurred.',
-                        'schema': {
-                            'type': 'string',
-                            'description': 'Stack trace.'}}},
-                    'summary': 'Retrieve status for provided task',
-                    'operationId': 'get_test_endpoint2_status',
-                    'tags': [
-                        'Test space']}},
-            '/foo/csv': {'get': {'responses': {
-                '202': {
-                    'description': 'Computation started.',
-                    'schema': {
-                        'type': 'string'},
-                    'headers': {'location': {
-                        'description': 'URL to fetch computation status from.',
-                        'type': 'string'}}}},
-                'operationId': 'get_test_endpoint_no_serialization',
-                'tags': [
-                    'Test space']}},
-            '/foo/csv/result/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Success'}},
-                    'summary': 'Retrieve result for provided task',
-                    'operationId': 'get_test_endpoint_no_serialization_result',
-                    'tags': [
-                        'Test space']}},
-            '/foo/csv/status/{task_id}': {
-                'parameters': [
-                    {'name': 'task_id',
-                     'in': 'path',
-                     'required': True,
-                     'type': 'string'}],
-                'get': {'responses': {'200': {
-                    'description': 'Task is still computing.',
-                    'schema': {
-                        '$ref': '#/definitions/CurrentAsyncState'}},
-                    '303': {
-                        'description': 'Result is available.',
-                        'headers': {
-                            'location': {
-                                'description': 'URL to fetch results from.',
-                                'type': 'string'}}},
-                    '500': {
-                        'description': 'An unexpected error occurred.',
-                        'schema': {
-                            'type': 'string',
-                            'description': 'Stack trace.'}}},
-                    'summary': 'Retrieve status for provided task',
-                    'operationId': 'get_test_endpoint_no_serialization_status',
-                    'tags': [
-                        'Test space']}}},
-                                       'info': {'title': 'API', 'version': '1.0'}, 'produces': ['application/json'],
-                                       'consumes': ['application/json'],
-                                       'tags': [{'name': 'Test space', 'description': 'Test'}], 'definitions': {
-                'BarModel': {'properties': {'status': {'type': 'string'}, 'foo': {'type': 'string'}}, 'type': 'object'},
-                'CurrentAsyncState': {'required': ['state'], 'properties': {
-                    'state': {'type': 'string', 'description': 'Indicates current computation state.',
-                              'example': 'PENDING'}}, 'type': 'object'},
-                'Bar2Model': {'properties': {'status2': {'type': 'string'}, 'foo2': {'type': 'string'}},
-                              'type': 'object'}},
-                                       'responses': {'ParseError': {'description': "When a mask can't be parsed"},
-                                                     'MaskError': {'description': 'When any error occurs on mask'}}})
+        self.assert_swagger(response, {'swagger': '2.0', 'basePath': '/', 'paths': {'/foo/bar': {'get': {'responses': {'202': {'description': 'Computation started.', 'schema': {'type': 'string'}, 'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}}}, 'operationId': 'get_test_endpoint', 'tags': ['Test space']}}, '/foo/bar/result/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Success', 'schema': {'$ref': '#/definitions/BarModel'}}}, 'summary': 'Retrieve result for provided task', 'operationId': 'get_test_endpoint_result', 'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}], 'tags': ['Test space']}}, '/foo/bar/status/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Task is still computing.', 'schema': {'$ref': '#/definitions/CurrentAsyncState'}}, '303': {'description': 'Result is available.', 'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}}, '500': {'description': 'An unexpected error occurred.', 'schema': {'type': 'string', 'description': 'Stack trace.'}}}, 'summary': 'Retrieve status for provided task', 'operationId': 'get_test_endpoint_status', 'tags': ['Test space']}}, '/foo/bar2': {'get': {'responses': {'202': {'description': 'Computation started.', 'schema': {'type': 'string'}, 'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}}}, 'operationId': 'get_test_endpoint2', 'tags': ['Test space']}}, '/foo/bar2/result/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Success', 'schema': {'type': 'array', 'items': {'$ref': '#/definitions/Bar2Model'}}}}, 'summary': 'Retrieve result for provided task', 'operationId': 'get_test_endpoint2_result', 'parameters': [{'name': 'X-Fields', 'in': 'header', 'type': 'string', 'format': 'mask', 'description': 'An optional fields mask'}], 'tags': ['Test space']}}, '/foo/bar2/status/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Task is still computing.', 'schema': {'$ref': '#/definitions/CurrentAsyncState'}}, '303': {'description': 'Result is available.', 'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}}, '500': {'description': 'An unexpected error occurred.', 'schema': {'type': 'string', 'description': 'Stack trace.'}}}, 'summary': 'Retrieve status for provided task', 'operationId': 'get_test_endpoint2_status', 'tags': ['Test space']}}, '/foo/csv': {'get': {'responses': {'202': {'description': 'Computation started.', 'schema': {'type': 'string'}, 'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}}}, 'operationId': 'get_test_endpoint_no_serialization', 'tags': ['Test space']}}, '/foo/csv/result/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Success'}}, 'summary': 'Retrieve result for provided task', 'operationId': 'get_test_endpoint_no_serialization_result', 'tags': ['Test space']}}, '/foo/csv/status/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Task is still computing.', 'schema': {'$ref': '#/definitions/CurrentAsyncState'}}, '303': {'description': 'Result is available.', 'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}}, '500': {'description': 'An unexpected error occurred.', 'schema': {'type': 'string', 'description': 'Stack trace.'}}}, 'summary': 'Retrieve status for provided task', 'operationId': 'get_test_endpoint_no_serialization_status', 'tags': ['Test space']}}, '/foo/modified_task_result': {'get': {'responses': {'202': {'description': 'Computation started.', 'schema': {'type': 'string'}, 'headers': {'location': {'description': 'URL to fetch computation status from.', 'type': 'string'}}}}, 'operationId': 'get_test_endpoint_modified_task_result', 'tags': ['Test space']}}, '/foo/modified_task_result/result/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Success'}}, 'summary': 'Retrieve result for provided task', 'operationId': 'get_test_endpoint_modified_task_result_result', 'tags': ['Test space']}}, '/foo/modified_task_result/status/{task_id}': {'parameters': [{'name': 'task_id', 'in': 'path', 'required': True, 'type': 'string'}], 'get': {'responses': {'200': {'description': 'Task is still computing.', 'schema': {'$ref': '#/definitions/CurrentAsyncState'}}, '303': {'description': 'Result is available.', 'headers': {'location': {'description': 'URL to fetch results from.', 'type': 'string'}}}, '500': {'description': 'An unexpected error occurred.', 'schema': {'type': 'string', 'description': 'Stack trace.'}}}, 'summary': 'Retrieve status for provided task', 'operationId': 'get_test_endpoint_modified_task_result_status', 'tags': ['Test space']}}}, 'info': {'title': 'API', 'version': '1.0'}, 'produces': ['application/json'], 'consumes': ['application/json'], 'tags': [{'name': 'Test space', 'description': 'Test'}], 'definitions': {'BarModel': {'properties': {'status': {'type': 'string'}, 'foo': {'type': 'string'}}, 'type': 'object'}, 'CurrentAsyncState': {'required': ['state'], 'properties': {'state': {'type': 'string', 'description': 'Indicates current computation state.', 'example': 'PENDING'}}, 'type': 'object'}, 'Bar2Model': {'properties': {'status2': {'type': 'string'}, 'foo2': {'type': 'string'}}, 'type': 'object'}}, 'responses': {'ParseError': {'description': "When a mask can't be parsed"}, 'MaskError': {'description': 'When any error occurs on mask'}}})
 
     def test_async_call_task(self):
         response = self.client.get('/foo/bar')
@@ -257,6 +105,11 @@ class AsyncRouteTest(JSONTestCase):
         status_reply = self.client.get('/foo/bar/status/42')
         self.assertStatus(status_reply, 200)
         self.assert_json(status_reply, {"state": "PENDING"})
+
+    def test_async_call_with_modified_response(self):
+        response = self.get('/foo/modified_task_result')
+        self.assert_200(response, 200)
+        self.assert_text(response, '6\n')
 
     def test_async_call_without_serialization(self):
         response = self.client.get('/foo/csv')
