@@ -108,7 +108,7 @@ class AsyncRouteTest(JSONTestCase):
 
     def test_async_call_with_modified_response(self):
         response = self.get('/foo/modified_task_result')
-        self.assert_200(response, 200)
+        self.assert_200(response)
         self.assert_text(response, '6\n')
 
     def test_async_call_without_serialization(self):
