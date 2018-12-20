@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.8.0 (2018-12-20) ##
+
+### Enhancements ###
+
+- Allow to provide an additional parameter to_response to an async route to manipulate async task result.
+
 ## Version 12.7.0 (2018-12-19) ##
 
 ### Enhancements ###
