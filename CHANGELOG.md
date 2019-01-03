@@ -6,6 +6,13 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.8.1 (2019-01-03) ##
+
+### Bug fixes ###
+
+- Ensure that health checker manage non json response by default.
+- Ensure that content type 'application/health+json' is recognized as json response.
+
 ## Version 12.8.0 (2018-12-20) ##
 
 ### Enhancements ###

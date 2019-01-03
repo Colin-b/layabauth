@@ -977,6 +977,34 @@ class HealthTest(unittest.TestCase):
         }), health.http_details('test', 'http://test/health'))
 
     @responses.activate
+    def test_pass_status_health_check_with_health_content_type(self):
+        responses.add(
+            url='http://test/health',
+            method=responses.GET,
+            status=200,
+            body=json.dumps({
+                'status': 'pass',
+                'version': '1',
+                'releaseId': '1.2.3',
+                'details': {'toto': 'tata'},
+            }),
+            content_type='application/health+json',
+        )
+        self.assertEqual(('pass', {
+            'test:health': {
+                'componentType': 'http://test/health',
+                'observedValue': {
+                    'details': {'toto': 'tata'},
+                    'releaseId': '1.2.3',
+                    'status': 'pass',
+                    'version': '1'
+                },
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), health.http_details('test', 'http://test/health'))
+
+    @responses.activate
     def test_pass_status_custom_health_check(self):
         responses.add(
             url='http://test/status',
@@ -992,6 +1020,23 @@ class HealthTest(unittest.TestCase):
                 'time': '2018-10-11T15:05:05.663979'
             }
         }), health.http_details('test', 'http://test/status', lambda resp: 'pass'))
+
+    @responses.activate
+    def test_pass_status_custom_health_check_with_default_extractor(self):
+        responses.add(
+            url='http://test/status',
+            method=responses.GET,
+            status=200,
+            body='pong'
+        )
+        self.assertEqual(('pass', {
+            'test:health': {
+                'componentType': 'http://test/status',
+                'observedValue': 'pong',
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        }), health.http_details('test', 'http://test/status'))
 
     @responses.activate
     def test_warn_status_health_check(self):
@@ -1100,6 +1145,7 @@ class HealthTest(unittest.TestCase):
 
     def test_status_aggregation_with_pass(self):
         self.assertEqual('pass', health.status('pass', 'pass', 'pass'))
+
 
 if __name__ == '__main__':
     unittest.main()

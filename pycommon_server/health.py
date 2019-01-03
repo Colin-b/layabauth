@@ -1,9 +1,13 @@
 import datetime
+import re
+
 import requests
 
 
-def _pycommon_status(health_response: dict):
-    return health_response.get('status', 'pass')
+def _pycommon_status(health_response):
+    if isinstance(health_response, dict):
+        return health_response.get('status', 'pass')
+    return 'pass'
 
 
 def http_details(service_name: str, url: str, status_extracting: callable = None, **requests_args) -> (str, dict):
@@ -23,7 +27,8 @@ def http_details(service_name: str, url: str, status_extracting: callable = None
             if not status_extracting:
                 status_extracting = _pycommon_status
 
-            response = response.json() if response.headers['Content-Type'] == 'application/json' else response.text
+            response = response.json() if re.match("application/(health\+)?json",
+                                                   response.headers['Content-Type']) else response.text
             return status_extracting(response), {
                 f'{service_name}:health': {
                     'componentType': url,
