@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     'testing': [
         # Used to provide testing help
-        'pycommon-test==4.8.0',
+        'pycommon-test==4.9.0',
     ],
     # Used to manage authentication
     'authentication': [
@@ -11,11 +11,11 @@ extra_requirements = {
     ],
     # Used to connect to a Microsoft Windows computer
     'windows': [
-        'pysmb==1.1.25',
+        'pysmb==1.1.27',
     ],
     # Async task execution using celery
     'celery': [
-        'redis==2.10.6',
+        'redis==2.10.6',  # Stick to this version until we upgrade our redis version running on Azure
         # Used to process requests asynchronously
         'celery[redis]==4.2.1',
     ],
