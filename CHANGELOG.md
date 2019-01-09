@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.9.0 (2019-01-09) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pycommon_test 4.9.0, pysmb 1.1.27)
+
 ## Version 12.8.0 (2018-12-20) ##
 
 ### Enhancements ###

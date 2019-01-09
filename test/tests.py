@@ -1101,5 +1101,6 @@ class HealthTest(unittest.TestCase):
     def test_status_aggregation_with_pass(self):
         self.assertEqual('pass', health.status('pass', 'pass', 'pass'))
 
+
 if __name__ == '__main__':
     unittest.main()
