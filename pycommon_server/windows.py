@@ -86,7 +86,8 @@ def get_file_desc(connection: SMBConnection, share_folder: str, file_path: str) 
     """
     logger.info(f'Returning \\\\{connection.remote_name}\\{share_folder}{file_path} description...')
     try:
-        return connection.listPath(share_folder, os.path.dirname(file_path), pattern=os.path.basename(file_path))[0]
+        files = connection.listPath(share_folder, os.path.dirname(file_path), pattern=os.path.basename(file_path))
+        return files[0] if files else None
     except OperationFailure:
         return
 
