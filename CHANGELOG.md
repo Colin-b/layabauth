@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.10.0 (2019-01-10) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pycommon_test 4.10.0)
+
 ## Version 12.9.0 (2019-01-09) ##
 
 ### Enhancements ###
