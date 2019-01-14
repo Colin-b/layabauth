@@ -4,6 +4,7 @@ extra_requirements = {
     'testing': [
         # Used to provide testing help
         'pycommon-test==4.10.0',
+        'openpyxl==2.5.12',
     ],
     # Used to manage authentication
     'authentication': [
@@ -22,6 +23,11 @@ extra_requirements = {
     # Used to connect to another REST API
     'rest': [
         'requests==2.21.0',
+    ],
+    # Pandas
+    'pandas': [
+        'pandas==0.23.4',
+        'XlsxWriter==1.1.2',
     ],
 }
 
