@@ -4,7 +4,7 @@ from flask import make_response
 from werkzeug.wrappers import BaseResponse
 
 
-def dataframe_as_response(df, code: HTTPStatus = HTTPStatus.OK, date_unit: str = 'ms') -> BaseResponse:
+def dataframe_as_json_response(df, code: HTTPStatus = HTTPStatus.OK, date_unit: str = 'ms') -> BaseResponse:
     """
     Generate a Flask response with Pandas Dataframe
 
