@@ -15,6 +15,3 @@ def dataframe_as_response(df, code: HTTPStatus = HTTPStatus.OK) -> BaseResponse:
     response = make_response(df.to_json(orient='records', date_format='iso'), code)
     response.headers['Content-Type'] = 'application/json'
     return response
-
-
-
