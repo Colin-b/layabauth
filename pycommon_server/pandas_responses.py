@@ -1,11 +1,10 @@
-import io
 from http import HTTPStatus
 
-import pandas as pd
 from flask import make_response
+from werkzeug.wrappers import BaseResponse
 
 
-def dataframe_as_response(df, code=HTTPStatus.OK):
+def dataframe_as_response(df, code: HTTPStatus = HTTPStatus.OK) -> BaseResponse:
     """
     Generate a Flask response with Pandas Dataframe
 
@@ -18,25 +17,4 @@ def dataframe_as_response(df, code=HTTPStatus.OK):
     return response
 
 
-def dataframe_as_excelresponse(df, file_name='sheet.xlsx', sheet_name='Sheet1', writer_callback=None,
-                               code=HTTPStatus.OK):
-    """
-    Generate a Flask response with Pandas Dataframe to Excel sheet
 
-    :param df: Dataframe to send back to the client as an Excel Sheet
-    :param file_name: File name in attachment
-    :param sheet_name: Excel sheet name
-    :param writer_callback: callback to apply user specifics to Excel Writer
-    :param code: Reply HTTP Status code
-    :return: Flask response with serialized form of Dataframe as Excel and HTTP Status 200
-    """
-    out = io.BytesIO()
-    writer = pd.ExcelWriter(out, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name=sheet_name, index=False)
-    if writer_callback:
-        writer_callback(writer)
-    writer.close()
-    resp = make_response(out.getvalue(), code)
-    resp.headers['Content-Disposition'] = f'attachment; filename={file_name}'
-    resp.headers['Content-type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    return resp

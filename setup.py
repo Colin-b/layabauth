@@ -4,7 +4,6 @@ extra_requirements = {
     'testing': [
         # Used to provide testing help
         'pycommon-test==4.10.0',
-        'openpyxl==2.5.12',
     ],
     # Used to manage authentication
     'authentication': [
@@ -27,9 +26,6 @@ extra_requirements = {
     # Pandas
     'pandas': [
         'pandas==0.23.4',
-    ],
-    'excel': [
-        'XlsxWriter==1.1.2',
     ]
 }
 
