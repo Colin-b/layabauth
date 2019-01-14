@@ -8,7 +8,7 @@ from flask_testing import TestCase
 from openpyxl import load_workbook
 from pycommon_test import mock_now
 
-from pycommon_server.http import dataframe_200, dataframe_as_excel_200
+from pycommon_server.pandas_responses import dataframe_200, dataframe_as_excel_200
 
 
 class HttpUtilTest(TestCase):
@@ -28,7 +28,7 @@ class HttpUtilTest(TestCase):
         response = dataframe_200(df)
         self.assertEqual(expected_data, json.loads(response.data))
         self.assertEqual('application/json', response.headers.get('Content-type'))
-        self.assertEqual('200 OK', response.status)
+        self.assert200(response)
 
     def test_dataframe_to_excel_200(self):
         keys = ['key1', 'key2']
@@ -40,7 +40,7 @@ class HttpUtilTest(TestCase):
         self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                          response.headers.get('Content-type'))
         self.assertEqual('attachment; filename=test.xlsx', response.headers.get('Content-Disposition'))
-        self.assertEqual('200 OK', response.status)
+        self.assert200(response)
         wb = load_workbook(filename=BytesIO(response.data), read_only=True)
         ws = wb['test_sheet']
         current_row = 0
