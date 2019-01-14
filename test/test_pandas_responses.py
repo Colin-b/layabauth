@@ -23,4 +23,4 @@ class HttpUtilTest(TestCase):
         response = dataframe_as_response(df)
         self.assertEqual(expected_data, json.loads(response.data))
         self.assertEqual('application/json', response.headers.get('Content-type'))
-        self.assert200(response)
+        self.assert_200(response)
