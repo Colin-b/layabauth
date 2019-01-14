@@ -5,7 +5,7 @@ import pandas as pd
 from flask import make_response
 
 
-def dataframe_as_reponse(df, code=HTTPStatus.OK):
+def dataframe_as_response(df, code=HTTPStatus.OK):
     """
     Generate a Flask response with Pandas Dataframe
 
@@ -18,7 +18,7 @@ def dataframe_as_reponse(df, code=HTTPStatus.OK):
     return response
 
 
-def dataframe_as_excelreponse(df, file_name='sheet.xlsx', sheet_name='Sheet1', writer_callback=None):
+def dataframe_as_excelresponse(df, file_name='sheet.xlsx', sheet_name='Sheet1', writer_callback=None):
     """
     Generate a Flask response with Pandas Dataframe to Excel sheet
 
