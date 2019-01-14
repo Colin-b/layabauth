@@ -8,7 +8,7 @@ from flask_testing import TestCase
 from openpyxl import load_workbook
 from pycommon_test import mock_now
 
-from pycommon_server.pandas_responses import dataframe_as_reponse, dataframe_as_excelreponse
+from pycommon_server.pandas_responses import dataframe_as_response, dataframe_as_excelresponse
 
 
 class HttpUtilTest(TestCase):
@@ -25,7 +25,7 @@ class HttpUtilTest(TestCase):
         data = [{'key1': 'row11', 'key2': 'row12'}, {'key1': 'row21', 'key2': datetime.datetime.now()}]
         expected_data = [{'key1': 'row11', 'key2': 'row12'}, {'key1': 'row21', 'key2': '2018-10-11T15:05:05.663Z'}]
         df = pd.DataFrame.from_dict(data)
-        response = dataframe_as_reponse(df)
+        response = dataframe_as_response(df)
         self.assertEqual(expected_data, json.loads(response.data))
         self.assertEqual('application/json', response.headers.get('Content-type'))
         self.assert200(response)
@@ -36,7 +36,7 @@ class HttpUtilTest(TestCase):
         expected_data = [{'key1': 'row11', 'key2': 'row12'},
                          {'key1': 'row21', 'key2': datetime.datetime(2018, 10, 11, 15, 5, 5, 663978)}]
         df = pd.DataFrame.from_dict(data)
-        response = dataframe_as_excelreponse(df, file_name='test.xlsx', sheet_name='test_sheet')
+        response = dataframe_as_excelresponse(df, file_name='test.xlsx', sheet_name='test_sheet')
         self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                          response.headers.get('Content-type'))
         self.assertEqual('attachment; filename=test.xlsx', response.headers.get('Content-Disposition'))
