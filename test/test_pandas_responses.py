@@ -6,7 +6,7 @@ import pandas as pd
 from flask import Flask
 from flask_testing import TestCase
 from openpyxl import load_workbook
-from pycommon_test import mock_now
+from pycommon_test import mock_now, revert_now
 
 from pycommon_server.pandas_responses import dataframe_as_response, dataframe_as_excelresponse
 
@@ -33,8 +33,10 @@ class HttpUtilTest(TestCase):
     def test_dataframe_to_excel_200(self):
         keys = ['key1', 'key2']
         data = [{'key1': 'row11', 'key2': 'row12'}, {'key1': 'row21', 'key2': datetime.datetime.now()}]
+        revert_now()
         expected_data = [{'key1': 'row11', 'key2': 'row12'},
-                         {'key1': 'row21', 'key2': datetime.datetime(2018, 10, 11, 15, 5, 5, 663978)}]
+                         {'key1': 'row21', 'key2': datetime.datetime(2018, 10, 11, 0, 0)}]
+        mock_now()
         df = pd.DataFrame.from_dict(data)
         response = dataframe_as_excelresponse(df, file_name='test.xlsx', sheet_name='test_sheet')
         self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -44,13 +46,16 @@ class HttpUtilTest(TestCase):
         wb = load_workbook(filename=BytesIO(response.data), read_only=True)
         ws = wb['test_sheet']
         current_row = 0
+        real_data = []
         for row in ws.rows:
             current_col = 0
+            real_row = {}
             for cell in row:
-                if current_row == 0:
-                    ## this is the header
-                    self.assertEqual(keys[current_col], cell.value)
-                else:
-                    self.assertEqual(expected_data[current_row - 1][keys[current_col]], cell.value)
+                ## skip the header
+                if current_row != 0:
+                    real_row[keys[current_col]] = cell.value
                 current_col += 1
             current_row += 1
+            if real_row:
+                real_data.append(real_row)
+        self.assertEqual(expected_data, real_data)
