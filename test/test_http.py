@@ -4,7 +4,6 @@ from io import BytesIO
 
 import pandas as pd
 from flask import Flask
-from flask_restplus import Api
 from flask_testing import TestCase
 from openpyxl import load_workbook
 from pycommon_test import mock_now
@@ -20,7 +19,6 @@ class HttpUtilTest(TestCase):
     def create_app(self):
         app = Flask(__name__)
         app.testing = True
-        api = Api(app, version='3.2.1')
         return app
 
     def test_dataframe_200(self):
@@ -54,6 +52,5 @@ class HttpUtilTest(TestCase):
                     self.assertEqual(keys[current_col], cell.value)
                 else:
                     self.assertEqual(expected_data[current_row - 1][keys[current_col]], cell.value)
-                print(cell.value)
                 current_col += 1
             current_row += 1

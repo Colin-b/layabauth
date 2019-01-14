@@ -27,8 +27,10 @@ extra_requirements = {
     # Pandas
     'pandas': [
         'pandas==0.23.4',
-        'XlsxWriter==1.1.2',
     ],
+    'excel': [
+        'XlsxWriter==1.1.2',
+    ]
 }
 
 # Add all extra requirements to testing
