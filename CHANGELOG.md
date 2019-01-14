@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.11.0 (2019-01-14) ##
+
+### Enhancements ###
+
+- New http module with pandas http response helpers
+
 ## Version 12.10.0 (2019-01-10) ##
 
 ### Enhancements ###

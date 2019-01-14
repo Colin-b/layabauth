@@ -23,6 +23,10 @@ extra_requirements = {
     'rest': [
         'requests==2.21.0',
     ],
+    # Pandas
+    'pandas': [
+        'pandas==0.23.4',
+    ]
 }
 
 # Add all extra requirements to testing
