@@ -17,12 +17,16 @@ extra_requirements = {
     'celery': [
         'redis==2.10.6',  # Stick to this version until we upgrade our redis version running on Azure
         # Used to process requests asynchronously
-        'celery[redis]==4.2.1',
+        'celery[redis,msgpack]==4.2.1',
     ],
     # Used to connect to another REST API
     'rest': [
         'requests==2.21.0',
     ],
+    # Pandas
+    'pandas': [
+        'pandas==0.23.4',
+    ]
 }
 
 # Add all extra requirements to testing
