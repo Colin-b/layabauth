@@ -6,7 +6,15 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 12.11.0 (2019-01-14) ##
+## Version 12.12.0 (2019-01-15) ##
+
+### Enhancements ###
+
+- Add celery msgpack module.
+- Update dependencies to latest version (pycommon_test 5.0.0)
+- Add celery health_details function to check celery health.
+
+## Version 12.11.0 (2019-01-11) ##
 
 ### Enhancements ###
 

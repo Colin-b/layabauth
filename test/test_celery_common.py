@@ -3,16 +3,21 @@ from flask import Flask, make_response
 from flask_restplus import Api, Resource, fields
 from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
+from pycommon_test import mock_now
 
 from pycommon_server.celery_common import (
     AsyncNamespaceProxy,
     how_to_get_async_status,
     build_celery_application,
-    how_to_get_async_status_doc
+    how_to_get_async_status_doc,
+    health_details
 )
 
 
 class AsyncRouteTest(JSONTestCase):
+
+    def setUp(self):
+        mock_now()
 
     def create_app(self):
         app = Flask(__name__)
@@ -121,6 +126,56 @@ class AsyncRouteTest(JSONTestCase):
         result_reply = self.client.get(result_url)
         self.assert200(result_reply)
         self.assertEqual(result_reply.data.decode(), "a;b;c")
+
+    def test_health_details_with_workers(self):
+        from celery.task import control
+        control.ping = lambda : [
+            {'celery@test': {'pong': 'ok'}},
+            {'celery@test': {'pong': 'ok'}},
+            {'celery@test2': {'pong': 'ok'}}
+        ]
+        status, details = health_details({'celery': {'namespace': 'test'}})
+        self.assertEqual(status, 'pass')
+        self.assertEqual(details, {
+            'celery:ping': {
+                'componentType': 'component',
+                'observedValue': [{'celery@test': {'pong': 'ok'}}, {'celery@test': {'pong': 'ok'}}],
+                'status': 'pass',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        })
+
+    def test_health_details_without_expected_workers(self):
+        from celery.task import control
+        control.ping = lambda : [
+            {'celery@test2': {'pong': 'ok'}},
+            {'celery@test3': {'pong': 'ok'}},
+            {'celery@test2': {'pong': 'ok'}}
+        ]
+        status, details = health_details({'celery': {'namespace': 'test'}})
+        self.assertEqual(status, 'fail')
+        self.assertEqual(details, {
+            'celery:ping': {
+                'componentType': 'component',
+                'output': [{'celery@test2': {'pong': 'ok'}}, {'celery@test3': {'pong': 'ok'}}, {'celery@test2': {'pong': 'ok'}}],
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        })
+
+    def test_health_details_without_workers(self):
+        from celery.task import control
+        control.ping = lambda : []
+        status, details = health_details({'celery': {'namespace': 'test'}})
+        self.assertEqual(status, 'fail')
+        self.assertEqual(details, {
+            'celery:ping': {
+                'componentType': 'component',
+                'output': [],
+                'status': 'fail',
+                'time': '2018-10-11T15:05:05.663979'
+            }
+        })
 
 
 class TestGetCeleryStatus(JSONTestCase):

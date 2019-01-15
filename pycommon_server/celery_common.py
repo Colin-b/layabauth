@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import re
@@ -6,6 +7,7 @@ from urllib.parse import urlparse
 import flask
 from celery import Celery
 from celery import result as celery_results
+from celery.task import control
 from flask_restplus import Resource, fields, Namespace
 
 _STATUS_ENDPOINT = 'status'
@@ -181,3 +183,39 @@ def _snake_case(name: str) -> str:
         raise ValueError(f'{name} should be Camel Case and should not contain any _')
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+def health_details(config: dict):
+    workers = control.ping()
+    if not workers:
+        return 'fail', {
+            'celery:ping': {
+                'componentType': 'component',
+                'status': 'fail',
+                'time': datetime.datetime.utcnow().isoformat(),
+                'output': workers
+            }
+        }
+
+    service_name = os.environ.get('ENV_CONTAINER_NAME')
+    if not service_name:
+        service_name = f"celery@{config['celery']['namespace']}"
+    related_workers = [worker for worker in workers if service_name in worker]
+    if not related_workers:
+        return 'fail', {
+            'celery:ping': {
+                'componentType': 'component',
+                'status': 'fail',
+                'time': datetime.datetime.utcnow().isoformat(),
+                'output': workers
+            }
+        }
+
+    return 'pass', {
+        'celery:ping': {
+            'componentType': 'component',
+            'observedValue': related_workers,
+            'status': 'pass',
+            'time': datetime.datetime.utcnow().isoformat(),
+        }
+    }

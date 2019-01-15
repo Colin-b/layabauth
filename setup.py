@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     'testing': [
         # Used to provide testing help
-        'pycommon-test==4.10.0',
+        'pycommon-test==5.0.0',
     ],
     # Used to manage authentication
     'authentication': [
@@ -17,7 +17,7 @@ extra_requirements = {
     'celery': [
         'redis==2.10.6',  # Stick to this version until we upgrade our redis version running on Azure
         # Used to process requests asynchronously
-        'celery[redis]==4.2.1',
+        'celery[redis,msgpack]==4.2.1',
     ],
     # Used to connect to another REST API
     'rest': [
