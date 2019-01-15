@@ -11,6 +11,7 @@ List all changes in various categories:
 ### Enhancements ###
 
 - Add celery msgpack module.
+- Update dependencies to latest version (pycommon_test 5.0.0)
 
 ## Version 12.11.0 (2019-01-11) ##
 
