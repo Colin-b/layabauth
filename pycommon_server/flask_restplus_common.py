@@ -17,7 +17,10 @@ from flask import request, has_request_context, make_response, Flask
 from flask_compress import Compress
 from flask_cors import CORS
 from flask_restplus import Resource, fields, Api, Namespace
+from werkzeug import cached_property
 from werkzeug.exceptions import Unauthorized
+
+from pycommon_server.configuration import get_environment
 
 logger = logging.getLogger(__name__)
 
@@ -304,6 +307,15 @@ class _ReverseProxied:
         return self.app(environ, start_response)
 
 
+class PycommonApi(Api):
+
+    @cached_property
+    def __schema__(self):
+        schema = super().__schema__
+        schema['info']['x-server-environment'] = get_environment()
+        return schema
+
+
 def create_api(file_path: str, cors: bool = True, compress_mimetypes: List[str] = None, reverse_proxy: bool = True,
                **kwargs) -> (Flask, Api):
     """
@@ -332,7 +344,7 @@ def create_api(file_path: str, cors: bool = True, compress_mimetypes: List[str] 
 
     version = importlib.import_module(f'{service_package}._version').__version__
 
-    return application, Api(application, version=version, **kwargs)
+    return application, PycommonApi(application, version=version, **kwargs)
 
 
 Resource.method_decorators.append(_log_request_details)

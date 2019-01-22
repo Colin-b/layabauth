@@ -1,10 +1,10 @@
 import logging
 import logging.config
-import os.path
 import os
+import os.path
 import sys
-import yaml
 
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,14 @@ def load_logging_configuration(configuration_folder: str) -> str:
     If file is not found, then logging will be performed as INFO into stdout.
     Return loaded configuration file path. None if not loaded.
     """
-    environment = os.environ.get('SERVER_ENVIRONMENT', 'default')
+    environment = get_environment()
 
     file_path = os.path.join(configuration_folder, f'logging_{environment}.yml')
     return _load_logging_configuration(file_path)
+
+
+def get_environment():
+    return os.environ.get('SERVER_ENVIRONMENT', 'default')
 
 
 def _load_logging_configuration(file_path: str) -> str:

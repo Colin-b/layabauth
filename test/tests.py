@@ -828,6 +828,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -843,6 +844,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -877,6 +879,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/behind_reverse_proxy', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -894,6 +897,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
                                                            'description': 'Testing API',
+                                                           'x-server-environment': 'test',
                                                            'license': {'name': 'engie', 'url': 'engie.license.com'}},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
