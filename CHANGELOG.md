@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 12.13.0 (2019-01-22) ##
+
+### Enhancements ###
+
+- Add x-server-environment to swagger.json info section
+ 
 ## Version 12.12.0 (2019-01-15) ##
 
 ### Enhancements ###
