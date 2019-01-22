@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def load(server_file_path: str) -> dict:
     """
-    Load logging and server YAML configurations according to ENVIRONMENT environment variable.
+    Load logging and server YAML configurations according to SERVER_ENVIRONMENT environment variable.
 
     :param server_file_path: Path to the server.py file (or any other file located in the python module directory).
     :return: server configuration as a dictionary.
@@ -28,13 +28,12 @@ def load_logging_configuration(configuration_folder: str) -> str:
     If file is not found, then logging will be performed as INFO into stdout.
     Return loaded configuration file path. None if not loaded.
     """
-    environment = get_environment()
-
-    file_path = os.path.join(configuration_folder, f'logging_{environment}.yml')
+    file_path = os.path.join(configuration_folder, f'logging_{get_environment()}.yml')
     return _load_logging_configuration(file_path)
 
 
 def get_environment():
+    """Return current server environment."""
     return os.environ.get('SERVER_ENVIRONMENT', 'default')
 
 
@@ -61,9 +60,7 @@ def load_configuration(configuration_folder: str) -> dict:
     Load configuration according to SERVER_ENVIRONMENT environment variable.
     Return a dictionary (empty if file cannot be found).
     """
-    environment = os.environ.get('SERVER_ENVIRONMENT', 'default')
-
-    file_path = os.path.join(configuration_folder, f'configuration_{environment}.yml')
+    file_path = os.path.join(configuration_folder, f'configuration_{get_environment()}.yml')
     return _load_configuration(file_path)
 
 
