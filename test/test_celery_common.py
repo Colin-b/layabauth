@@ -1,9 +1,9 @@
 import flask
 from flask import Flask, make_response
 from flask_restplus import Api, Resource, fields
+from pycommon_test import mock_now
 from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
-from pycommon_test import mock_now
 
 from pycommon_server.celery_common import (
     AsyncNamespaceProxy,
@@ -88,8 +88,7 @@ class AsyncRouteTest(JSONTestCase):
     def test_async_call_task(self):
         response = self.client.get('/foo/bar')
         status_url = self.assert_202_regex(response, '/foo/bar/status/.*')
-        self.assert_text_regex(response,
-                               'Computation status can be found using this URL: http://localhost/foo/bar/status/.*')
+        self.assertRegex(response.json['url'], 'http://localhost/foo/bar/status/.*')
         status_reply = self.client.get(status_url)
         result_url = self.assert_303_regex(status_reply, '/foo/bar/result/.*')
         result_reply = self.client.get(result_url)
@@ -98,8 +97,7 @@ class AsyncRouteTest(JSONTestCase):
 
         response = self.client.get('/foo/bar2')
         status_url = self.assert_202_regex(response, '/foo/bar2/status/.*')
-        self.assert_text_regex(response,
-                               'Computation status can be found using this URL: http://localhost/foo/bar2/status/.*')
+        self.assertRegex(response.json['url'], 'http://localhost/foo/bar2/status/.*')
         status_reply = self.client.get(status_url)
         result_url = self.assert_303_regex(status_reply, '/foo/bar2/result/.*')
         result_reply = self.client.get(result_url)
@@ -119,8 +117,7 @@ class AsyncRouteTest(JSONTestCase):
     def test_async_call_without_serialization(self):
         response = self.client.get('/foo/csv')
         status_url = self.assert_202_regex(response, '/foo/csv/status/.*')
-        self.assert_text_regex(response,
-                               'Computation status can be found using this URL: http://localhost/foo/csv/status/.*')
+        self.assertRegex(response.json['url'], 'http://localhost/foo/csv/status/.*')
         status_reply = self.client.get(status_url)
         result_url = self.assert_303_regex(status_reply, '/foo/csv/result/.*')
         result_reply = self.client.get(result_url)
@@ -192,5 +189,5 @@ class TestGetCeleryStatus(JSONTestCase):
         celery_task = CeleryTaskStub()
         flask.request.base_url = 'http://localhost/foo'
         response = how_to_get_async_status(celery_task)
-        self.assert_202_regex(response, '/foo/status/idtest')
-        self.assert_text(response, 'Computation status can be found using this URL: http://localhost/foo/status/idtest')
+        self.assertListEqual(list(response.json.keys()), ['taskId', 'url'])
+        self.assertRegex(response.json['url'], '/foo/status/idtest')

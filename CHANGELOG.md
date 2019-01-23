@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.0.0 (2019-01-23) ##
+
+### Enhancements ###
+
+- Breaking API change on async api: when you start a task it now replies with a JSON body with 2 keys: taskId and url
+
 ## Version 12.13.0 (2019-01-22) ##
 
 ### Enhancements ###
