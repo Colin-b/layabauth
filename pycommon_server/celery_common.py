@@ -98,7 +98,7 @@ def _base_url() -> str:
 
 def how_to_get_async_status(celery_task) -> flask.Response:
     url = f'{_base_url()}/{_STATUS_ENDPOINT}/{celery_task.id}'
-    status = flask.Response(mimetype='application/json')
+    status = flask.Response()
     status.status_code = 202
     status.content_type = 'application/json'
     status.headers['location'] = url
