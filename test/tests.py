@@ -14,7 +14,7 @@ from pycommon_test.samba_mock import TestConnection
 from pycommon_test.service_tester import JSONTestCase
 
 from pycommon_server import flask_restplus_common, logging_filter, windows, health
-from pycommon_server.configuration import load_configuration, load_logging_configuration, load
+from pycommon_server.configuration import load_configuration, load_logging_configuration, load, get_environment
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,13 @@ class ConfigurationTest(unittest.TestCase):
                     }
                 },
                 load_configuration(tmp_dir))
+
+    def test_environment_is_default_if_no_environment_specified(self):
+        self.assertEqual('default', get_environment())
+
+    def test_environment_is_server_environment(self):
+        os.environ['SERVER_ENVIRONMENT'] = 'test'
+        self.assertEqual('test', get_environment())
 
     def test_server_environment_configuration_loaded(self):
         os.environ['SERVER_ENVIRONMENT'] = 'test'
@@ -828,6 +835,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -843,6 +851,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -877,6 +886,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_200(response)
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/behind_reverse_proxy', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
+                                                           'x-server-environment': 'test',
                                                            'description': 'Testing API'},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {
@@ -894,6 +904,7 @@ class CreateNewApi(unittest.TestCase):
             JSONTestCase().assert_json(response, {'swagger': '2.0', 'basePath': '/', 'paths': {},
                                                   'info': {'title': 'TestApi', 'version': '1.0.0',
                                                            'description': 'Testing API',
+                                                           'x-server-environment': 'test',
                                                            'license': {'name': 'engie', 'url': 'engie.license.com'}},
                                                   'produces': ['application/json'], 'consumes': ['application/json'],
                                                   'tags': [], 'responses': {

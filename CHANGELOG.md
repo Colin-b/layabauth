@@ -6,6 +6,20 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.0.0 (2019-01-23) ##
+
+### Release notes ###
+
+- Change on async api: when you start a task it now replies with a JSON body with 2 keys: task_id and url
+- Move module attribute how_to_get_async_status_doc to an instance attribute of AsyncNamespaceProxy.
+  * Instead of using celery_common.how_to_get_async_status_doc (or importing from celery_common import how_to_get_async_status_doc) use async_ns_proxy.how_to_get_async_status_doc
+
+## Version 12.13.0 (2019-01-22) ##
+
+### Enhancements ###
+
+- Add x-server-environment to swagger.json info section
+ 
 ## Version 12.12.0 (2019-01-15) ##
 
 ### Enhancements ###
