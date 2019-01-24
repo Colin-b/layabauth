@@ -162,7 +162,7 @@ class AsyncRouteTest(JSONTestCase):
 
     def test_health_details_without_workers(self):
         from celery.task import control
-        control.ping = lambda : []
+        control.ping = lambda: []
         status, details = health_details({'celery': {'namespace': 'test'}})
         self.assertEqual(status, 'fail')
         self.assertEqual(details, {
