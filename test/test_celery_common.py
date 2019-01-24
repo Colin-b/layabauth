@@ -189,5 +189,6 @@ class TestGetCeleryStatus(JSONTestCase):
         celery_task = CeleryTaskStub()
         flask.request.base_url = 'http://localhost/foo'
         response = how_to_get_async_status(celery_task)
-        self.assertListEqual(list(response.json.keys()), ['taskId', 'url'])
+        self.assert_202_regex(response, '/foo/status/idtest')
+        self.assertListEqual(list(response.json.keys()), ['task_id', 'url'])
         self.assertRegex(response.json['url'], '/foo/status/idtest')

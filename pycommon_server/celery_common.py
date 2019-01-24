@@ -102,7 +102,7 @@ def how_to_get_async_status(celery_task) -> flask.Response:
     status.status_code = 202
     status.content_type = 'application/json'
     status.headers['location'] = url
-    status.data = json.dumps({'taskId': celery_task.id, 'url': url})
+    status.data = json.dumps({'task_id': celery_task.id, 'url': url})
     return status
 
 
