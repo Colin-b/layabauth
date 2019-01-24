@@ -10,7 +10,7 @@ List all changes in various categories:
 
 ### Release notes ###
 
-- Change on async api: when you start a task it now replies with a JSON body with 2 keys: taskId and url
+- Change on async api: when you start a task it now replies with a JSON body with 2 keys: task_id and url
 
 ## Version 12.13.0 (2019-01-22) ##
 
