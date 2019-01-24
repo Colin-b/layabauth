@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 import re
@@ -99,8 +100,9 @@ def how_to_get_async_status(celery_task) -> flask.Response:
     url = f'{_base_url()}/{_STATUS_ENDPOINT}/{celery_task.id}'
     status = flask.Response()
     status.status_code = 202
+    status.content_type = 'application/json'
     status.headers['location'] = url
-    status.data = f'Computation status can be found using this URL: {url}'
+    status.data = json.dumps({'task_id': celery_task.id, 'url': url})
     return status
 
 
