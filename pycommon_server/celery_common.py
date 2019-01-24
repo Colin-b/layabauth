@@ -27,6 +27,14 @@ class AsyncNamespaceProxy:
     def __init__(self, namespace: Namespace, celery_app: Celery):
         self.__namespace = namespace
         self.__celery_app = celery_app
+        task_status_model = namespace.model('AsyncTaskStatusModel', {
+            'task_id': fields.String(required=True, description='Task Id.'),
+            'url': fields.String(required=True, description='URL when task status can be checked.'),
+        })
+        self.how_to_get_async_status_doc = {'responses': {
+            202: ('Computation started.', task_status_model,
+                  {'headers': {'location': 'URL to fetch computation status from.'}}),
+        }}
 
     def __getattr__(self, name):
         return getattr(self.__namespace, name)
@@ -47,7 +55,8 @@ class AsyncNamespaceProxy:
             # Create the requested route
             self.__namespace.route(endpoint)(cls)
             # Create two additional endpoints to retrieve status and result
-            _build_result_endpoints(cls.__name__, endpoint, self.__namespace, self.__celery_app, serializer, to_response)
+            _build_result_endpoints(cls.__name__, endpoint, self.__namespace, self.__celery_app, serializer,
+                                    to_response)
             return cls
 
         return wrapper
@@ -106,11 +115,6 @@ def how_to_get_async_status(celery_task) -> flask.Response:
     return status
 
 
-how_to_get_async_status_doc = {'responses': {
-    202: ('Computation started.', fields.String(), {'headers': {'location': 'URL to fetch computation status from.'}}),
-}}
-
-
 def _get_celery_status(celery_task_id: str, celery_app: Celery) -> flask.Response:
     celery_task = celery_results.AsyncResult(celery_task_id, app=celery_app)
 
@@ -150,7 +154,6 @@ def _build_result_endpoints(
         celery_application: Celery,
         response_model,
         to_response: callable):
-
     @namespace.route(f'{endpoint_root}/{_RESULT_ENDPOINT}/<string:task_id>')
     class AsyncTaskResult(Resource):
         @_conditional_marshalling(namespace, response_model)
