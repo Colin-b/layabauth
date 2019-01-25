@@ -205,7 +205,7 @@ class HealthCheckWithException(JSONTestCase):
 
     def test_health_check_response_on_exception(self):
         response = self.client.get("/health")
-        self.assert400(response)
+        self.assert_400(response)
         self.assert_json(
             response,
             {
@@ -233,7 +233,7 @@ class HealthCheckWithoutFailureDetails(JSONTestCase):
 
     def test_health_check_response_on_exception(self):
         response = self.client.get("/health")
-        self.assert400(response)
+        self.assert_400(response)
         self.assert_json(
             response,
             {"details": None, "releaseId": "3.2.1", "status": "fail", "version": "3"},
@@ -255,7 +255,7 @@ class HealthCheckWithFailureDetails(JSONTestCase):
 
     def test_health_check_response_on_exception(self):
         response = self.client.get("/health")
-        self.assert400(response)
+        self.assert_400(response)
         self.assert_json(
             response,
             {
@@ -282,7 +282,7 @@ class HealthCheckWithWarnDetails(JSONTestCase):
 
     def test_health_check_response_on_warning(self):
         response = self.client.get("/health")
-        self.assert200(response)
+        self.assert_status(response, 429)
         self.assert_json(
             response,
             {
@@ -309,7 +309,7 @@ class HealthCheckWithPassDetails(JSONTestCase):
 
     def test_health_check_response_on_pass(self):
         response = self.client.get("/health")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_json(
             response,
             {
@@ -322,7 +322,7 @@ class HealthCheckWithPassDetails(JSONTestCase):
 
     def test_generated_swagger(self):
         response = self.client.get("/swagger.json")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_swagger(
             response,
             {
@@ -336,6 +336,10 @@ class HealthCheckWithPassDetails(JSONTestCase):
                                     "description": "Server is in a coherent state.",
                                     "schema": {"$ref": "#/definitions/HealthPass"},
                                 },
+                                "429": {
+                                    "description": "Server is almost in a coherent state.",
+                                    "schema": {"$ref": "#/definitions/HealthWarn"},
+                                },
                                 "400": {
                                     "description": "Server is not in a coherent state.",
                                     "schema": {"$ref": "#/definitions/HealthFail"},
@@ -346,7 +350,20 @@ class HealthCheckWithPassDetails(JSONTestCase):
                             "operationId": "get_health",
                             "tags": ["Monitoring"],
                         }
-                    }
+                    },
+                    "/changelog": {
+                        "get": {
+                            "responses": {
+                                "200": {
+                                    "description": "Service changelog.",
+                                    "schema": {"type": "string"},
+                                }
+                            },
+                            "summary": "Retrieve service changelog",
+                            "operationId": "get_changelog",
+                            "tags": ["Monitoring"],
+                        }
+                    },
                 },
                 "info": {"title": "API", "version": "3.2.1"},
                 "produces": ["application/json"],
@@ -362,7 +379,33 @@ class HealthCheckWithPassDetails(JSONTestCase):
                                 "type": "string",
                                 "description": "Indicates whether the service status is acceptable or not.",
                                 "example": "pass",
-                                "enum": ["pass", "warn"],
+                                "enum": ["pass"],
+                            },
+                            "version": {
+                                "type": "string",
+                                "description": "Public version of the service.",
+                                "example": "1",
+                            },
+                            "releaseId": {
+                                "type": "string",
+                                "description": "Version of the service.",
+                                "example": "1.0.0",
+                            },
+                            "details": {
+                                "type": "object",
+                                "description": "Provides more details about the status of the service.",
+                            },
+                        },
+                        "type": "object",
+                    },
+                    "HealthWarn": {
+                        "required": ["details", "releaseId", "status", "version"],
+                        "properties": {
+                            "status": {
+                                "type": "string",
+                                "description": "Indicates whether the service status is acceptable or not.",
+                                "example": "warn",
+                                "enum": ["warn"],
                             },
                             "version": {
                                 "type": "string",
@@ -536,7 +579,7 @@ class FlaskRestPlusTest(JSONTestCase):
 
     def test_generated_swagger(self):
         response = self.client.get("/swagger.json")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_swagger(
             response,
             {
@@ -654,29 +697,29 @@ class FlaskRestPlusTest(JSONTestCase):
 
     def test_authentication_failure_token_not_provided_on_get(self):
         response = self.client.get("/requires_authentication")
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(response, {"message": "JWT Token is mandatory."})
 
     def test_authentication_failure_token_not_provided_on_post(self):
         response = self.client.post("/requires_authentication")
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(response, {"message": "JWT Token is mandatory."})
 
     def test_authentication_failure_token_not_provided_on_put(self):
         response = self.client.put("/requires_authentication")
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(response, {"message": "JWT Token is mandatory."})
 
     def test_authentication_failure_token_not_provided_on_delete(self):
         response = self.client.delete("/requires_authentication")
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(response, {"message": "JWT Token is mandatory."})
 
     def test_authentication_failure_fake_token_provided_on_get(self):
         response = self.client.get(
             "/requires_authentication", headers={"Authorization": "Bearer Fake token"}
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(
             response,
             {
@@ -688,7 +731,7 @@ class FlaskRestPlusTest(JSONTestCase):
         response = self.client.post(
             "/requires_authentication", headers={"Authorization": "Bearer Fake token"}
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(
             response,
             {
@@ -700,7 +743,7 @@ class FlaskRestPlusTest(JSONTestCase):
         response = self.client.put(
             "/requires_authentication", headers={"Authorization": "Bearer Fake token"}
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(
             response,
             {
@@ -712,7 +755,7 @@ class FlaskRestPlusTest(JSONTestCase):
         response = self.client.delete(
             "/requires_authentication", headers={"Authorization": "Bearer Fake token"}
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json(
             response,
             {
@@ -743,7 +786,7 @@ class FlaskRestPlusTest(JSONTestCase):
                 "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
             },
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json_regex(
             response,
             "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}",
@@ -772,7 +815,7 @@ class FlaskRestPlusTest(JSONTestCase):
                 "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
             },
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json_regex(
             response,
             "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}",
@@ -801,7 +844,7 @@ class FlaskRestPlusTest(JSONTestCase):
                 "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
             },
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json_regex(
             response,
             "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}",
@@ -830,7 +873,7 @@ class FlaskRestPlusTest(JSONTestCase):
                 "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
             },
         )
-        self.assert401(response)
+        self.assert_401(response)
         self.assert_json_regex(
             response,
             "\{'message': \"SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are .*\"\}",
@@ -838,22 +881,22 @@ class FlaskRestPlusTest(JSONTestCase):
 
     def test_log_get_request_details(self):
         response = self.client.get("/logging")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_json(response, "")
 
     def test_log_delete_request_details(self):
         response = self.client.delete("/logging")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_json(response, "")
 
     def test_log_post_request_details(self):
         response = self.client.post("/logging")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_json(response, "")
 
     def test_log_put_request_details(self):
         response = self.client.put("/logging")
-        self.assert200(response)
+        self.assert_200(response)
         self.assert_json(response, "")
 
 

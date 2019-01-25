@@ -47,6 +47,8 @@ setup(
         "flask_cors==3.0.7",
         # Used to gz compress http output
         "flask_compress==1.4.0",
+        # Used to ensure Black code style is checked on pre-commit
+        "pre-commit==1.14.2",
     ],
     extras_require=extra_requirements,
 )

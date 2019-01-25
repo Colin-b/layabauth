@@ -17,6 +17,8 @@ List all changes in various categories:
 ### Enhancements ###
 
 - Rely on latest version of redis.
+- Return HTTP 429 in case of warning to trigger a Consul warning. (was a 200 previously)
+- Add a new /changelog endpoint within monitoring section for all services.
 
 ## Version 13.0.0 (2019-01-23) ##
 
