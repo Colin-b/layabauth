@@ -1,3 +1,4 @@
+from typing import Tuple
 import datetime
 import json
 import logging
@@ -232,7 +233,7 @@ def _snake_case(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def redis_health_details(redis_url: str, namespace: str):
+def redis_health_details(redis_url: str, namespace: str) -> Tuple[str, dict]:
     redis = Redis.from_url(redis_url)
     try:
         redis.ping()
@@ -244,7 +245,7 @@ def redis_health_details(redis_url: str, namespace: str):
                     "componentType": "component",
                     "status": "fail",
                     "time": datetime.datetime.utcnow().isoformat(),
-                    "output": e.__repr__(),
+                    "output": str(e),
                 }
             },
         )
@@ -275,10 +276,6 @@ def redis_health_details(redis_url: str, namespace: str):
             }
         },
     )
-    if "_" in name:
-        raise ValueError(f"{name} should be Camel Case and should not contain any _")
-    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
 def health_details(config: dict):
