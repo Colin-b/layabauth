@@ -53,7 +53,35 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                             description="Indicates whether the service status is acceptable or not.",
                             required=True,
                             example="pass",
-                            enum=["pass", "warn"],
+                            enum=["pass"],
+                        ),
+                        "version": fields.String(
+                            description="Public version of the service.",
+                            required=True,
+                            example="1",
+                        ),
+                        "releaseId": fields.String(
+                            description="Version of the service.",
+                            required=True,
+                            example="1.0.0",
+                        ),
+                        "details": fields.Raw(
+                            description="Provides more details about the status of the service.",
+                            required=True,
+                        ),
+                    },
+                ),
+            ),
+            429: (
+                "Server is almost in a coherent state.",
+                namespace.model(
+                    "HealthWarn",
+                    {
+                        "status": fields.String(
+                            description="Indicates whether the service status is acceptable or not.",
+                            required=True,
+                            example="warn",
+                            enum=["warn"],
                         ),
                         "version": fields.String(
                             description="Public version of the service.",
@@ -113,14 +141,12 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
             """
             try:
                 status, details = health_details()
-                return self._send_status(
-                    status, 400 if "fail" == status else 200, details
-                )
+                return self._send_status(status, details)
             except Exception as e:
-                return self._send_status("fail", 400, {}, output=str(e))
+                return self._send_status("fail", {}, output=str(e))
 
         @staticmethod
-        def _send_status(status: str, code: int, details: dict, **kwargs):
+        def _send_status(status: str, details: dict, **kwargs):
             body = {
                 "status": status,
                 "version": version,
@@ -128,6 +154,11 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                 "details": details,
             }
             body.update(kwargs)
+            code = 200  # Consul consider every 2** as Ok
+            if "fail" == status:
+                code = 400  # Consul consider every non 429 or 2** as Critical
+            elif "warn" == status:
+                code = 429  # Consul consider a 429 as a Warning
             response = make_response(json.dumps(body), code)
             response.headers["Content-Type"] = "application/health+json"
             return response
