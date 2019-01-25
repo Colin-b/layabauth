@@ -235,8 +235,8 @@ def _snake_case(name: str) -> str:
 def redis_health_details(redis_url: str, namespace: str):
     redis = Redis.from_url(redis_url)
     try:
-        redis_ping = redis.ping()
-    except:
+        redis.ping()
+    except Exception as e:
         return (
             "fail",
             {
@@ -244,7 +244,7 @@ def redis_health_details(redis_url: str, namespace: str):
                     "componentType": "component",
                     "status": "fail",
                     "time": datetime.datetime.utcnow().isoformat(),
-                    "output": redis_ping,
+                    "output": e.__repr__(),
                 }
             },
         )
