@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 
 def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     """
-    Create a monitoring namespace containing the Health check endpoint.
-    This endpoint implements https://inadarei.github.io/rfc-healthcheck/
+    Create a monitoring namespace containing:
+     * Health check endpoint implementing https://inadarei.github.io/rfc-healthcheck/
+     * Changelog endpoint
 
     :param api: The root Api
     :param health_details: Function returning a tuple with a string providing the status (pass, warn, fail)
@@ -40,6 +41,23 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     )
     version = api.version.split(".", maxsplit=1)[0]
     release_id = api.version
+
+    def _retrieve_changelog():
+        try:
+            server_py_python_path = inspect.stack()[2][0]
+            server_py_module = inspect.getmodule(server_py_python_path)
+            server_py_file_path = server_py_module.__file__
+            changelog_path = os.path.join(
+                os.path.abspath(os.path.dirname(server_py_file_path)),
+                "..",
+                "CHANGELOG.md",
+            )
+            with open(changelog_path) as change_log:
+                return change_log.read()
+        except:
+            return "No changelog can be found. Please contact support."
+
+    changelog = _retrieve_changelog()
 
     @namespace.route("/health")
     @namespace.doc(
@@ -53,7 +71,35 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                             description="Indicates whether the service status is acceptable or not.",
                             required=True,
                             example="pass",
-                            enum=["pass", "warn"],
+                            enum=["pass"],
+                        ),
+                        "version": fields.String(
+                            description="Public version of the service.",
+                            required=True,
+                            example="1",
+                        ),
+                        "releaseId": fields.String(
+                            description="Version of the service.",
+                            required=True,
+                            example="1.0.0",
+                        ),
+                        "details": fields.Raw(
+                            description="Provides more details about the status of the service.",
+                            required=True,
+                        ),
+                    },
+                ),
+            ),
+            429: (
+                "Server is almost in a coherent state.",
+                namespace.model(
+                    "HealthWarn",
+                    {
+                        "status": fields.String(
+                            description="Indicates whether the service status is acceptable or not.",
+                            required=True,
+                            example="warn",
+                            enum=["warn"],
                         ),
                         "version": fields.String(
                             description="Public version of the service.",
@@ -113,14 +159,12 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
             """
             try:
                 status, details = health_details()
-                return self._send_status(
-                    status, 400 if "fail" == status else 200, details
-                )
+                return self._send_status(status, details)
             except Exception as e:
-                return self._send_status("fail", 400, {}, output=str(e))
+                return self._send_status("fail", {}, output=str(e))
 
         @staticmethod
-        def _send_status(status: str, code: int, details: dict, **kwargs):
+        def _send_status(status: str, details: dict, **kwargs):
             body = {
                 "status": status,
                 "version": version,
@@ -128,9 +172,23 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                 "details": details,
             }
             body.update(kwargs)
+            code = 200  # Consul consider every 2** as Ok
+            if "fail" == status:
+                code = 400  # Consul consider every non 429 or 2** as Critical
+            elif "warn" == status:
+                code = 429  # Consul consider a 429 as a Warning
             response = make_response(json.dumps(body), code)
             response.headers["Content-Type"] = "application/health+json"
             return response
+
+    @namespace.route("/changelog")
+    @namespace.doc(responses={200: ("Service changelog.", fields.String())})
+    class Changelog(Resource):
+        def get(self):
+            """
+            Retrieve service changelog.
+            """
+            return make_response(changelog, 200)
 
     return namespace
 
