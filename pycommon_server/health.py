@@ -6,11 +6,13 @@ import requests
 
 def _pycommon_status(health_response):
     if isinstance(health_response, dict):
-        return health_response.get('status', 'pass')
-    return 'pass'
+        return health_response.get("status", "pass")
+    return "pass"
 
 
-def http_details(service_name: str, url: str, status_extracting: callable = None, **requests_args) -> (str, dict):
+def http_details(
+    service_name: str, url: str, status_extracting: callable = None, **requests_args
+) -> (str, dict):
     """
     Return Health details for an external service connection.
 
@@ -22,38 +24,54 @@ def http_details(service_name: str, url: str, status_extracting: callable = None
     Details are based on https://inadarei.github.io/rfc-healthcheck/
     """
     try:
-        response = requests.get(url, timeout=requests_args.pop('timeout', (1, 5)), **requests_args)
+        response = requests.get(
+            url, timeout=requests_args.pop("timeout", (1, 5)), **requests_args
+        )
         if response:
             if not status_extracting:
                 status_extracting = _pycommon_status
 
-            response = response.json() if re.match("application/(health\+)?json",
-                                                   response.headers['Content-Type']) else response.text
-            return status_extracting(response), {
-                f'{service_name}:health': {
-                    'componentType': url,
-                    'observedValue': response,
-                    'status': status_extracting(response),
-                    'time': datetime.datetime.utcnow().isoformat(),
+            response = (
+                response.json()
+                if re.match(
+                    "application/(health\+)?json", response.headers["Content-Type"]
+                )
+                else response.text
+            )
+            return (
+                status_extracting(response),
+                {
+                    f"{service_name}:health": {
+                        "componentType": url,
+                        "observedValue": response,
+                        "status": status_extracting(response),
+                        "time": datetime.datetime.utcnow().isoformat(),
+                    }
+                },
+            )
+        return (
+            "fail",
+            {
+                f"{service_name}:health": {
+                    "componentType": url,
+                    "status": "fail",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                    "output": response.text,
                 }
-            }
-        return 'fail', {
-            f'{service_name}:health': {
-                'componentType': url,
-                'status': 'fail',
-                'time': datetime.datetime.utcnow().isoformat(),
-                'output': response.text
-            }
-        }
+            },
+        )
     except Exception as e:
-        return 'fail', {
-            f'{service_name}:health': {
-                'componentType': url,
-                'status': 'fail',
-                'time': datetime.datetime.utcnow().isoformat(),
-                'output': str(e)
-            }
-        }
+        return (
+            "fail",
+            {
+                f"{service_name}:health": {
+                    "componentType": url,
+                    "status": "fail",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                    "output": str(e),
+                }
+            },
+        )
 
 
 def status(*statuses: str) -> str:
@@ -65,8 +83,8 @@ def status(*statuses: str) -> str:
     :param statuses: List of statuses, valid values are pass, warn or fail
     :return: Status according to statuses
     """
-    if 'fail' in statuses:
-        return 'fail'
-    if 'warn' in statuses:
-        return 'warn'
-    return 'pass'
+    if "fail" in statuses:
+        return "fail"
+    if "warn" in statuses:
+        return "warn"
+    return "pass"

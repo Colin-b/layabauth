@@ -22,12 +22,12 @@ xKkdWKYVswcJipenU9PP63R0wNXr-8cb-6PGIUzaQDREo-EuR2e3uShF9u5cagG7emt9fDmJr8eGxBJU
             jwt_checker.get_user(bearer=self.encoded, no_auth=False)
         self.assertRegex(
             str(em.exception),
-            "Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM is not a valid key identifier. Valid ones are .*"
+            "Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM is not a valid key identifier. Valid ones are .*",
         )
 
     def test_get_user_no_auth_no_bearer(self):
         user = jwt_checker.get_user(bearer=None, no_auth=True)
-        self.assertEqual('anonymous', user)
+        self.assertEqual("anonymous", user)
 
     def test_get_user_no_auth_api_key(self):
         user = jwt_checker.get_user(bearer="SESAME", no_auth=True)
@@ -38,7 +38,7 @@ xKkdWKYVswcJipenU9PP63R0wNXr-8cb-6PGIUzaQDREo-EuR2e3uShF9u5cagG7emt9fDmJr8eGxBJU
             jwt_checker.get_user(bearer="TOTO", no_auth=True)
         self.assertEqual(
             str(em.exception),
-            "Token validation error: Invalid JWT Token (header, body and signature must be separated by dots)."
+            "Token validation error: Invalid JWT Token (header, body and signature must be separated by dots).",
         )
 
     def test_get_user_no_auth_no_br(self):
@@ -46,5 +46,5 @@ xKkdWKYVswcJipenU9PP63R0wNXr-8cb-6PGIUzaQDREo-EuR2e3uShF9u5cagG7emt9fDmJr8eGxBJU
         self.assertEqual("PARKER", user)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
