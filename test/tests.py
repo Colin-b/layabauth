@@ -350,7 +350,20 @@ class HealthCheckWithPassDetails(JSONTestCase):
                             "operationId": "get_health",
                             "tags": ["Monitoring"],
                         }
-                    }
+                    },
+                    "/changelog": {
+                        "get": {
+                            "responses": {
+                                "200": {
+                                    "description": "Service changelog.",
+                                    "schema": {"type": "string"},
+                                }
+                            },
+                            "summary": "Retrieve service changelog",
+                            "operationId": "get_changelog",
+                            "tags": ["Monitoring"],
+                        }
+                    },
                 },
                 "info": {"title": "API", "version": "3.2.1"},
                 "produces": ["application/json"],

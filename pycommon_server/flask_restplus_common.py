@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 
 def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     """
-    Create a monitoring namespace containing the Health check endpoint.
-    This endpoint implements https://inadarei.github.io/rfc-healthcheck/
+    Create a monitoring namespace containing:
+     * Health check endpoint implementing https://inadarei.github.io/rfc-healthcheck/
+     * Changelog endpoint
 
     :param api: The root Api
     :param health_details: Function returning a tuple with a string providing the status (pass, warn, fail)
@@ -40,6 +41,23 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     )
     version = api.version.split(".", maxsplit=1)[0]
     release_id = api.version
+
+    def _retrieve_changelog():
+        try:
+            server_py_python_path = inspect.stack()[2][0]
+            server_py_module = inspect.getmodule(server_py_python_path)
+            server_py_file_path = server_py_module.__file__
+            changelog_path = os.path.join(
+                os.path.abspath(os.path.dirname(server_py_file_path)),
+                "..",
+                "CHANGELOG.md",
+            )
+            with open(changelog_path) as change_log:
+                return change_log.read()
+        except:
+            return "No changelog can be found. Please contact support."
+
+    changelog = _retrieve_changelog()
 
     @namespace.route("/health")
     @namespace.doc(
@@ -162,6 +180,15 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
             response = make_response(json.dumps(body), code)
             response.headers["Content-Type"] = "application/health+json"
             return response
+
+    @namespace.route("/changelog")
+    @namespace.doc(responses={200: ("Service changelog.", fields.String())})
+    class Changelog(Resource):
+        def get(self):
+            """
+            Retrieve service changelog.
+            """
+            return make_response(changelog, 200)
 
     return namespace
 
