@@ -551,7 +551,7 @@ class AsyncRouteTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping")
     def test_redis_health_details_cannot_connect_to_redis(self, ping_mock):
-        ping_mock.side_effect = redis.exceptions.ConnectionError()
+        ping_mock.side_effect = redis.exceptions.ConnectionError("Test message")
 
         status, details = redis_health_details(
             redis_url="test_url", namespace="test_namespace"
@@ -564,7 +564,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "ConnectionError()",
+                    "output": "Test message",
                 }
             },
         )
