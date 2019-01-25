@@ -10,6 +10,7 @@ from celery import Celery
 from celery import result as celery_results
 from celery.task import control
 from flask_restplus import Resource, fields, Namespace
+from redis import Redis
 
 _STATUS_ENDPOINT = "status"
 _RESULT_ENDPOINT = "result"
@@ -225,6 +226,55 @@ def _build_result_endpoints(
 
 
 def _snake_case(name: str) -> str:
+    if "_" in name:
+        raise ValueError(f"{name} should be Camel Case and should not contain any _")
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
+def redis_health_details(redis_url: str, namespace: str):
+    redis = Redis.from_url(redis_url)
+    try:
+        redis_ping = redis.ping()
+    except:
+        return (
+            "fail",
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                    "output": redis_ping,
+                }
+            },
+        )
+
+    keys = redis.keys(namespace)
+
+    if not keys:
+        return (
+            "fail",
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                    "output": f"missing namespace: {namespace}",
+                }
+            },
+        )
+
+    return (
+        "pass",
+        {
+            "redis:ping": {
+                "componentType": "component",
+                "observedValue": keys,
+                "status": "pass",
+                "time": datetime.datetime.utcnow().isoformat(),
+            }
+        },
+    )
     if "_" in name:
         raise ValueError(f"{name} should be Camel Case and should not contain any _")
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)

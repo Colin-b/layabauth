@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 import flask
+import redis
 from flask import Flask, make_response
 from flask_restplus import Api, Resource, fields
 from pycommon_test import mock_now
@@ -10,6 +13,7 @@ from pycommon_server.celery_common import (
     how_to_get_async_status,
     build_celery_application,
     health_details,
+    redis_health_details,
 )
 
 
@@ -525,6 +529,64 @@ class AsyncRouteTest(JSONTestCase):
         result_reply = self.client.get(result_url)
         self.assert200(result_reply)
         self.assertEqual(result_reply.data.decode(), "a;b;c")
+
+    @patch.object(redis.Redis, "ping", return_value=1)
+    @patch.object(redis.Redis, "keys", return_value=["test_namespace"])
+    def test_redis_health_details_ok(self, ping_mock, keys_mock):
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "pass")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "observedValue": ["test_namespace"],
+                    "status": "pass",
+                    "time": "2018-10-11T15:05:05.663979",
+                }
+            },
+        )
+
+    @patch.object(redis.Redis, "ping")
+    def test_redis_health_details_cannot_connect_to_redis(self, ping_mock):
+        ping_mock.side_effect = redis.exceptions.ConnectionError()
+
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "fail")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": "2018-10-11T15:05:05.663979",
+                    "output": "ConnectionError()",
+                }
+            },
+        )
+
+    @patch.object(redis.Redis, "ping", return_value=1)
+    @patch.object(redis.Redis, "keys", return_value=[])
+    def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "fail")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": "2018-10-11T15:05:05.663979",
+                    "output": "missing namespace: test_namespace",
+                }
+            },
+        )
 
     def test_health_details_with_workers(self):
         from celery.task import control
