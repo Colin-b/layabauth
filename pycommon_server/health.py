@@ -11,7 +11,11 @@ def _pycommon_status(health_response):
 
 
 def http_details(
-    service_name: str, url: str, status_extracting: callable = None, **requests_args
+    service_name: str,
+    url: str,
+    status_extracting: callable = None,
+    failure_status: str = "fail",
+    **requests_args,
 ) -> (str, dict):
     """
     Return Health details for an external service connection.
@@ -50,11 +54,11 @@ def http_details(
                 },
             )
         return (
-            "fail",
+            failure_status,
             {
                 f"{service_name}:health": {
                     "componentType": url,
-                    "status": "fail",
+                    "status": failure_status,
                     "time": datetime.datetime.utcnow().isoformat(),
                     "output": response.text,
                 }
@@ -62,11 +66,11 @@ def http_details(
         )
     except Exception as e:
         return (
-            "fail",
+            failure_status,
             {
                 f"{service_name}:health": {
                     "componentType": url,
-                    "status": "fail",
+                    "status": failure_status,
                     "time": datetime.datetime.utcnow().isoformat(),
                     "output": str(e),
                 }
