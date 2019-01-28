@@ -1,4 +1,8 @@
-# Python Common Server Module #
+<h2 align="center">Python Common Server Module</h2>
+
+<p align="center">
+<a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
 This package provides the following features:
 
@@ -49,3 +53,15 @@ If you need to access Windows computers from your REST API hosted on Linux.
 
 You will find more details in pycommon_server.windows module.
 
+Contributing
+------------
+
+Everyone is free to contribute on this project.
+
+Before creating an issue please make sure that it was not already reported.
+
+Project follow "Black" code formatting: https://black.readthedocs.io/en/stable/
+
+To integrate it within Pycharm: https://black.readthedocs.io/en/stable/editor_integration.html#pycharm
+
+To add the pre-commit hook, after the installation run: **pre-commit install**

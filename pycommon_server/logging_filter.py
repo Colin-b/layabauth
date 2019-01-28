@@ -21,12 +21,14 @@ def _request_id():
 
     :return: current request identifier or a new one if there is none
     """
-    if getattr(flask.g, 'request_id', None):
+    if getattr(flask.g, "request_id", None):
         return flask.g.request_id
 
     headers = flask.request.headers
-    original_request_id = headers.get('X-Request-Id')
-    request_id = f"{original_request_id},{uuid.uuid4()}" if original_request_id else uuid.uuid4()
+    original_request_id = headers.get("X-Request-Id")
+    request_id = (
+        f"{original_request_id},{uuid.uuid4()}" if original_request_id else uuid.uuid4()
+    )
 
     flask.g.request_id = request_id
     return request_id
@@ -39,11 +41,11 @@ def _user_id():
 
     :return: current user identifier or anonymous if there is none
     """
-    if getattr(flask.g, 'user_id', None):
+    if getattr(flask.g, "user_id", None):
         return flask.g.user_id
 
     # TODO implement generic authentication user_id retrieval
-    user_id = get_user(flask.request.headers.get('Bearer'))
+    user_id = get_user(flask.request.headers.get("Bearer"))
 
     flask.g.user_id = user_id
     return user_id
@@ -57,8 +59,15 @@ class RequestIdFilter(logging.Filter):
     """
 
     def filter(self, record):
-        record.request_id = _request_id() if flask.has_request_context() else current_task.request.id if current_task and hasattr(
-            current_task, 'request') and hasattr(current_task.request, 'id') else ''
+        record.request_id = (
+            _request_id()
+            if flask.has_request_context()
+            else current_task.request.id
+            if current_task
+            and hasattr(current_task, "request")
+            and hasattr(current_task.request, "id")
+            else ""
+        )
         return True
 
 
@@ -70,12 +79,12 @@ class UserIdFilter(logging.Filter):
 
     def filter(self, record):
         if flask.has_request_context():
-            if getattr(flask.g, 'user_id', None):
+            if getattr(flask.g, "user_id", None):
                 user_id = flask.g.user_id
             else:
-                user_id = get_user(flask.request.headers.get('Bearer'))
+                user_id = get_user(flask.request.headers.get("Bearer"))
                 flask.g.user_id = user_id
         else:
-            user_id = ''
+            user_id = ""
         record.user_id = user_id
         return True
