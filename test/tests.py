@@ -1350,6 +1350,23 @@ class HealthTest(unittest.TestCase):
         )
 
     @responses.activate
+    def test_exception_health_check_as_warn(self):
+        self.assertEqual(
+            (
+                "warn",
+                {
+                    "test:health": {
+                        "componentType": "http://test/health",
+                        "output": "Connection refused: GET http://test/health",
+                        "status": "warn",
+                        "time": "2018-10-11T15:05:05.663979",
+                    }
+                },
+            ),
+            health.http_details("test", "http://test/health", failure_status="warn"),
+        )
+
+    @responses.activate
     def test_error_health_check(self):
         responses.add(
             url="http://test/health",
@@ -1370,6 +1387,29 @@ class HealthTest(unittest.TestCase):
                 },
             ),
             health.http_details("test", "http://test/health"),
+        )
+
+    @responses.activate
+    def test_error_health_check_as_warn(self):
+        responses.add(
+            url="http://test/health",
+            method=responses.GET,
+            status=500,
+            json={"message": "An error occurred"},
+        )
+        self.assertEqual(
+            (
+                "warn",
+                {
+                    "test:health": {
+                        "componentType": "http://test/health",
+                        "output": '{"message": "An error occurred"}',
+                        "status": "warn",
+                        "time": "2018-10-11T15:05:05.663979",
+                    }
+                },
+            ),
+            health.http_details("test", "http://test/health", failure_status="warn"),
         )
 
     @responses.activate
@@ -1602,6 +1642,23 @@ class HealthTest(unittest.TestCase):
                 },
             ),
             health.http_details("test", "http://test/status"),
+        )
+
+    @responses.activate
+    def test_fail_status_when_server_is_down_as_warn(self):
+        self.assertEqual(
+            (
+                "warn",
+                {
+                    "test:health": {
+                        "componentType": "http://test/status",
+                        "output": "Connection refused: GET http://test/status",
+                        "status": "warn",
+                        "time": "2018-10-11T15:05:05.663979",
+                    }
+                },
+            ),
+            health.http_details("test", "http://test/status", failure_status="warn"),
         )
 
     def test_status_aggregation_with_failure(self):

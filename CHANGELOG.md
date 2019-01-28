@@ -6,13 +6,15 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
-## Version 13.1.0 (2019-01-25) ##
+## Version 13.1.0 (2019-01-28) ##
 
 ### Enhancements ###
 
 - Rely on latest version of redis.
 - Return HTTP 429 in case of warning to trigger a Consul warning. (was a 200 previously)
 - Add a new /changelog endpoint within monitoring section for all services.
+- Add health check for Redis
+- Allow to consider HTTP health check failure as pass or warn status (instead of fail as default).
 
 ## Version 13.0.0 (2019-01-23) ##
 
