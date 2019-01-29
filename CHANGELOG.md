@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.2.0 (2019-01-29) ##
+
+### Enhancements ###
+
+- Celery common does not expose celery_result variable, use celery.result instead.
+
 ## Version 13.1.0 (2019-01-28) ##
 
 ### Enhancements ###
