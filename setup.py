@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     "testing": [
         # Used to provide testing help
-        "pycommon-test==5.0.0"
+        "pycommon-test==5.0.1"
     ],
     # Used to manage authentication
     "authentication": ["oauth2helper==1.4.0"],

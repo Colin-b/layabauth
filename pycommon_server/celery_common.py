@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import flask
 from celery import Celery
-from celery import result as celery_results
+import celery.result
 from celery.task import control
 from flask_restplus import Resource, fields, Namespace
 from redis import Redis
@@ -134,7 +134,7 @@ def how_to_get_async_status(celery_task) -> flask.Response:
 
 
 def _get_celery_status(celery_task_id: str, celery_app: Celery) -> flask.Response:
-    celery_task = celery_results.AsyncResult(celery_task_id, app=celery_app)
+    celery_task = celery.result.AsyncResult(celery_task_id, app=celery_app)
 
     if celery_task.failed():
         # TODO try to construct the original error
@@ -153,7 +153,7 @@ def _get_celery_status(celery_task_id: str, celery_app: Celery) -> flask.Respons
 
 
 def _get_celery_result(celery_app: Celery, celery_task_id: str):
-    celery_task = celery_results.AsyncResult(celery_task_id, app=celery_app)
+    celery_task = celery.result.AsyncResult(celery_task_id, app=celery_app)
     return celery_task.get()
 
 
