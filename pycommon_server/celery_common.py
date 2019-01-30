@@ -234,9 +234,36 @@ def _snake_case(name: str) -> str:
 
 
 def redis_health_details(redis_url: str, namespace: str) -> Tuple[str, dict]:
-    redis = Redis.from_url(redis_url)
     try:
+        redis = Redis.from_url(redis_url)
         redis.ping()
+
+        keys = redis.keys(namespace)
+
+        if not keys or not isinstance(keys, list):
+            return (
+                "fail",
+                {
+                    "redis:ping": {
+                        "componentType": "component",
+                        "status": "fail",
+                        "time": datetime.datetime.utcnow().isoformat(),
+                        "output": f"Namespace {namespace} cannot be found in {keys}",
+                    }
+                },
+            )
+
+        return (
+            "pass",
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "observedValue": keys,
+                    "status": "pass",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                }
+            },
+        )
     except Exception as e:
         return (
             "fail",
@@ -250,37 +277,52 @@ def redis_health_details(redis_url: str, namespace: str) -> Tuple[str, dict]:
             },
         )
 
-    keys = redis.keys(namespace)
-
-    if not keys:
-        return (
-            "fail",
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": datetime.datetime.utcnow().isoformat(),
-                    "output": f"missing namespace: {namespace}",
-                }
-            },
-        )
-
-    return (
-        "pass",
-        {
-            "redis:ping": {
-                "componentType": "component",
-                "observedValue": keys,
-                "status": "pass",
-                "time": datetime.datetime.utcnow().isoformat(),
-            }
-        },
-    )
-
 
 def health_details(config: dict):
-    workers = control.ping()
-    if not workers:
+    try:
+        workers = control.ping()
+        if not workers:
+            return (
+                "fail",
+                {
+                    "celery:ping": {
+                        "componentType": "component",
+                        "status": "fail",
+                        "time": datetime.datetime.utcnow().isoformat(),
+                        "output": f"No workers could be found: {workers}",
+                    }
+                },
+            )
+
+        service_name = os.environ.get("ENV_CONTAINER_NAME")
+        if not service_name:
+            service_name = f"celery@{config['celery']['namespace']}"
+        related_workers = [worker for worker in workers if service_name in worker]
+        if not related_workers:
+            return (
+                "fail",
+                {
+                    "celery:ping": {
+                        "componentType": "component",
+                        "status": "fail",
+                        "time": datetime.datetime.utcnow().isoformat(),
+                        "output": f"No workers related to {service_name} could be found within {workers}",
+                    }
+                },
+            )
+
+        return (
+            "pass",
+            {
+                "celery:ping": {
+                    "componentType": "component",
+                    "observedValue": related_workers,
+                    "status": "pass",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                }
+            },
+        )
+    except Exception as e:
         return (
             "fail",
             {
@@ -288,36 +330,7 @@ def health_details(config: dict):
                     "componentType": "component",
                     "status": "fail",
                     "time": datetime.datetime.utcnow().isoformat(),
-                    "output": workers,
+                    "output": str(e),
                 }
             },
         )
-
-    service_name = os.environ.get("ENV_CONTAINER_NAME")
-    if not service_name:
-        service_name = f"celery@{config['celery']['namespace']}"
-    related_workers = [worker for worker in workers if service_name in worker]
-    if not related_workers:
-        return (
-            "fail",
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": datetime.datetime.utcnow().isoformat(),
-                    "output": workers,
-                }
-            },
-        )
-
-    return (
-        "pass",
-        {
-            "celery:ping": {
-                "componentType": "component",
-                "observedValue": related_workers,
-                "status": "pass",
-                "time": datetime.datetime.utcnow().isoformat(),
-            }
-        },
-    )
