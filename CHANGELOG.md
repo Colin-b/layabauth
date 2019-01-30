@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.2.2 (2019-01-30) ##
+
+### Bug fixes ###
+
+- Avoid sending bytes in redis health details (as it cannot be serialized to JSON).
+
 ## Version 13.2.1 (2019-01-30) ##
 
 ### Bug fixes ###

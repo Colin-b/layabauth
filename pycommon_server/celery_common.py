@@ -258,7 +258,7 @@ def redis_health_details(redis_url: str, namespace: str) -> Tuple[str, dict]:
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": keys,
+                    "observedValue": f"Namespace {namespace} can be found.",
                     "status": "pass",
                     "time": datetime.datetime.utcnow().isoformat(),
                 }
