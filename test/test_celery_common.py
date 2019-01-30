@@ -542,7 +542,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": ["test_namespace"],
+                    "observedValue": "Namespace test_namespace can be found.",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -607,6 +607,27 @@ class AsyncRouteTest(JSONTestCase):
                     "time": "2018-10-11T15:05:05.663979",
                     "output": "Namespace test_namespace cannot be found in b'Those "
                     "are bytes'",
+                }
+            },
+        )
+
+    @patch.object(redis.Redis, "ping", return_value=1)
+    @patch.object(redis.Redis, "keys", return_value=[b"test_namespace"])
+    def test_redis_health_details_retrieve_keys_as_bytes_list(
+        self, ping_mock, keys_mock
+    ):
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "pass")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "pass",
+                    "time": "2018-10-11T15:05:05.663979",
+                    "observedValue": "Namespace test_namespace can be found.",
                 }
             },
         )
