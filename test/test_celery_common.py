@@ -569,6 +569,48 @@ class AsyncRouteTest(JSONTestCase):
             },
         )
 
+    @patch.object(redis.Redis, "from_url")
+    def test_redis_health_details_cannot_retrieve_url(self, from_url_mock):
+        from_url_mock.side_effect = redis.exceptions.ConnectionError("Test message")
+
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "fail")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": "2018-10-11T15:05:05.663979",
+                    "output": "Test message",
+                }
+            },
+        )
+
+    @patch.object(redis.Redis, "ping", return_value=1)
+    @patch.object(redis.Redis, "keys", return_value=b"Those are bytes")
+    def test_redis_health_details_cannot_retrieve_keys_as_list(
+        self, ping_mock, keys_mock
+    ):
+        status, details = redis_health_details(
+            redis_url="test_url", namespace="test_namespace"
+        )
+        self.assertEqual(status, "fail")
+        self.assertEqual(
+            details,
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": "2018-10-11T15:05:05.663979",
+                    "output": "Namespace test_namespace cannot be found in b'Those "
+                    "are bytes'",
+                }
+            },
+        )
+
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=[])
     def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
@@ -583,7 +625,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "missing namespace: test_namespace",
+                    "output": "Namespace test_namespace cannot be found in []",
                 }
             },
         )
@@ -628,11 +670,10 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": [
-                        {"celery@test2": {"pong": "ok"}},
-                        {"celery@test3": {"pong": "ok"}},
-                        {"celery@test2": {"pong": "ok"}},
-                    ],
+                    "output": "No workers related to celery@test could be found "
+                    "within [{'celery@test2': {'pong': 'ok'}}, "
+                    "{'celery@test3': {'pong': 'ok'}}, {'celery@test2': "
+                    "{'pong': 'ok'}}]",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -650,7 +691,28 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": [],
+                    "output": "No workers could be found: []",
+                    "status": "fail",
+                    "time": "2018-10-11T15:05:05.663979",
+                }
+            },
+        )
+
+    def test_health_details_ping_exception(self):
+        from celery.task import control
+
+        def ex():
+            raise Exception("ping failure")
+
+        control.ping = ex
+        status, details = health_details({"celery": {"namespace": "test"}})
+        self.assertEqual(status, "fail")
+        self.assertEqual(
+            details,
+            {
+                "celery:ping": {
+                    "componentType": "component",
+                    "output": "ping failure",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }

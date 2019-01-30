@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.2.1 (2019-01-30) ##
+
+### Bug fixes ###
+
+- Prevent redis and celery health check to throw exception.
+
 ## Version 13.2.0 (2019-01-29) ##
 
 ### Enhancements ###
