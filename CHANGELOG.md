@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.2.3 (2019-02-05) ##
+
+### Bug fixes ###
+
+- Avoid importing requests in health.py (preventing use of status function).
+
 ## Version 13.2.2 (2019-01-30) ##
 
 ### Bug fixes ###
