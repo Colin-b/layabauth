@@ -1,8 +1,6 @@
 import datetime
 import re
 
-import requests
-
 
 def _pycommon_status(health_response):
     if isinstance(health_response, dict):
@@ -24,9 +22,12 @@ def http_details(
     :param url: External service health check URL.
     :param status_extracting: Function returning status according to the JSON response (as parameter).
     Default to the way status should be extracted from a python_service_template based service.
+    :param failure_status: Status to return in case of failure (Exception or HTTP rejection). fail by default.
     :return: A tuple with a string providing the status (pass, warn, fail) and the details.
     Details are based on https://inadarei.github.io/rfc-healthcheck/
     """
+    import requests
+
     try:
         response = requests.get(
             url, timeout=requests_args.pop("timeout", (1, 5)), **requests_args
