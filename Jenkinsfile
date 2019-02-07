@@ -13,7 +13,7 @@ pipeline {
             steps {
                 script {
                     if(BRANCH_NAME == "development") {
-                        environment = "dev"
+                        environment = "preprod"
                     }else if(BRANCH_NAME == "acceptance") {
                         environment = "uat"
                     }else if(BRANCH_NAME == "master") {
