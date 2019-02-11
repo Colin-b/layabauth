@@ -22,20 +22,25 @@ pipeline {
                         environment = "scratch"
                     }
                 }
-                sh 'python3.6 -m venv testenv'
                 sh """
-                . ./testenv/bin/activate
-                python3.6 -m pip install --upgrade pip
                 python3.6 -m pip install -e .[testing] --index https://${ARTIFACTORY}@artifactory.tools.digital.engie.com/artifactory/api/pypi/${project}-${team}-pypi-${environment}/simple --upgrade
-                cd test
-                nosetests . --exe --with-doctest --with-xunit --xunit-file python_unittest_out.xml --with-coverage --cover-erase --cover-package=../pycommon_server/. --cover-min-percentage=93 --cover-html
-                coverage xml
                 """
+            }
+        }
+        stage('Test') {
+            steps {
+                sh """
+                nosetests test --exe --with-doctest --with-xunit --xunit-file test-results.xml --with-coverage --cover-erase --cover-package=pycommon_server/. --cover-min-percentage=93 --cover-html
+                """
+            }
+        }
+        stage('Publish test results') {
+            steps {
+                junit '**/test-results.xml'
             }
         }
         stage('Deploy') {
             steps {
-                sh 'python3.6 -m venv testenv'
                 sh """ cat << EOF > .pypirc
 [distutils]
 index-servers=local
@@ -46,12 +51,34 @@ password=${ARTIFACTORY_PSW}
 EOF
 """
                 sh """
-                . ./testenv/bin/activate
-                python3.6 -m pip install --upgrade pip
-                python3.6 -m pip install twine
                 python3.6 setup.py sdist
                 twine upload dist/* -r local --config-file ./.pypirc
                 """
+            }
+        }
+        stage('Generate coverage') {
+            steps {
+                sh """
+                coverage xml -o cobertura.xml
+                """
+            }
+        }
+        stage('Record master coverage') {
+            when { branch 'master' }
+            steps {
+                script {
+                    currentBuild.result = 'SUCCESS'
+                 }
+                step([$class: 'MasterCoverageAction', scmVars: [GIT_URL: env.GIT_URL]])
+            }
+        }
+        stage('PR Coverage to Github') {
+            when { allOf {not { branch 'master' }; expression { return env.CHANGE_ID != null }} }
+            steps {
+                script {
+                    currentBuild.result = 'SUCCESS'
+                 }
+                step([$class: 'CompareCoverageAction', publishResultAs: 'statusCheck', scmVars: [GIT_URL: env.GIT_URL]])
             }
         }
     }
