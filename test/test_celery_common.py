@@ -534,7 +534,7 @@ class AsyncRouteTest(JSONTestCase):
     @patch.object(redis.Redis, "keys", return_value=["test_namespace"])
     def test_redis_health_details_ok(self, ping_mock, keys_mock):
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "pass")
         self.assertEqual(
@@ -554,7 +554,7 @@ class AsyncRouteTest(JSONTestCase):
         ping_mock.side_effect = redis.exceptions.ConnectionError("Test message")
 
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "fail")
         self.assertEqual(
@@ -574,7 +574,7 @@ class AsyncRouteTest(JSONTestCase):
         from_url_mock.side_effect = redis.exceptions.ConnectionError("Test message")
 
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "fail")
         self.assertEqual(
@@ -595,7 +595,7 @@ class AsyncRouteTest(JSONTestCase):
         self, ping_mock, keys_mock
     ):
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "fail")
         self.assertEqual(
@@ -617,7 +617,7 @@ class AsyncRouteTest(JSONTestCase):
         self, ping_mock, keys_mock
     ):
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "pass")
         self.assertEqual(
@@ -636,7 +636,7 @@ class AsyncRouteTest(JSONTestCase):
     @patch.object(redis.Redis, "keys", return_value=[])
     def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
         status, details = redis_health_details(
-            redis_url="test_url", namespace="test_namespace"
+            redis_url="redis://test_url", namespace="test_namespace"
         )
         self.assertEqual(status, "fail")
         self.assertEqual(
