@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.3.0 (2019-02-22) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pycommon-test 5.1.0, oauth2helper 1.5.0, redis 3.2.0).
+
 ## Version 13.2.3 (2019-02-05) ##
 
 ### Bug fixes ###
