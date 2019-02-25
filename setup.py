@@ -3,16 +3,16 @@ from setuptools import setup, find_packages
 extra_requirements = {
     "testing": [
         # Used to provide testing help
-        "pycommon-test==5.0.1"
+        "pycommon-test==5.1.0"
     ],
     # Used to manage authentication
-    "authentication": ["oauth2helper==1.4.0"],
+    "authentication": ["oauth2helper==1.5.0"],
     # Used to connect to a Microsoft Windows computer
     "windows": ["pysmb==1.1.27"],
     # Async task execution using celery
     "celery": [
         # Used to store results
-        "redis==3.0.1",
+        "redis==3.2.0",
         # Used to process requests asynchronously
         "celery[redis,msgpack]==4.2.1",
     ],
