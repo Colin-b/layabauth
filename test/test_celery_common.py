@@ -612,7 +612,7 @@ class AsyncRouteTest(JSONTestCase):
         status_url = self.assert_202_regex(response, ".*")
         status_reply = self.client.get(status_url)
         result_url = self.assert_303_regex(status_reply, ".*")
-        self.assert500(self.client.get(result_url))
+        self.assert_500(self.client.get(result_url))
 
     def test_async_call_without_serialization(self):
         response = self.client.get("/foo/csv")
