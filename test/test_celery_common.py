@@ -25,6 +25,7 @@ class AsyncRouteTest(JSONTestCase):
         app = Flask(__name__)
         app.config["TESTING"] = True
         app.config["DEBUG"] = True
+
         self.api = Api(app)
         config = {
             "celery": {
@@ -84,6 +85,17 @@ class AsyncRouteTest(JSONTestCase):
                 @celery_application.task(queue=celery_application.namespace)
                 def fetch_the_answer():
                     return 3
+
+                celery_task = fetch_the_answer.apply_async()
+                return how_to_get_async_status(celery_task)
+
+        @ns.async_route("/exception", to_response=modify_response)
+        class TestEndpointException(Resource):
+            @ns.doc(**ns.how_to_get_async_status_doc)
+            def get(self):
+                @celery_application.task(queue=celery_application.namespace)
+                def fetch_the_answer():
+                    raise Exception("Celery task exception")
 
                 celery_task = fetch_the_answer.apply_async()
                 return how_to_get_async_status(celery_task)
@@ -366,6 +378,81 @@ class AsyncRouteTest(JSONTestCase):
                             "tags": ["Test space"],
                         },
                     },
+                    "/foo/exception": {
+                        "get": {
+                            "responses": {
+                                "202": {
+                                    "description": "Computation started.",
+                                    "schema": {
+                                        "$ref": "#/definitions/AsyncTaskStatusModel"
+                                    },
+                                    "headers": {
+                                        "location": {
+                                            "description": "URL to fetch computation status from.",
+                                            "type": "string",
+                                        }
+                                    },
+                                }
+                            },
+                            "operationId": "get_test_endpoint_exception",
+                            "tags": ["Test space"],
+                        }
+                    },
+                    "/foo/exception/result/{task_id}": {
+                        "parameters": [
+                            {
+                                "name": "task_id",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            }
+                        ],
+                        "get": {
+                            "responses": {"200": {"description": "Success"}},
+                            "summary": "Retrieve result for provided task",
+                            "operationId": "get_test_endpoint_exception_result",
+                            "tags": ["Test space"],
+                        },
+                    },
+                    "/foo/exception/status/{task_id}": {
+                        "parameters": [
+                            {
+                                "name": "task_id",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            }
+                        ],
+                        "get": {
+                            "responses": {
+                                "200": {
+                                    "description": "Task is still computing.",
+                                    "schema": {
+                                        "$ref": "#/definitions/CurrentAsyncState"
+                                    },
+                                },
+                                "303": {
+                                    "description": "Result is available.",
+                                    "headers": {
+                                        "location": {
+                                            "description": "URL to fetch results from.",
+                                            "type": "string",
+                                        }
+                                    },
+                                },
+                                "500": {
+                                    "description": "An unexpected error occurred.",
+                                    "schema": {
+                                        "type": "string",
+                                        "description": "Stack trace.",
+                                    },
+                                },
+                            },
+                            "summary": "Retrieve status for provided task",
+                            "operationId": "get_test_endpoint_exception_status",
+                            "tags": ["Test space"],
+                        },
+                    },
                     "/foo/modified_task_result": {
                         "get": {
                             "responses": {
@@ -448,14 +535,14 @@ class AsyncRouteTest(JSONTestCase):
                 "tags": [{"name": "Test space", "description": "Test"}],
                 "definitions": {
                     "AsyncTaskStatusModel": {
+                        "required": ["task_id", "url"],
                         "properties": {
-                            "task_id": {"description": "Task " "Id.", "type": "string"},
+                            "task_id": {"type": "string", "description": "Task Id."},
                             "url": {
-                                "description": "URL when task status can be checked.",
                                 "type": "string",
+                                "description": "URL when task status can be checked.",
                             },
                         },
-                        "required": ["task_id", "url"],
                         "type": "object",
                     },
                     "BarModel": {
@@ -519,6 +606,13 @@ class AsyncRouteTest(JSONTestCase):
         response = self.get("/foo/modified_task_result")
         self.assert_200(response)
         self.assert_text(response, "6\n")
+
+    def test_exception_raised_and_propagated(self):
+        response = self.client.get("/foo/exception")
+        status_url = self.assert_202_regex(response, ".*")
+        status_reply = self.client.get(status_url)
+        result_url = self.assert_303_regex(status_reply, ".*")
+        self.assert500(self.client.get(result_url))
 
     def test_async_call_without_serialization(self):
         response = self.client.get("/foo/csv")

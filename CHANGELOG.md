@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.3.1 (2019-01-26) ##
+
+### Bug fixes ###
+
+- Exception raised by the celery task are now propagated to the service when requesting the result. 
+
 ## Version 13.3.0 (2019-02-22) ##
 
 ### Enhancements ###
