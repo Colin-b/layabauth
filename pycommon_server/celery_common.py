@@ -1,14 +1,14 @@
-from typing import Tuple
 import datetime
 import json
 import logging
 import os
 import re
+from typing import Tuple
 from urllib.parse import urlparse
 
+import celery.result
 import flask
 from celery import Celery
-import celery.result
 from celery.task import control
 from flask_restplus import Resource, fields, Namespace
 from redis import Redis
@@ -136,10 +136,6 @@ def how_to_get_async_status(celery_task) -> flask.Response:
 def _get_celery_status(celery_task_id: str, celery_app: Celery) -> flask.Response:
     celery_task = celery.result.AsyncResult(celery_task_id, app=celery_app)
 
-    if celery_task.failed():
-        # TODO try to construct the original error
-        return flask.make_response(f"{celery_task.traceback}", 500)
-
     if celery_task.ready():
         status = flask.Response()
         status.status_code = 303
@@ -154,7 +150,7 @@ def _get_celery_status(celery_task_id: str, celery_app: Celery) -> flask.Respons
 
 def _get_celery_result(celery_app: Celery, celery_task_id: str):
     celery_task = celery.result.AsyncResult(celery_task_id, app=celery_app)
-    return celery_task.get()
+    return celery_task.get(propagate=True)
 
 
 def _conditional_marshalling(namespace: Namespace, response_model):
