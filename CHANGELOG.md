@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 13.3.2 (2019-03-08) ##
+
+### Bug fixes ###
+
+- Celery now handle path parameters (in result and status endpoint, as well as in custom response callable). 
+
 ## Version 13.3.1 (2019-01-26) ##
 
 ### Bug fixes ###
