@@ -58,7 +58,7 @@ class AsyncNamespaceProxy:
         :param serializer: In case the response needs serialization, a single model or a list of model.
         If a list is given, the output will be treated (serialized) and documented as a list
         :param to_response: In case the task result needs to be processed before returning it to client.
-        This is a function taking the task result as parameter and returning a result.
+        This is a function taking the task result as parameter (and path parameters if needed) and returning a result.
         Default to returning unmodified task result.
         :return: route decorator
         """
@@ -179,12 +179,12 @@ def _build_result_endpoints(
     class AsyncTaskResult(Resource):
         @_conditional_marshalling(namespace, response_model)
         @namespace.doc(f"get_{_snake_case(base_clazz)}_result")
-        def get(self, task_id: str):
+        def get(self, task_id: str, **kwargs):
             """
             Retrieve result for provided task.
             """
             result = _get_celery_result(celery_application, task_id)
-            return to_response(result) if to_response else result
+            return to_response(result, **kwargs) if to_response else result
 
     @namespace.route(f"{endpoint_root}/{_STATUS_ENDPOINT}/<string:task_id>")
     @namespace.doc(
@@ -215,7 +215,7 @@ def _build_result_endpoints(
     )
     class AsyncTaskStatus(Resource):
         @namespace.doc(f"get_{_snake_case(base_clazz)}_status")
-        def get(self, task_id: str):
+        def get(self, task_id: str, **kwargs):
             """
             Retrieve status for provided task.
             """

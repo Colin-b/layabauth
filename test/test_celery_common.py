@@ -111,6 +111,27 @@ class AsyncRouteTest(JSONTestCase):
                 celery_task = fetch_the_answer.apply_async()
                 return how_to_get_async_status(celery_task)
 
+        def to_path_response(result, str_value, int_value):
+            return make_response(
+                f"{str_value}: {result * int_value}",
+                200,
+                {"Content-type": "text/plain"},
+            )
+
+        @ns.async_route(
+            "/path_parameters/<string:str_value>/<int:int_value>",
+            to_response=to_path_response,
+        )
+        class TestEndpointWithPathParameter(Resource):
+            @ns.doc(**ns.how_to_get_async_status_doc)
+            def get(self, str_value, int_value):
+                @celery_application.task(queue=celery_application.namespace)
+                def fetch_the_answer():
+                    return 3
+
+                celery_task = fetch_the_answer.apply_async()
+                return how_to_get_async_status(celery_task)
+
         return app
 
     def test_async_ns_proxy_creates_2_extra_endpoints_per_declared_endpoint(self):
@@ -528,6 +549,119 @@ class AsyncRouteTest(JSONTestCase):
                             "tags": ["Test space"],
                         },
                     },
+                    "/foo/path_parameters/{str_value}/{int_value}": {
+                        "parameters": [
+                            {
+                                "name": "str_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            },
+                            {
+                                "name": "int_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "integer",
+                            },
+                        ],
+                        "get": {
+                            "responses": {
+                                "202": {
+                                    "description": "Computation started.",
+                                    "schema": {
+                                        "$ref": "#/definitions/AsyncTaskStatusModel"
+                                    },
+                                    "headers": {
+                                        "location": {
+                                            "description": "URL to fetch computation status from.",
+                                            "type": "string",
+                                        }
+                                    },
+                                }
+                            },
+                            "operationId": "get_test_endpoint_with_path_parameter",
+                            "tags": ["Test space"],
+                        },
+                    },
+                    "/foo/path_parameters/{str_value}/{int_value}/result/{task_id}": {
+                        "parameters": [
+                            {
+                                "name": "str_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            },
+                            {
+                                "name": "int_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "integer",
+                            },
+                            {
+                                "name": "task_id",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            },
+                        ],
+                        "get": {
+                            "responses": {"200": {"description": "Success"}},
+                            "summary": "Retrieve result for provided task",
+                            "operationId": "get_test_endpoint_with_path_parameter_result",
+                            "tags": ["Test space"],
+                        },
+                    },
+                    "/foo/path_parameters/{str_value}/{int_value}/status/{task_id}": {
+                        "parameters": [
+                            {
+                                "name": "str_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            },
+                            {
+                                "name": "int_value",
+                                "in": "path",
+                                "required": True,
+                                "type": "integer",
+                            },
+                            {
+                                "name": "task_id",
+                                "in": "path",
+                                "required": True,
+                                "type": "string",
+                            },
+                        ],
+                        "get": {
+                            "responses": {
+                                "200": {
+                                    "description": "Task is still computing.",
+                                    "schema": {
+                                        "$ref": "#/definitions/CurrentAsyncState"
+                                    },
+                                },
+                                "303": {
+                                    "description": "Result is available.",
+                                    "headers": {
+                                        "location": {
+                                            "description": "URL to fetch results from.",
+                                            "type": "string",
+                                        }
+                                    },
+                                },
+                                "500": {
+                                    "description": "An unexpected error occurred.",
+                                    "schema": {
+                                        "type": "string",
+                                        "description": "Stack trace.",
+                                    },
+                                },
+                            },
+                            "summary": "Retrieve status for provided task",
+                            "operationId": "get_test_endpoint_with_path_parameter_status",
+                            "tags": ["Test space"],
+                        },
+                    },
                 },
                 "info": {"title": "API", "version": "1.0"},
                 "produces": ["application/json"],
@@ -606,6 +740,11 @@ class AsyncRouteTest(JSONTestCase):
         response = self.get("/foo/modified_task_result")
         self.assert_200(response)
         self.assert_text(response, "6\n")
+
+    def test_async_call_with_path_parameters_and_modified_response(self):
+        response = self.get("/foo/path_parameters/test/2")
+        self.assert_200(response)
+        self.assert_text(response, "test: 6")
 
     def test_exception_raised_and_propagated(self):
         response = self.client.get("/foo/exception")
