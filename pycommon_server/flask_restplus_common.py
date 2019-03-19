@@ -4,16 +4,17 @@ import json
 import logging
 import os
 import sys
+import re
 import time
 import traceback
 from collections import OrderedDict
 from functools import wraps
 from http import HTTPStatus
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from urllib.parse import urlparse
 
 import flask
-from flask import request, has_request_context, make_response, Flask
+from flask import request, has_request_context, make_response, Flask, jsonify
 from flask_compress import Compress
 from flask_cors import CORS
 from flask_restplus import Resource, fields, Api, Namespace
@@ -42,7 +43,34 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     version = api.version.split(".", maxsplit=1)[0]
     release_id = api.version
 
-    def _retrieve_changelog():
+    def _markdown_to_dict(changelog_path: str) -> List[dict]:
+        changes = []
+        current_release = {}
+        current_category = None
+        release_pattern = re.compile("^## Version (.*) \((.*)\) ##$")
+        with open(changelog_path) as change_log:
+            for line in change_log:
+                line = line.strip(" \n")
+                release = release_pattern.fullmatch(line)
+                if release:
+                    current_release = {
+                        "version": release.group(1),
+                        "release_date": release.group(2),
+                    }
+                    changes.append(current_release)
+                elif "### Release notes ###" == line:
+                    current_category = current_release.setdefault("release_notes", [])
+                elif "### Enhancements ###" == line:
+                    current_category = current_release.setdefault("enhancements", [])
+                elif "### Bug fixes ###" == line:
+                    current_category = current_release.setdefault("bug_fixes", [])
+                elif "### Known issues ###" == line:
+                    current_category = current_release.setdefault("known_issues", [])
+                elif line and current_category is not None:
+                    current_category.append(line)
+        return changes
+
+    def _retrieve_changelog() -> Optional[List[dict]]:
         try:
             server_py_python_path = inspect.stack()[2][0]
             server_py_module = inspect.getmodule(server_py_python_path)
@@ -52,10 +80,9 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                 "..",
                 "CHANGELOG.md",
             )
-            with open(changelog_path) as change_log:
-                return change_log.read()
+            return _markdown_to_dict(changelog_path)
         except:
-            return "No changelog can be found. Please contact support."
+            return
 
     changelog = _retrieve_changelog()
 
@@ -182,13 +209,65 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
             return response
 
     @namespace.route("/changelog")
-    @namespace.doc(responses={200: ("Service changelog.", fields.String())})
+    @namespace.doc(
+        responses={
+            200: (
+                "Service changelog.",
+                [
+                    namespace.model(
+                        "ChangelogReleaseModel",
+                        {
+                            "version": fields.String(
+                                description="Release version formatted as major.minor.patch where major, minor and patch are numbers.",
+                                required=True,
+                                example="3.12.5",
+                            ),
+                            "release_date": fields.Date(
+                                description="Release date.",
+                                required=True,
+                                example="2019-12-31",
+                            ),
+                            "release_notes": fields.List(
+                                fields.String(
+                                    description="Release note.",
+                                    example="Foo will now reject bar.",
+                                )
+                            ),
+                            "enhancements": fields.List(
+                                fields.String(
+                                    description="Enhancement.",
+                                    example="Foo can now return bar.",
+                                )
+                            ),
+                            "bug_fixes": fields.List(
+                                fields.String(
+                                    description="Bug fix.",
+                                    example="Foo is now properly returning bar.",
+                                )
+                            ),
+                            "known_issues": fields.List(
+                                fields.String(
+                                    description="Known issue with this release.",
+                                    example="Foo does not return bar yet.",
+                                )
+                            ),
+                        },
+                    )
+                ],
+            ),
+            500: ("Unable to retrieve changelog.", fields.String()),
+        }
+    )
     class Changelog(Resource):
         def get(self):
             """
             Retrieve service changelog.
             """
-            return make_response(changelog, 200)
+            if changelog is not None:
+                return jsonify(changelog)
+            return make_response(
+                "No changelog can be found. Please contact support.", 500
+            )
 
     return namespace
 
