@@ -6,6 +6,12 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 14.0.0 (2019-03-19) ##
+
+### Release notes ###
+
+- /changelog endpoint now returns an interpreted Markdown changelog as JSON (so that it can be processed by clients).
+
 ## Version 13.3.2 (2019-03-08) ##
 
 ### Bug fixes ###

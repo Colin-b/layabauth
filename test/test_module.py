@@ -329,6 +329,28 @@ class HealthCheckWithPassDetails(JSONTestCase):
                 "swagger": "2.0",
                 "basePath": "/",
                 "paths": {
+                    "/changelog": {
+                        "get": {
+                            "responses": {
+                                "200": {
+                                    "description": "Service changelog.",
+                                    "schema": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/ChangelogReleaseModel"
+                                        },
+                                    },
+                                },
+                                "500": {
+                                    "description": "Unable to retrieve changelog.",
+                                    "schema": {"type": "string"},
+                                },
+                            },
+                            "summary": "Retrieve service changelog",
+                            "operationId": "get_changelog",
+                            "tags": ["Monitoring"],
+                        }
+                    },
                     "/health": {
                         "get": {
                             "responses": {
@@ -348,19 +370,6 @@ class HealthCheckWithPassDetails(JSONTestCase):
                             "summary": "Check service health",
                             "description": "This endpoint perform a quick server state check.",
                             "operationId": "get_health",
-                            "tags": ["Monitoring"],
-                        }
-                    },
-                    "/changelog": {
-                        "get": {
-                            "responses": {
-                                "200": {
-                                    "description": "Service changelog.",
-                                    "schema": {"type": "string"},
-                                }
-                            },
-                            "summary": "Retrieve service changelog",
-                            "operationId": "get_changelog",
                             "tags": ["Monitoring"],
                         }
                     },
@@ -450,6 +459,55 @@ class HealthCheckWithPassDetails(JSONTestCase):
                             "output": {
                                 "type": "string",
                                 "description": "Raw error output.",
+                            },
+                        },
+                        "type": "object",
+                    },
+                    "ChangelogReleaseModel": {
+                        "required": ["release_date", "version"],
+                        "properties": {
+                            "version": {
+                                "type": "string",
+                                "description": "Release version formatted as major.minor.patch where major, minor and patch are numbers.",
+                                "example": "3.12.5",
+                            },
+                            "release_date": {
+                                "type": "string",
+                                "format": "date",
+                                "description": "Release date.",
+                                "example": "2019-12-31",
+                            },
+                            "release_notes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Release note.",
+                                    "example": "Foo will now reject bar.",
+                                },
+                            },
+                            "enhancements": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Enhancement.",
+                                    "example": "Foo can now return bar.",
+                                },
+                            },
+                            "bug_fixes": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Bug fix.",
+                                    "example": "Foo is now properly returning bar.",
+                                },
+                            },
+                            "known_issues": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Known issue with this release.",
+                                    "example": "Foo does not return bar yet.",
+                                },
                             },
                         },
                         "type": "object",
