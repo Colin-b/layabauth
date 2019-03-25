@@ -3,8 +3,8 @@ import inspect
 import json
 import logging
 import os
-import sys
 import re
+import sys
 import time
 import traceback
 from collections import OrderedDict
@@ -392,10 +392,10 @@ class Authentication:
             return User(json_body)
         except ImportError:
             raise Unauthorized(
-                "Server is missing oauth2helper module to handle authentication."
+                description="Server is missing oauth2helper module to handle authentication."
             )
         except (InvalidTokenError or InvalidKeyError) as e:
-            raise Unauthorized(e.args[0])
+            raise Unauthorized(description=e.args[0])
 
 
 def requires_authentication(func):
