@@ -6,6 +6,16 @@ List all changes in various categories:
 * Bug fixes
 * Known issues
 
+## Version 15.0.0 (2019-03-27) ##
+
+### Release notes ###
+
+- celery_common.redis_health_details function now takes a single argument being the configuration as a dict.
+
+### Bug fixes ###
+
+- Properly retrieve the environment value used to identify celery production worker namespace.
+
 ## Version 14.0.0 (2019-03-19) ##
 
 ### Release notes ###

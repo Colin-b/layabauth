@@ -229,11 +229,18 @@ def _snake_case(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def redis_health_details(redis_url: str, namespace: str) -> Tuple[str, dict]:
+def _namespace(config: dict) -> str:
+    # Workers are started using CONTAINER_NAME environment variable as namespace.
+    namespace = os.environ.get("CONTAINER_NAME")
+    return namespace if namespace else config["celery"]["namespace"]
+
+
+def redis_health_details(config: dict) -> Tuple[str, dict]:
     try:
-        redis = Redis.from_url(redis_url)
+        redis = Redis.from_url(config["celery"]["backend"])
         redis.ping()
 
+        namespace = _namespace(config)
         keys = redis.keys(namespace)
 
         if not keys or not isinstance(keys, list):
@@ -290,10 +297,8 @@ def health_details(config: dict):
                 },
             )
 
-        service_name = os.environ.get("ENV_CONTAINER_NAME")
-        if not service_name:
-            service_name = f"celery@{config['celery']['namespace']}"
-        related_workers = [worker for worker in workers if service_name in worker]
+        worker_name = f"celery@{_namespace(config)}"
+        related_workers = [worker for worker in workers if worker_name in worker]
         if not related_workers:
             return (
                 "fail",
@@ -302,7 +307,7 @@ def health_details(config: dict):
                         "componentType": "component",
                         "status": "fail",
                         "time": datetime.datetime.utcnow().isoformat(),
-                        "output": f"No workers related to {service_name} could be found within {workers}",
+                        "output": f"No {worker_name} workers could be found within {workers}",
                     }
                 },
             )
