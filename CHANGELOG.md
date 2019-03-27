@@ -11,10 +11,14 @@ List all changes in various categories:
 ### Release notes ###
 
 - celery_common.redis_health_details function now takes a single argument being the configuration as a dict.
+- celery_common.health_details function does not take arguments anymore.
 
 ### Enhancements ###
 
 - Update dependencies to latest version (redis 3.2.1, celery 4.2.2, pre-commit 1.14.4, pycommon_test 5.2.0).
+- Celery health check now ping only relevant workers.
+- namespace is not read anymore from celery configuration.
+- Add more common arguments to celery application.
 
 ### Bug fixes ###
 

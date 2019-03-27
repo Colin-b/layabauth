@@ -86,7 +86,7 @@ def build_celery_application(config: dict, *apps, **kwargs) -> Celery:
     Build a celery application with given configuration and modules
     :param config: Dictionary with following structure: {
         'celery': {
-            'namespace': ..., (will default to CONTAINER_NAME environment variable)
+            'namespace': ..., (will default to CONTAINER_NAME environment variable or local)
             'broker': ...,
             'backend': ...,
         }
@@ -97,19 +97,25 @@ def build_celery_application(config: dict, *apps, **kwargs) -> Celery:
     As in changes={'task_serializer': 'pickle'}
     :return: Celery Application
     """
-    namespace = os.getenv("CONTAINER_NAME", config["celery"]["namespace"])
+    namespace = _namespace()
 
     logger.info(f"Starting Celery server on {namespace} namespace")
 
-    return Celery(
+    celery_app = Celery(
         "celery_server",
         broker=config["celery"]["broker"],
         # Store the state and return values of tasks
         backend=config["celery"]["backend"],
         namespace=namespace,
         include=apps,
+        worker_hijack_root_logger=False,
         **kwargs,
     )
+    celery_app.conf["CELERY_TASK_SERIALIZER"] = "msgpack"
+    celery_app.conf["CELERY_RESULT_SERIALIZER"] = "msgpack"
+    celery_app.conf["CELERY_ACCEPT_CONTENT"] = ["msgpack"]
+    celery_app.conf["CELERY_TASK_COMPRESSION"] = "gzip"
+    return celery_app
 
 
 def _base_url() -> str:
@@ -229,10 +235,9 @@ def _snake_case(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def _namespace(config: dict) -> str:
-    # Workers are started using CONTAINER_NAME environment variable as namespace.
-    namespace = os.environ.get("CONTAINER_NAME")
-    return namespace if namespace else config["celery"]["namespace"]
+def _namespace() -> str:
+    # Workers are started using CONTAINER_NAME environment variable as namespace or local.
+    return os.getenv("CONTAINER_NAME", "local")
 
 
 def redis_health_details(config: dict) -> Tuple[str, dict]:
@@ -240,7 +245,7 @@ def redis_health_details(config: dict) -> Tuple[str, dict]:
         redis = Redis.from_url(config["celery"]["backend"])
         redis.ping()
 
-        namespace = _namespace(config)
+        namespace = _namespace()
         keys = redis.keys(namespace)
 
         if not keys or not isinstance(keys, list):
@@ -281,9 +286,10 @@ def redis_health_details(config: dict) -> Tuple[str, dict]:
         )
 
 
-def health_details(config: dict):
+def health_details():
     try:
-        workers = control.ping()
+        worker_name = f"celery@{_namespace()}"
+        workers = control.ping(destination=[worker_name])
         if not workers:
             return (
                 "fail",
@@ -292,22 +298,7 @@ def health_details(config: dict):
                         "componentType": "component",
                         "status": "fail",
                         "time": datetime.datetime.utcnow().isoformat(),
-                        "output": f"No workers could be found: {workers}",
-                    }
-                },
-            )
-
-        worker_name = f"celery@{_namespace(config)}"
-        related_workers = [worker for worker in workers if worker_name in worker]
-        if not related_workers:
-            return (
-                "fail",
-                {
-                    "celery:ping": {
-                        "componentType": "component",
-                        "status": "fail",
-                        "time": datetime.datetime.utcnow().isoformat(),
-                        "output": f"No {worker_name} workers could be found within {workers}",
+                        "output": f"No {worker_name} workers could be found.",
                     }
                 },
             )
@@ -317,7 +308,7 @@ def health_details(config: dict):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "observedValue": related_workers,
+                    "observedValue": workers,
                     "status": "pass",
                     "time": datetime.datetime.utcnow().isoformat(),
                 }
