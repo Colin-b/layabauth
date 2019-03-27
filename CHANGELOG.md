@@ -12,6 +12,10 @@ List all changes in various categories:
 
 - celery_common.redis_health_details function now takes a single argument being the configuration as a dict.
 
+### Enhancements ###
+
+- Update dependencies to latest version (redis 3.2.1, celery 4.2.2, pre-commit 1.14.4, pycommon_test 5.2.0).
+
 ### Bug fixes ###
 
 - Properly retrieve the environment value used to identify celery production worker namespace.
