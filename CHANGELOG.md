@@ -16,6 +16,12 @@ List all changes in various categories:
 
 - Properly retrieve the environment value used to identify celery production worker namespace.
 
+## Version 14.1.0 (2019-03-21) ##
+
+### Enhancements ###
+
+- Update dependencies to latest version (pandas 0.24.2 PyYaml 5.1).
+
 ## Version 14.0.0 (2019-03-19) ##
 
 ### Release notes ###

@@ -19,7 +19,7 @@ extra_requirements = {
     # Used to connect to another REST API
     "rest": ["requests==2.21.0"],
     # Pandas
-    "pandas": ["pandas==0.23.4"],
+    "pandas": ["pandas==0.24.2"],
 }
 
 
@@ -42,7 +42,7 @@ setup(
         # Used to manage endpoints and swagger
         "flask-restplus==0.12.1",
         # Used to parse configurations
-        "PyYAML==3.13",
+        "PyYAML==5.1",
         # Cross Origin handling
         "flask_cors==3.0.7",
         # Used to gz compress http output
