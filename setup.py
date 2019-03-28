@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     "testing": [
         # Used to provide testing help
-        "pycommon-test==5.1.1"
+        "pycommon-test==5.2.0"
     ],
     # Used to manage authentication
     "authentication": ["oauth2helper==1.5.0"],
@@ -12,9 +12,9 @@ extra_requirements = {
     # Async task execution using celery
     "celery": [
         # Used to store results
-        "redis==3.2.0",
+        "redis==3.2.1",
         # Used to process requests asynchronously
-        "celery[redis,msgpack]==4.2.1",
+        "celery[redis,msgpack]==4.2.2",
     ],
     # Used to connect to another REST API
     "rest": ["requests==2.21.0"],
@@ -48,7 +48,7 @@ setup(
         # Used to gz compress http output
         "flask_compress==1.4.0",
         # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.14.2",
+        "pre-commit==1.14.4",
     ],
     extras_require=extra_requirements,
 )
