@@ -30,7 +30,7 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     """
     Create a monitoring namespace containing:
      * Health check endpoint implementing https://inadarei.github.io/rfc-healthcheck/
-     * Changelog endpoint
+     * Changelog endpoint parsing https://keepachangelog.com/en/1.0.0/
 
     :param api: The root Api
     :param health_details: Function returning a tuple with a string providing the status (pass, warn, fail)
@@ -47,7 +47,7 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
         changes = []
         current_release = {}
         current_category = None
-        release_pattern = re.compile("^## Version (.*) \((.*)\) ##$")
+        release_pattern = re.compile("^## \[(.*)\] - (.*)$")
         with open(changelog_path) as change_log:
             for line in change_log:
                 line = line.strip(" \n")
@@ -58,14 +58,18 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                         "release_date": release.group(2),
                     }
                     changes.append(current_release)
-                elif "### Release notes ###" == line:
-                    current_category = current_release.setdefault("release_notes", [])
-                elif "### Enhancements ###" == line:
-                    current_category = current_release.setdefault("enhancements", [])
-                elif "### Bug fixes ###" == line:
-                    current_category = current_release.setdefault("bug_fixes", [])
-                elif "### Known issues ###" == line:
-                    current_category = current_release.setdefault("known_issues", [])
+                elif "### Added" == line:
+                    current_category = current_release.setdefault("added", [])
+                elif "### Changed" == line:
+                    current_category = current_release.setdefault("changed", [])
+                elif "### Deprecated" == line:
+                    current_category = current_release.setdefault("deprecated", [])
+                elif "### Removed" == line:
+                    current_category = current_release.setdefault("removed", [])
+                elif "### Fixed" == line:
+                    current_category = current_release.setdefault("fixed", [])
+                elif "### Security" == line:
+                    current_category = current_release.setdefault("security", [])
                 elif line and current_category is not None:
                     current_category.append(line)
         return changes
@@ -218,7 +222,7 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                         "ChangelogReleaseModel",
                         {
                             "version": fields.String(
-                                description="Release version formatted as major.minor.patch where major, minor and patch are numbers.",
+                                description="Release version following semantic versioning.",
                                 required=True,
                                 example="3.12.5",
                             ),
@@ -227,29 +231,27 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
                                 required=True,
                                 example="2019-12-31",
                             ),
-                            "release_notes": fields.List(
+                            "added": fields.List(
+                                fields.String(description="New features.")
+                            ),
+                            "changed": fields.List(
                                 fields.String(
-                                    description="Release note.",
-                                    example="Foo will now reject bar.",
+                                    description="Changes in existing functionaliy."
                                 )
                             ),
-                            "enhancements": fields.List(
+                            "deprecated": fields.List(
                                 fields.String(
-                                    description="Enhancement.",
-                                    example="Foo can now return bar.",
+                                    description="Soon-to-be removed features."
                                 )
                             ),
-                            "bug_fixes": fields.List(
-                                fields.String(
-                                    description="Bug fix.",
-                                    example="Foo is now properly returning bar.",
-                                )
+                            "removed": fields.List(
+                                fields.String(description="Removed features.")
                             ),
-                            "known_issues": fields.List(
-                                fields.String(
-                                    description="Known issue with this release.",
-                                    example="Foo does not return bar yet.",
-                                )
+                            "fixed": fields.List(
+                                fields.String(description="Any bug fixes.")
+                            ),
+                            "security": fields.List(
+                                fields.String(description="Vulnerabilities.")
                             ),
                         },
                     )
