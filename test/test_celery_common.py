@@ -765,6 +765,7 @@ class AsyncRouteTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=["local"])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_redis_health_details_ok(self, ping_mock, keys_mock):
         status, details = redis_health_details(
             {"celery": {"backend": "redis://test_url"}}
@@ -775,7 +776,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": "Namespace local_localhost can be found.",
+                    "observedValue": "Namespace local_my_host can be found.",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -824,6 +825,7 @@ class AsyncRouteTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=b"Those are bytes")
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_redis_health_details_cannot_retrieve_keys_as_list(
         self, ping_mock, keys_mock
     ):
@@ -838,7 +840,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local_localhost cannot be found in b'Those "
+                    "output": "Namespace local_my_host cannot be found in b'Those "
                     "are bytes'",
                 }
             },
@@ -846,6 +848,7 @@ class AsyncRouteTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=[b"local"])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_redis_health_details_retrieve_keys_as_bytes_list(
         self, ping_mock, keys_mock
     ):
@@ -860,13 +863,14 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace local_localhost can be found.",
+                    "observedValue": "Namespace local_my_host can be found.",
                 }
             },
         )
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=[])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
         status, details = redis_health_details(
             {"celery": {"backend": "redis://test_url"}}
@@ -879,11 +883,12 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local_localhost cannot be found in []",
+                    "output": "Namespace local_my_host cannot be found in []",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_health_details_with_workers(self):
         from celery.task import control
 
@@ -897,13 +902,14 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "observedValue": [{"celery@local_localhost": {"pong": "ok"}}],
+                    "observedValue": [{"celery@local_my_host": {"pong": "ok"}}],
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_health_details_without_workers(self):
         from celery.task import control
 
@@ -915,13 +921,14 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "No celery@local_localhost workers could be found.",
+                    "output": "No celery@local_my_host workers could be found.",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
     def test_health_details_ping_exception(self):
         from celery.task import control
 
@@ -936,7 +943,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "['celery@local_localhost'] ping failure",
+                    "output": "['celery@local_my_host'] ping failure",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -948,10 +955,8 @@ class RedisAndCeleryHealthTest(JSONTestCase):
     def setUp(self):
         self._log_start()
         mock_now()
-        os.environ["CONTAINER_NAME"] = "/v1.2.3"
 
     def tearDown(self):
-        del os.environ["CONTAINER_NAME"]
         revert_now()
         self._log_end()
 
@@ -1069,6 +1074,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=["kombu@/v1.2.3"])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_redis_health_details_ok(self, ping_mock, keys_mock):
         status, details = redis_health_details(
             {"celery": {"backend": "redis://test_url"}}
@@ -1079,7 +1085,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": "Namespace /v1.2.3_localhost can be found.",
+                    "observedValue": "Namespace /v1.2.3_my_host can be found.",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -1128,6 +1134,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=b"Those are bytes")
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_redis_health_details_cannot_retrieve_keys_as_list(
         self, ping_mock, keys_mock
     ):
@@ -1142,7 +1149,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3_localhost cannot be found in b'Those "
+                    "output": "Namespace /v1.2.3_my_host cannot be found in b'Those "
                     "are bytes'",
                 }
             },
@@ -1150,6 +1157,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=[b"kombu@/v1.2.3"])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_redis_health_details_retrieve_keys_as_bytes_list(
         self, ping_mock, keys_mock
     ):
@@ -1164,13 +1172,14 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace /v1.2.3_localhost can be found.",
+                    "observedValue": "Namespace /v1.2.3_my_host can be found.",
                 }
             },
         )
 
     @patch.object(redis.Redis, "ping", return_value=1)
     @patch.object(redis.Redis, "keys", return_value=[])
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
         status, details = redis_health_details(
             {"celery": {"backend": "redis://test_url"}}
@@ -1183,11 +1192,12 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3_localhost cannot be found in []",
+                    "output": "Namespace /v1.2.3_my_host cannot be found in []",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_health_details_with_workers(self):
         from celery.task import control
 
@@ -1201,13 +1211,14 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "observedValue": [{"celery@/v1.2.3_localhost": {"pong": "ok"}}],
+                    "observedValue": [{"celery@/v1.2.3_my_host": {"pong": "ok"}}],
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_health_details_without_workers(self):
         from celery.task import control
 
@@ -1219,13 +1230,14 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "No celery@/v1.2.3_localhost workers could be found.",
+                    "output": "No celery@/v1.2.3_my_host workers could be found.",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
             },
         )
 
+    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
     def test_health_details_ping_exception(self):
         from celery.task import control
 
@@ -1240,7 +1252,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "['celery@/v1.2.3_localhost'] ping failure",
+                    "output": "['celery@/v1.2.3_my_host'] ping failure",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
