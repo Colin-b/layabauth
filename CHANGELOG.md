@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [15.2.0] - 2019-04-01
+### Changed
+- Update celery to version 4.3.0.
+- Update pre-commit to version 1.15.0.
+
 ## [15.1.0] - 2019-04-01
 ### Changed
 - Follow keep a changelog format.

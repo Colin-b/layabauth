@@ -775,7 +775,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": "Namespace local can be found.",
+                    "observedValue": "Namespace local_localhost can be found.",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -838,7 +838,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local cannot be found in b'Those "
+                    "output": "Namespace local_localhost cannot be found in b'Those "
                     "are bytes'",
                 }
             },
@@ -860,7 +860,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace local can be found.",
+                    "observedValue": "Namespace local_localhost can be found.",
                 }
             },
         )
@@ -879,7 +879,7 @@ class AsyncRouteTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local cannot be found in []",
+                    "output": "Namespace local_localhost cannot be found in []",
                 }
             },
         )
@@ -897,7 +897,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "observedValue": [{"celery@local": {"pong": "ok"}}],
+                    "observedValue": [{"celery@local_localhost": {"pong": "ok"}}],
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -915,7 +915,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "No celery@local workers could be found.",
+                    "output": "No celery@local_localhost workers could be found.",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -936,7 +936,7 @@ class AsyncRouteTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "['celery@local'] ping failure",
+                    "output": "['celery@local_localhost'] ping failure",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -1079,7 +1079,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": "Namespace /v1.2.3 can be found.",
+                    "observedValue": "Namespace /v1.2.3_localhost can be found.",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -1142,7 +1142,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3 cannot be found in b'Those "
+                    "output": "Namespace /v1.2.3_localhost cannot be found in b'Those "
                     "are bytes'",
                 }
             },
@@ -1164,7 +1164,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace /v1.2.3 can be found.",
+                    "observedValue": "Namespace /v1.2.3_localhost can be found.",
                 }
             },
         )
@@ -1183,7 +1183,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
                     "componentType": "component",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3 cannot be found in []",
+                    "output": "Namespace /v1.2.3_localhost cannot be found in []",
                 }
             },
         )
@@ -1201,7 +1201,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "observedValue": [{"celery@/v1.2.3": {"pong": "ok"}}],
+                    "observedValue": [{"celery@/v1.2.3_localhost": {"pong": "ok"}}],
                     "status": "pass",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -1219,7 +1219,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "No celery@/v1.2.3 workers could be found.",
+                    "output": "No celery@/v1.2.3_localhost workers could be found.",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
@@ -1240,7 +1240,7 @@ class RedisAndCeleryHealthTest(JSONTestCase):
             {
                 "celery:ping": {
                     "componentType": "component",
-                    "output": "['celery@/v1.2.3'] ping failure",
+                    "output": "['celery@/v1.2.3_localhost'] ping failure",
                     "status": "fail",
                     "time": "2018-10-11T15:05:05.663979",
                 }
