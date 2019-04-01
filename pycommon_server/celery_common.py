@@ -80,13 +80,12 @@ class AsyncNamespaceProxy:
         return wrapper
 
 
-def build_celery_application(config: dict, *apps, **kwargs) -> Celery:
+def build_celery_application(config: dict, *apps: str, **kwargs) -> Celery:
     """
     This function should be called within a python module called 'celery_server.py'
     Build a celery application with given configuration and modules
     :param config: Dictionary with following structure: {
         'celery': {
-            'namespace': ..., (will default to CONTAINER_NAME environment variable or local)
             'broker': ...,
             'backend': ...,
         }
@@ -98,24 +97,31 @@ def build_celery_application(config: dict, *apps, **kwargs) -> Celery:
     :return: Celery Application
     """
     namespace = _namespace()
+    queue = _queue()
 
     logger.info(f"Starting Celery server on {namespace} namespace")
 
-    celery_app = Celery(
+    return Celery(
         "celery_server",
         broker=config["celery"]["broker"],
         # Store the state and return values of tasks
         backend=config["celery"]["backend"],
         namespace=namespace,
         include=apps,
-        worker_hijack_root_logger=False,
+        changes={
+            "worker_hijack_root_logger": False,
+            # Use pickle instead of msgpack for now as there is a bug in Celery 4.3.0 with redis
+            "task_serializer": "pickle",
+            "result_serializer": "pickle",
+            "accept_content": ["pickle"],
+            "task_compression": "gzip",
+            "task_default_queue": queue,
+            "task_default_exchange": queue,
+            "task_default_routing_key": queue,
+            **kwargs.pop("changes", {}),
+        },
         **kwargs,
     )
-    celery_app.conf["CELERY_TASK_SERIALIZER"] = "msgpack"
-    celery_app.conf["CELERY_RESULT_SERIALIZER"] = "msgpack"
-    celery_app.conf["CELERY_ACCEPT_CONTENT"] = ["msgpack"]
-    celery_app.conf["CELERY_TASK_COMPRESSION"] = "gzip"
-    return celery_app
 
 
 def _base_url() -> str:
@@ -236,7 +242,19 @@ def _snake_case(name: str) -> str:
 
 
 def _namespace() -> str:
-    # Workers are started using CONTAINER_NAME environment variable as namespace or local.
+    """
+    Workers are started using CONTAINER_NAME environment variable as namespace or local.
+    Followed by a unique identifier per machine (HOSTNAME environment variable or localhost)
+    """
+    return (
+        f"{os.getenv('CONTAINER_NAME', 'local')}_{os.getenv('HOSTNAME', 'localhost')}"
+    )
+
+
+def _queue():
+    """
+    Workers are started using CONTAINER_NAME environment variable as queue or local.
+    """
     return os.getenv("CONTAINER_NAME", "local")
 
 

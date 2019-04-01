@@ -11,10 +11,8 @@ extra_requirements = {
     "windows": ["pysmb==1.1.27"],
     # Async task execution using celery
     "celery": [
-        # Used to store results
-        "redis==3.2.1",
         # Used to process requests asynchronously
-        "celery[redis,msgpack]==4.2.2",
+        "celery[redis,msgpack]==4.3.0"
     ],
     # Used to connect to another REST API
     "rest": ["requests==2.21.0"],
@@ -48,7 +46,7 @@ setup(
         # Used to gz compress http output
         "flask_compress==1.4.0",
         # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.14.4",
+        "pre-commit==1.15.0",
     ],
     extras_require=extra_requirements,
 )
