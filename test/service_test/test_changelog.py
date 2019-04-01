@@ -74,62 +74,57 @@ class MonitoringWithChangelogWithVersionsAndAllCategoriesTest(JSONTestCase):
 
         with open(self.changelog_file_path, "wt") as file:
             file.write(
-                """# Test Changelog #
+                """# Changelog
+All notable changes to this project will be documented in this file.
 
-List all changes in various categories:
-* Release notes: Contains all worth noting changes (breaking changes mainly)
-* Enhancements
-* Bug fixes
-* Known issues
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 2.0.0 (next) ##
-
-### Release notes ###
-
+## [Unreleased]
+### Changed
 - Release note 1.
 - Release note 2.
 
-### Enhancements ###
-
+### Added
 - Enhancement 1
     - sub enhancement 1
     - sub enhancement 2
 - Enhancement 2
 
-### Bug fixes ###
-
+### Fixed
 - Bug fix 1
     - sub bug 1
     - sub bug 2
 - Bug fix 2
 
-### Known issues ###
-
+### Security
 - Known issue 1
 - Known issue 2
 
-## Version 1.1.0 (2018-05-31) ##
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
 
-### Enhancements ###
+### Removed
+- Deprecated feature 2
+- Future removal 1
 
+## [1.1.0] - 2018-05-31
+### Changed
 - Enhancement 1 (1.1.0)
     - sub enhancement 1
     - sub enhancement 2
 - Enhancement 2 (1.1.0)
 
-## Version 1.0.1 (2018-05-31) ##
-
-### Bug fixes ###
-
+## [1.0.1] - 2018-05-31
+### Fixed
 - Bug fix 1 (1.0.1)
     - sub bug 1
     - sub bug 2
 - Bug fix 2 (1.0.1)
 
-## Version 1.0.0 (2017-04-10) ##
-
-### Known issues ###
-
+## [1.0.0] - 2017-04-10
+### Deprecated
 - Known issue 1 (1.0.0)
 - Known issue 2 (1.0.0)
 """
@@ -150,25 +145,7 @@ List all changes in various categories:
             response,
             [
                 {
-                    "bug_fixes": [
-                        "- Bug fix 1",
-                        "- sub bug 1",
-                        "- sub bug 2",
-                        "- Bug fix 2",
-                    ],
-                    "enhancements": [
-                        "- Enhancement 1",
-                        "- sub enhancement 1",
-                        "- sub enhancement 2",
-                        "- Enhancement 2",
-                    ],
-                    "known_issues": ["- Known issue 1", "- Known issue 2"],
-                    "release_date": "next",
-                    "release_notes": ["- Release note 1.", "- Release note 2."],
-                    "version": "2.0.0",
-                },
-                {
-                    "enhancements": [
+                    "changed": [
                         "- Enhancement 1 (1.1.0)",
                         "- sub enhancement 1",
                         "- sub enhancement 2",
@@ -178,7 +155,7 @@ List all changes in various categories:
                     "version": "1.1.0",
                 },
                 {
-                    "bug_fixes": [
+                    "fixed": [
                         "- Bug fix 1 (1.0.1)",
                         "- sub bug 1",
                         "- sub bug 2",
@@ -188,7 +165,7 @@ List all changes in various categories:
                     "version": "1.0.1",
                 },
                 {
-                    "known_issues": [
+                    "deprecated": [
                         "- Known issue 1 (1.0.0)",
                         "- Known issue 2 (1.0.0)",
                     ],
@@ -199,7 +176,7 @@ List all changes in various categories:
         )
 
 
-class MonitoringWithChangelogWithVersionsAndNoReleaseNotesTest(JSONTestCase):
+class MonitoringWithChangelogWithVersionsAndNoAddedTest(JSONTestCase):
     def create_app(self):
         self.changelog_file_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
@@ -214,57 +191,51 @@ class MonitoringWithChangelogWithVersionsAndNoReleaseNotesTest(JSONTestCase):
 
         with open(self.changelog_file_path, "wt") as file:
             file.write(
-                """# Test Changelog #
+                """# Changelog
+All notable changes to this project will be documented in this file.
 
-List all changes in various categories:
-* Release notes: Contains all worth noting changes (breaking changes mainly)
-* Enhancements
-* Bug fixes
-* Known issues
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 2.0.0 (next) ##
+## [Unreleased]
+### Changed
+- Release note 1.
+- Release note 2.
 
-### Enhancements ###
-
-- Enhancement 1
-    - sub enhancement 1
-    - sub enhancement 2
-- Enhancement 2
-
-### Bug fixes ###
-
+### Fixed
 - Bug fix 1
     - sub bug 1
     - sub bug 2
 - Bug fix 2
 
-### Known issues ###
-
+### Security
 - Known issue 1
 - Known issue 2
 
-## Version 1.1.0 (2018-05-31) ##
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
 
-### Enhancements ###
+### Removed
+- Deprecated feature 2
+- Future removal 1
 
+## [1.1.0] - 2018-05-31
+### Changed
 - Enhancement 1 (1.1.0)
     - sub enhancement 1
     - sub enhancement 2
 - Enhancement 2 (1.1.0)
 
-## Version 1.0.1 (2018-05-31) ##
-
-### Bug fixes ###
-
+## [1.0.1] - 2018-05-31
+### Fixed
 - Bug fix 1 (1.0.1)
     - sub bug 1
     - sub bug 2
 - Bug fix 2 (1.0.1)
 
-## Version 1.0.0 (2017-04-10) ##
-
-### Known issues ###
-
+## [1.0.0] - 2017-04-10
+### Deprecated
 - Known issue 1 (1.0.0)
 - Known issue 2 (1.0.0)
 """
@@ -278,31 +249,14 @@ List all changes in various categories:
             os.remove(self.changelog_file_path)
         super().tearDown()
 
-    def test_changelog_with_versions_and_no_release_notes(self):
+    def test_changelog_with_versions_and_no_added(self):
         response = self.client.get("/changelog")
         self.assert_200(response)
         self.assert_json(
             response,
             [
                 {
-                    "bug_fixes": [
-                        "- Bug fix 1",
-                        "- sub bug 1",
-                        "- sub bug 2",
-                        "- Bug fix 2",
-                    ],
-                    "enhancements": [
-                        "- Enhancement 1",
-                        "- sub enhancement 1",
-                        "- sub enhancement 2",
-                        "- Enhancement 2",
-                    ],
-                    "known_issues": ["- Known issue 1", "- Known issue 2"],
-                    "release_date": "next",
-                    "version": "2.0.0",
-                },
-                {
-                    "enhancements": [
+                    "changed": [
                         "- Enhancement 1 (1.1.0)",
                         "- sub enhancement 1",
                         "- sub enhancement 2",
@@ -312,7 +266,7 @@ List all changes in various categories:
                     "version": "1.1.0",
                 },
                 {
-                    "bug_fixes": [
+                    "fixed": [
                         "- Bug fix 1 (1.0.1)",
                         "- sub bug 1",
                         "- sub bug 2",
@@ -322,7 +276,7 @@ List all changes in various categories:
                     "version": "1.0.1",
                 },
                 {
-                    "known_issues": [
+                    "deprecated": [
                         "- Known issue 1 (1.0.0)",
                         "- Known issue 2 (1.0.0)",
                     ],
@@ -333,7 +287,7 @@ List all changes in various categories:
         )
 
 
-class MonitoringWithChangelogWithVersionsAndNoEnhancementsTest(JSONTestCase):
+class MonitoringWithChangelogWithVersionsAndNoChangedTest(JSONTestCase):
     def create_app(self):
         self.changelog_file_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
@@ -348,48 +302,48 @@ class MonitoringWithChangelogWithVersionsAndNoEnhancementsTest(JSONTestCase):
 
         with open(self.changelog_file_path, "wt") as file:
             file.write(
-                """# Test Changelog #
+                """# Changelog
+All notable changes to this project will be documented in this file.
 
-List all changes in various categories:
-* Release notes: Contains all worth noting changes (breaking changes mainly)
-* Enhancements
-* Bug fixes
-* Known issues
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 2.0.0 (next) ##
+## [Unreleased]
+### Added
+- Enhancement 1
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2
 
-### Release notes ###
-
-- Release note 1.
-- Release note 2.
-
-### Bug fixes ###
-
+### Fixed
 - Bug fix 1
     - sub bug 1
     - sub bug 2
 - Bug fix 2
 
-### Known issues ###
-
+### Security
 - Known issue 1
 - Known issue 2
 
-## Version 1.1.0 (2018-05-31) ##
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
 
-## Version 1.0.1 (2018-05-31) ##
+### Removed
+- Deprecated feature 2
+- Future removal 1
 
-### Bug fixes ###
+## [1.1.0] - 2018-05-31
 
+## [1.0.1] - 2018-05-31
+### Fixed
 - Bug fix 1 (1.0.1)
     - sub bug 1
     - sub bug 2
 - Bug fix 2 (1.0.1)
 
-## Version 1.0.0 (2017-04-10) ##
-
-### Known issues ###
-
+## [1.0.0] - 2017-04-10
+### Deprecated
 - Known issue 1 (1.0.0)
 - Known issue 2 (1.0.0)
 """
@@ -403,27 +357,15 @@ List all changes in various categories:
             os.remove(self.changelog_file_path)
         super().tearDown()
 
-    def test_changelog_with_versions_and_no_enhancements(self):
+    def test_changelog_with_versions_and_no_changed(self):
         response = self.client.get("/changelog")
         self.assert_200(response)
         self.assert_json(
             response,
             [
-                {
-                    "bug_fixes": [
-                        "- Bug fix 1",
-                        "- sub bug 1",
-                        "- sub bug 2",
-                        "- Bug fix 2",
-                    ],
-                    "known_issues": ["- Known issue 1", "- Known issue 2"],
-                    "release_date": "next",
-                    "release_notes": ["- Release note 1.", "- Release note 2."],
-                    "version": "2.0.0",
-                },
                 {"release_date": "2018-05-31", "version": "1.1.0"},
                 {
-                    "bug_fixes": [
+                    "fixed": [
                         "- Bug fix 1 (1.0.1)",
                         "- sub bug 1",
                         "- sub bug 2",
@@ -433,7 +375,7 @@ List all changes in various categories:
                     "version": "1.0.1",
                 },
                 {
-                    "known_issues": [
+                    "deprecated": [
                         "- Known issue 1 (1.0.0)",
                         "- Known issue 2 (1.0.0)",
                     ],
@@ -444,7 +386,7 @@ List all changes in various categories:
         )
 
 
-class MonitoringWithChangelogWithVersionsAndNoBugFixesTest(JSONTestCase):
+class MonitoringWithChangelogWithVersionsAndNoDeprecatedTest(JSONTestCase):
     def create_app(self):
         self.changelog_file_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
@@ -459,165 +401,52 @@ class MonitoringWithChangelogWithVersionsAndNoBugFixesTest(JSONTestCase):
 
         with open(self.changelog_file_path, "wt") as file:
             file.write(
-                """# Test Changelog #
+                """# Changelog
+All notable changes to this project will be documented in this file.
 
-List all changes in various categories:
-* Release notes: Contains all worth noting changes (breaking changes mainly)
-* Enhancements
-* Bug fixes
-* Known issues
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 2.0.0 (next) ##
-
-### Release notes ###
-
+## [Unreleased]
+### Changed
 - Release note 1.
 - Release note 2.
 
-### Enhancements ###
-
+### Added
 - Enhancement 1
     - sub enhancement 1
     - sub enhancement 2
 - Enhancement 2
 
-### Known issues ###
-
-- Known issue 1
-- Known issue 2
-
-## Version 1.1.0 (2018-05-31) ##
-
-### Enhancements ###
-
-- Enhancement 1 (1.1.0)
-    - sub enhancement 1
-    - sub enhancement 2
-- Enhancement 2 (1.1.0)
-
-## Version 1.0.1 (2018-05-31) ##
-
-## Version 1.0.0 (2017-04-10) ##
-
-### Known issues ###
-
-- Known issue 1 (1.0.0)
-- Known issue 2 (1.0.0)
-"""
-            )
-
-        flask_restplus_common.add_monitoring_namespace(api, pass_details)
-        return app
-
-    def tearDown(self):
-        if os.path.exists(self.changelog_file_path):
-            os.remove(self.changelog_file_path)
-        super().tearDown()
-
-    def test_changelog_with_versions_and_no_bug_fixes(self):
-        response = self.client.get("/changelog")
-        self.assert_200(response)
-        self.assert_json(
-            response,
-            [
-                {
-                    "enhancements": [
-                        "- Enhancement 1",
-                        "- sub enhancement 1",
-                        "- sub enhancement 2",
-                        "- Enhancement 2",
-                    ],
-                    "known_issues": ["- Known issue 1", "- Known issue 2"],
-                    "release_date": "next",
-                    "release_notes": ["- Release note 1.", "- Release note 2."],
-                    "version": "2.0.0",
-                },
-                {
-                    "enhancements": [
-                        "- Enhancement 1 (1.1.0)",
-                        "- sub enhancement 1",
-                        "- sub enhancement 2",
-                        "- Enhancement 2 (1.1.0)",
-                    ],
-                    "release_date": "2018-05-31",
-                    "version": "1.1.0",
-                },
-                {"release_date": "2018-05-31", "version": "1.0.1"},
-                {
-                    "known_issues": [
-                        "- Known issue 1 (1.0.0)",
-                        "- Known issue 2 (1.0.0)",
-                    ],
-                    "release_date": "2017-04-10",
-                    "version": "1.0.0",
-                },
-            ],
-        )
-
-
-class MonitoringWithChangelogWithVersionsAndNoKnownIssuesTest(JSONTestCase):
-    def create_app(self):
-        self.changelog_file_path = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
-        )
-
-        app = Flask(__name__)
-        app.testing = True
-        api = Api(app, version="3.2.1")
-
-        def pass_details():
-            return "pass", {"toto2": {"status": "pass"}}
-
-        with open(self.changelog_file_path, "wt") as file:
-            file.write(
-                """# Test Changelog #
-
-List all changes in various categories:
-* Release notes: Contains all worth noting changes (breaking changes mainly)
-* Enhancements
-* Bug fixes
-* Known issues
-
-## Version 2.0.0 (next) ##
-
-### Release notes ###
-
-- Release note 1.
-- Release note 2.
-
-### Enhancements ###
-
-- Enhancement 1
-    - sub enhancement 1
-    - sub enhancement 2
-- Enhancement 2
-
-### Bug fixes ###
-
+### Fixed
 - Bug fix 1
     - sub bug 1
     - sub bug 2
 - Bug fix 2
 
-## Version 1.1.0 (2018-05-31) ##
+### Security
+- Known issue 1
+- Known issue 2
 
-### Enhancements ###
+### Removed
+- Deprecated feature 2
+- Future removal 1
 
+## [1.1.0] - 2018-05-31
+### Changed
 - Enhancement 1 (1.1.0)
     - sub enhancement 1
     - sub enhancement 2
 - Enhancement 2 (1.1.0)
 
-## Version 1.0.1 (2018-05-31) ##
-
-### Bug fixes ###
-
+## [1.0.1] - 2018-05-31
+### Fixed
 - Bug fix 1 (1.0.1)
     - sub bug 1
     - sub bug 2
 - Bug fix 2 (1.0.1)
 
-## Version 1.0.0 (2017-04-10) ##
+## [1.0.0] - 2017-04-10
 """
             )
 
@@ -629,31 +458,14 @@ List all changes in various categories:
             os.remove(self.changelog_file_path)
         super().tearDown()
 
-    def test_changelog_with_versions_and_no_known_issues(self):
+    def test_changelog_with_versions_and_no_deprecated(self):
         response = self.client.get("/changelog")
         self.assert_200(response)
         self.assert_json(
             response,
             [
                 {
-                    "bug_fixes": [
-                        "- Bug fix 1",
-                        "- sub bug 1",
-                        "- sub bug 2",
-                        "- Bug fix 2",
-                    ],
-                    "enhancements": [
-                        "- Enhancement 1",
-                        "- sub enhancement 1",
-                        "- sub enhancement 2",
-                        "- Enhancement 2",
-                    ],
-                    "release_date": "next",
-                    "release_notes": ["- Release note 1.", "- Release note 2."],
-                    "version": "2.0.0",
-                },
-                {
-                    "enhancements": [
+                    "changed": [
                         "- Enhancement 1 (1.1.0)",
                         "- sub enhancement 1",
                         "- sub enhancement 2",
@@ -663,7 +475,7 @@ List all changes in various categories:
                     "version": "1.1.0",
                 },
                 {
-                    "bug_fixes": [
+                    "fixed": [
                         "- Bug fix 1 (1.0.1)",
                         "- sub bug 1",
                         "- sub bug 2",
@@ -673,5 +485,352 @@ List all changes in various categories:
                     "version": "1.0.1",
                 },
                 {"release_date": "2017-04-10", "version": "1.0.0"},
+            ],
+        )
+
+
+class MonitoringWithChangelogWithVersionsAndNoRemovedTest(JSONTestCase):
+    def create_app(self):
+        self.changelog_file_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
+        )
+
+        app = Flask(__name__)
+        app.testing = True
+        api = Api(app, version="3.2.1")
+
+        def pass_details():
+            return "pass", {"toto2": {"status": "pass"}}
+
+        with open(self.changelog_file_path, "wt") as file:
+            file.write(
+                """# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+### Changed
+- Release note 1.
+- Release note 2.
+
+### Added
+- Enhancement 1
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2
+
+### Fixed
+- Bug fix 1
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2
+
+### Security
+- Known issue 1
+- Known issue 2
+
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
+
+## [1.1.0] - 2018-05-31
+### Changed
+- Enhancement 1 (1.1.0)
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2 (1.1.0)
+
+## [1.0.1] - 2018-05-31
+### Fixed
+- Bug fix 1 (1.0.1)
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2 (1.0.1)
+
+## [1.0.0] - 2017-04-10
+### Deprecated
+- Known issue 1 (1.0.0)
+- Known issue 2 (1.0.0)
+"""
+            )
+
+        flask_restplus_common.add_monitoring_namespace(api, pass_details)
+        return app
+
+    def tearDown(self):
+        if os.path.exists(self.changelog_file_path):
+            os.remove(self.changelog_file_path)
+        super().tearDown()
+
+    def test_changelog_with_versions_and_no_removed(self):
+        response = self.client.get("/changelog")
+        self.assert_200(response)
+        self.assert_json(
+            response,
+            [
+                {
+                    "changed": [
+                        "- Enhancement 1 (1.1.0)",
+                        "- sub enhancement 1",
+                        "- sub enhancement 2",
+                        "- Enhancement 2 (1.1.0)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.1.0",
+                },
+                {
+                    "fixed": [
+                        "- Bug fix 1 (1.0.1)",
+                        "- sub bug 1",
+                        "- sub bug 2",
+                        "- Bug fix 2 (1.0.1)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.0.1",
+                },
+                {
+                    "deprecated": [
+                        "- Known issue 1 (1.0.0)",
+                        "- Known issue 2 (1.0.0)",
+                    ],
+                    "release_date": "2017-04-10",
+                    "version": "1.0.0",
+                },
+            ],
+        )
+
+
+class MonitoringWithChangelogWithVersionsAndNoFixedTest(JSONTestCase):
+    def create_app(self):
+        self.changelog_file_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
+        )
+
+        app = Flask(__name__)
+        app.testing = True
+        api = Api(app, version="3.2.1")
+
+        def pass_details():
+            return "pass", {"toto2": {"status": "pass"}}
+
+        with open(self.changelog_file_path, "wt") as file:
+            file.write(
+                """# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+### Changed
+- Release note 1.
+- Release note 2.
+
+### Added
+- Enhancement 1
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2
+
+### Fixed
+- Bug fix 1
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2
+
+### Security
+- Known issue 1
+- Known issue 2
+
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
+
+### Removed
+- Deprecated feature 2
+- Future removal 1
+
+## [1.1.0] - 2018-05-31
+### Changed
+- Enhancement 1 (1.1.0)
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2 (1.1.0)
+
+## [1.0.1] - 2018-05-31
+### Fixed
+- Bug fix 1 (1.0.1)
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2 (1.0.1)
+
+## [1.0.0] - 2017-04-10
+### Deprecated
+- Known issue 1 (1.0.0)
+- Known issue 2 (1.0.0)
+"""
+            )
+
+        flask_restplus_common.add_monitoring_namespace(api, pass_details)
+        return app
+
+    def tearDown(self):
+        if os.path.exists(self.changelog_file_path):
+            os.remove(self.changelog_file_path)
+        super().tearDown()
+
+    def test_changelog_with_versions_and_no_fixed(self):
+        response = self.client.get("/changelog")
+        self.assert_200(response)
+        self.assert_json(
+            response,
+            [
+                {
+                    "changed": [
+                        "- Enhancement 1 (1.1.0)",
+                        "- sub enhancement 1",
+                        "- sub enhancement 2",
+                        "- Enhancement 2 (1.1.0)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.1.0",
+                },
+                {
+                    "fixed": [
+                        "- Bug fix 1 (1.0.1)",
+                        "- sub bug 1",
+                        "- sub bug 2",
+                        "- Bug fix 2 (1.0.1)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.0.1",
+                },
+                {
+                    "deprecated": [
+                        "- Known issue 1 (1.0.0)",
+                        "- Known issue 2 (1.0.0)",
+                    ],
+                    "release_date": "2017-04-10",
+                    "version": "1.0.0",
+                },
+            ],
+        )
+
+
+class MonitoringWithChangelogWithVersionsAndNoSecurityTest(JSONTestCase):
+    def create_app(self):
+        self.changelog_file_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), "..", "CHANGELOG.md"
+        )
+
+        app = Flask(__name__)
+        app.testing = True
+        api = Api(app, version="3.2.1")
+
+        def pass_details():
+            return "pass", {"toto2": {"status": "pass"}}
+
+        with open(self.changelog_file_path, "wt") as file:
+            file.write(
+                """# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+### Changed
+- Release note 1.
+- Release note 2.
+
+### Added
+- Enhancement 1
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2
+
+### Fixed
+- Bug fix 1
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2
+
+### Security
+- Known issue 1
+- Known issue 2
+
+### Deprecated
+- Deprecated feature 1
+- Future removal 2
+
+### Removed
+- Deprecated feature 2
+- Future removal 1
+
+## [1.1.0] - 2018-05-31
+### Changed
+- Enhancement 1 (1.1.0)
+    - sub enhancement 1
+    - sub enhancement 2
+- Enhancement 2 (1.1.0)
+
+## [1.0.1] - 2018-05-31
+### Fixed
+- Bug fix 1 (1.0.1)
+    - sub bug 1
+    - sub bug 2
+- Bug fix 2 (1.0.1)
+
+## [1.0.0] - 2017-04-10
+### Deprecated
+- Known issue 1 (1.0.0)
+- Known issue 2 (1.0.0)
+"""
+            )
+
+        flask_restplus_common.add_monitoring_namespace(api, pass_details)
+        return app
+
+    def tearDown(self):
+        if os.path.exists(self.changelog_file_path):
+            os.remove(self.changelog_file_path)
+        super().tearDown()
+
+    def test_changelog_with_versions_and_no_security(self):
+        response = self.client.get("/changelog")
+        self.assert_200(response)
+        self.assert_json(
+            response,
+            [
+                {
+                    "changed": [
+                        "- Enhancement 1 (1.1.0)",
+                        "- sub enhancement 1",
+                        "- sub enhancement 2",
+                        "- Enhancement 2 (1.1.0)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.1.0",
+                },
+                {
+                    "fixed": [
+                        "- Bug fix 1 (1.0.1)",
+                        "- sub bug 1",
+                        "- sub bug 2",
+                        "- Bug fix 2 (1.0.1)",
+                    ],
+                    "release_date": "2018-05-31",
+                    "version": "1.0.1",
+                },
+                {
+                    "deprecated": [
+                        "- Known issue 1 (1.0.0)",
+                        "- Known issue 2 (1.0.0)",
+                    ],
+                    "release_date": "2017-04-10",
+                    "version": "1.0.0",
+                },
             ],
         )

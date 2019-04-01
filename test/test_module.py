@@ -468,7 +468,7 @@ class HealthCheckWithPassDetails(JSONTestCase):
                         "properties": {
                             "version": {
                                 "type": "string",
-                                "description": "Release version formatted as major.minor.patch where major, minor and patch are numbers.",
+                                "description": "Release version following semantic versioning.",
                                 "example": "3.12.5",
                             },
                             "release_date": {
@@ -477,36 +477,46 @@ class HealthCheckWithPassDetails(JSONTestCase):
                                 "description": "Release date.",
                                 "example": "2019-12-31",
                             },
-                            "release_notes": {
+                            "added": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "description": "Release note.",
-                                    "example": "Foo will now reject bar.",
+                                    "description": "New features.",
                                 },
                             },
-                            "enhancements": {
+                            "changed": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "description": "Enhancement.",
-                                    "example": "Foo can now return bar.",
+                                    "description": "Changes in existing functionaliy.",
                                 },
                             },
-                            "bug_fixes": {
+                            "deprecated": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "description": "Bug fix.",
-                                    "example": "Foo is now properly returning bar.",
+                                    "description": "Soon-to-be removed features.",
                                 },
                             },
-                            "known_issues": {
+                            "removed": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "description": "Known issue with this release.",
-                                    "example": "Foo does not return bar yet.",
+                                    "description": "Removed features.",
+                                },
+                            },
+                            "fixed": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Any bug fixes.",
+                                },
+                            },
+                            "security": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Vulnerabilities.",
                                 },
                             },
                         },
