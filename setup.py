@@ -6,7 +6,7 @@ extra_requirements = {
         "pycommon-test==5.3.0"
     ],
     # Used to manage authentication
-    "authentication": ["oauth2helper==1.5.0"],
+    "authentication": ["oauth2helper==1.6.0"],
     # Used to connect to a Microsoft Windows computer
     "windows": ["pysmb==1.1.27"],
     # Async task execution using celery

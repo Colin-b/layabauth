@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version is now in a public file.
 - Update pre-commit to version 1.15.1
 - Update pycommon-test to version 5.3.0
+- Update oauth2helper to version 1.6.0
 
 ## [15.2.0] - 2019-04-01
 ### Changed
