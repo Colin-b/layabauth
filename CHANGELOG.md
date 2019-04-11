@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [16.0.0] - 2019-04-11
+### Changed
+- Version is now extracted from version.py instead of _version.py
+- Version is now in a public file.
+- Update pre-commit to version 1.15.1
+- Update pycommon-test to version 5.3.0
+- Update oauth2helper to version 1.6.0
+
 ## [15.2.0] - 2019-04-01
 ### Changed
 - Update celery to version 4.3.0.
@@ -345,7 +353,8 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...HEAD
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...HEAD
+[16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...v16.0.0
 [15.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.1.0...v15.2.0
 [15.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.0.0...v15.1.0
 [15.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v14.1.0...v15.0.0

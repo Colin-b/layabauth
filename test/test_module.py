@@ -1236,7 +1236,7 @@ class HealthTest(unittest.TestCase):
                 {
                     "test:health": {
                         "componentType": "http://test/health",
-                        "output": "Connection refused: GET http://test/health",
+                        "output": "Connection refused by Responses: GET http://test/health doesn't match Responses Mock",
                         "status": "fail",
                         "time": "2018-10-11T15:05:05.663979",
                     }
@@ -1253,7 +1253,7 @@ class HealthTest(unittest.TestCase):
                 {
                     "test:health": {
                         "componentType": "http://test/health",
-                        "output": "Connection refused: GET http://test/health",
+                        "output": "Connection refused by Responses: GET http://test/health doesn't match Responses Mock",
                         "status": "warn",
                         "time": "2018-10-11T15:05:05.663979",
                     }
@@ -1531,7 +1531,7 @@ class HealthTest(unittest.TestCase):
                 {
                     "test:health": {
                         "componentType": "http://test/status",
-                        "output": "Connection refused: GET http://test/status",
+                        "output": "Connection refused by Responses: GET http://test/status doesn't match Responses Mock",
                         "status": "fail",
                         "time": "2018-10-11T15:05:05.663979",
                     }
@@ -1548,7 +1548,7 @@ class HealthTest(unittest.TestCase):
                 {
                     "test:health": {
                         "componentType": "http://test/status",
-                        "output": "Connection refused: GET http://test/status",
+                        "output": "Connection refused by Responses: GET http://test/status doesn't match Responses Mock",
                         "status": "warn",
                         "time": "2018-10-11T15:05:05.663979",
                     }
