@@ -561,7 +561,7 @@ def create_api(
     if reverse_proxy:
         application.wsgi_app = _ReverseProxied(application.wsgi_app)
 
-    version = importlib.import_module(f"{service_package}._version").__version__
+    version = importlib.import_module(f"{service_package}.version").__version__
 
     return application, PycommonApi(application, version=version, **kwargs)
 

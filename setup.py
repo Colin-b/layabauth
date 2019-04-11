@@ -30,7 +30,7 @@ extra_requirements["testing"] += [
 ]
 
 
-from pycommon_server._version import __version__
+from pycommon_server.version import __version__
 
 setup(
     name="pycommon_server",
