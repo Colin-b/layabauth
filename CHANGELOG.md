@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Version is now extracted from version.py instead of _version.py
 - Version is now in a public file.
+- Update pre-commit to version 1.15.1
+- Update pycommon-test to version 5.3.0
 
 ## [15.2.0] - 2019-04-01
 ### Changed

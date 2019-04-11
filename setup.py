@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 extra_requirements = {
     "testing": [
         # Used to provide testing help
-        "pycommon-test==5.2.0"
+        "pycommon-test==5.3.0"
     ],
     # Used to manage authentication
     "authentication": ["oauth2helper==1.5.0"],
@@ -46,7 +46,7 @@ setup(
         # Used to gz compress http output
         "flask_compress==1.4.0",
         # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.15.0",
+        "pre-commit==1.15.1",
     ],
     extras_require=extra_requirements,
 )
