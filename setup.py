@@ -14,6 +14,11 @@ extra_requirements = {
         # Used to process requests asynchronously
         "celery[redis,msgpack]==4.3.0"
     ],
+    # Async task execution using huey
+    "huey": [
+        # Used to process requests asynchronously
+        "huey==2.0.1"
+    ],
     # Used to connect to another REST API
     "rest": ["requests==2.21.0"],
     # Pandas
