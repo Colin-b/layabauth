@@ -1,20 +1,13 @@
-from unittest.mock import patch
-import os
-
 import flask
-import redis
 from flask import Flask, make_response
 from flask_restplus import Api, Resource, fields
 from pycommon_test import mock_now, revert_now
-from pycommon_test.celery_mock import TestCeleryAppProxy
 from pycommon_test.service_tester import JSONTestCase
 
-from pycommon_server.celery_common import (
+from pycommon_server.huey_common import (
     AsyncNamespaceProxy,
-    how_to_get_async_status,
-    build_celery_application,
-    health_details,
-    redis_health_details,
+    how_to_get_asynchronous_status,
+    build_huey_application,
 )
 
 
@@ -28,36 +21,31 @@ class AsyncRouteTest(JSONTestCase):
         app.config["DEBUG"] = True
 
         self.api = Api(app)
-        config = {
-            "celery": {
-                "broker": "memory://localhost/",
-                "backend": "memory://localhost/",
-            }
-        }
-        celery_application = TestCeleryAppProxy(build_celery_application(config))
+        config = {"asynchronous": {"broker": "redis://localhost/"}}
+        huey_application = build_huey_application(config, immediate=True)
 
         ns = AsyncNamespaceProxy(
             self.api.namespace("Test space", path="/foo", description="Test"),
-            celery_application,
+            huey_application,
         )
 
-        @ns.async_route(
+        @ns.asynchronous_route(
             "/bar",
             serializer=self.api.model(
                 "BarModel", {"status": fields.String, "foo": fields.String}
             ),
         )
         class TestEndpoint(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpoint_fetch_the_answer():
                     return {"status": "why not", "foo": "bar"}
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpoint_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
-        @ns.async_route(
+        @ns.asynchronous_route(
             "/bar2",
             [
                 self.api.model(
@@ -66,53 +54,53 @@ class AsyncRouteTest(JSONTestCase):
             ],
         )
         class TestEndpoint2(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpoint2_fetch_the_answer():
                     return [{"status2": "why not2", "foo2": "bar2"}]
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpoint2_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
         def modify_response(task_result: int) -> int:
             return task_result * 2
 
-        @ns.async_route("/modified_task_result", to_response=modify_response)
+        @ns.asynchronous_route("/modified_task_result", to_response=modify_response)
         class TestEndpointModifiedTaskResult(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpointModifiedTaskResult_fetch_the_answer():
                     return 3
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpointModifiedTaskResult_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
-        @ns.async_route("/exception", to_response=modify_response)
+        @ns.asynchronous_route("/exception", to_response=modify_response)
         class TestEndpointException(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpointException_fetch_the_answer():
                     raise Exception("Celery task exception")
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpointException_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
         def to_csv_response(result):
             return make_response(result, 200, {"Content-type": "text/csv"})
 
-        @ns.async_route("/csv", to_response=to_csv_response)
+        @ns.asynchronous_route("/csv", to_response=to_csv_response)
         class TestEndpointNoSerialization(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpointNoSerialization_fetch_the_answer():
                     return "a;b;c"
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpointNoSerialization_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
         def to_path_response(result, str_value, int_value):
             return make_response(
@@ -121,19 +109,19 @@ class AsyncRouteTest(JSONTestCase):
                 {"Content-type": "text/plain"},
             )
 
-        @ns.async_route(
+        @ns.asynchronous_route(
             "/path_parameters/<string:str_value>/<int:int_value>",
             to_response=to_path_response,
         )
         class TestEndpointWithPathParameter(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
+            @ns.doc(**ns.how_to_get_asynchronous_status_doc)
             def get(self, str_value, int_value):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
+                @huey_application.task()
+                def TestEndpointWithPathParameter_fetch_the_answer():
                     return 3
 
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
+                celery_task = TestEndpointWithPathParameter_fetch_the_answer()
+                return how_to_get_asynchronous_status(celery_task)
 
         return app
 
@@ -766,502 +754,6 @@ class AsyncRouteTest(JSONTestCase):
         self.assert200(result_reply)
         self.assertEqual(result_reply.data.decode(), "a;b;c")
 
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=["local"])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_redis_health_details_ok(self, ping_mock, keys_mock):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "observedValue": "Namespace local_my_host can be found.",
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping")
-    def test_redis_health_details_cannot_connect_to_redis(self, ping_mock):
-        ping_mock.side_effect = redis.exceptions.ConnectionError("Test message")
-
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Test message",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "from_url")
-    def test_redis_health_details_cannot_retrieve_url(self, from_url_mock):
-        from_url_mock.side_effect = redis.exceptions.ConnectionError("Test message")
-
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Test message",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=b"Those are bytes")
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_redis_health_details_cannot_retrieve_keys_as_list(
-        self, ping_mock, keys_mock
-    ):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local_my_host cannot be found in b'Those "
-                    "are bytes'",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=[b"local"])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_redis_health_details_retrieve_keys_as_bytes_list(
-        self, ping_mock, keys_mock
-    ):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace local_my_host can be found.",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=[])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace local_my_host cannot be found in []",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_health_details_with_workers(self):
-        from celery.task import control
-
-        control.ping = lambda destination: [
-            {worker: {"pong": "ok"}} for worker in destination
-        ]
-        status, details = health_details()
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "observedValue": [{"celery@local_my_host": {"pong": "ok"}}],
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_health_details_without_workers(self):
-        from celery.task import control
-
-        control.ping = lambda destination: []
-        status, details = health_details()
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "output": "No celery@local_my_host workers could be found.",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host"})
-    def test_health_details_ping_exception(self):
-        from celery.task import control
-
-        def ex(destination=None):
-            raise Exception(f"{destination} ping failure")
-
-        control.ping = ex
-        status, details = health_details()
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "output": "['celery@local_my_host'] ping failure",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-
-class RedisAndCeleryHealthTest(JSONTestCase):
-    def setUp(self):
-        self._log_start()
-        mock_now()
-
-    def tearDown(self):
-        revert_now()
-        self._log_end()
-
-    def create_app(self):
-        app = Flask(__name__)
-        app.config["TESTING"] = True
-        app.config["DEBUG"] = True
-
-        self.api = Api(app)
-        config = {
-            "celery": {
-                "broker": "memory://localhost/",
-                "backend": "memory://localhost/",
-            }
-        }
-        celery_application = TestCeleryAppProxy(build_celery_application(config))
-
-        ns = AsyncNamespaceProxy(
-            self.api.namespace("Test space", path="/foo", description="Test"),
-            celery_application,
-        )
-
-        @ns.async_route(
-            "/bar",
-            serializer=self.api.model(
-                "BarModel", {"status": fields.String, "foo": fields.String}
-            ),
-        )
-        class TestEndpoint(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    return {"status": "why not", "foo": "bar"}
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        @ns.async_route(
-            "/bar2",
-            [
-                self.api.model(
-                    "Bar2Model", {"status2": fields.String, "foo2": fields.String}
-                )
-            ],
-        )
-        class TestEndpoint2(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    return [{"status2": "why not2", "foo2": "bar2"}]
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        def modify_response(task_result: int) -> int:
-            return task_result * 2
-
-        @ns.async_route("/modified_task_result", to_response=modify_response)
-        class TestEndpointModifiedTaskResult(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    return 3
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        @ns.async_route("/exception", to_response=modify_response)
-        class TestEndpointException(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    raise Exception("Celery task exception")
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        @ns.async_route("/csv")
-        class TestEndpointNoSerialization(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    return make_response("a;b;c", 200, {"Content-type": "text/csv"})
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        def to_path_response(result, str_value, int_value):
-            return make_response(
-                f"{str_value}: {result * int_value}",
-                200,
-                {"Content-type": "text/plain"},
-            )
-
-        @ns.async_route(
-            "/path_parameters/<string:str_value>/<int:int_value>",
-            to_response=to_path_response,
-        )
-        class TestEndpointWithPathParameter(Resource):
-            @ns.doc(**ns.how_to_get_async_status_doc)
-            def get(self, str_value, int_value):
-                @celery_application.task(queue=celery_application.namespace)
-                def fetch_the_answer():
-                    return 3
-
-                celery_task = fetch_the_answer.apply_async()
-                return how_to_get_async_status(celery_task)
-
-        return app
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=["kombu@/v1.2.3"])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_redis_health_details_ok(self, ping_mock, keys_mock):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "observedValue": "Namespace /v1.2.3_my_host can be found.",
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping")
-    def test_redis_health_details_cannot_connect_to_redis(self, ping_mock):
-        ping_mock.side_effect = redis.exceptions.ConnectionError("Test message")
-
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Test message",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "from_url")
-    def test_redis_health_details_cannot_retrieve_url(self, from_url_mock):
-        from_url_mock.side_effect = redis.exceptions.ConnectionError("Test message")
-
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Test message",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=b"Those are bytes")
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_redis_health_details_cannot_retrieve_keys_as_list(
-        self, ping_mock, keys_mock
-    ):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3_my_host cannot be found in b'Those "
-                    "are bytes'",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=[b"kombu@/v1.2.3"])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_redis_health_details_retrieve_keys_as_bytes_list(
-        self, ping_mock, keys_mock
-    ):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "observedValue": "Namespace /v1.2.3_my_host can be found.",
-                }
-            },
-        )
-
-    @patch.object(redis.Redis, "ping", return_value=1)
-    @patch.object(redis.Redis, "keys", return_value=[])
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_redis_health_details_missing_namespace(self, ping_mock, keys_mock):
-        status, details = redis_health_details(
-            {"celery": {"backend": "redis://test_url"}}
-        )
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                    "output": "Namespace /v1.2.3_my_host cannot be found in []",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_health_details_with_workers(self):
-        from celery.task import control
-
-        control.ping = lambda destination: [
-            {worker: {"pong": "ok"}} for worker in destination
-        ]
-        status, details = health_details()
-        self.assertEqual(status, "pass")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "observedValue": [{"celery@/v1.2.3_my_host": {"pong": "ok"}}],
-                    "status": "pass",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_health_details_without_workers(self):
-        from celery.task import control
-
-        control.ping = lambda destination: []
-        status, details = health_details()
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "output": "No celery@/v1.2.3_my_host workers could be found.",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
-    @patch.dict(os.environ, {"HOSTNAME": "my_host", "CONTAINER_NAME": "/v1.2.3"})
-    def test_health_details_ping_exception(self):
-        from celery.task import control
-
-        def ex(destination):
-            raise Exception(f"{destination} ping failure")
-
-        control.ping = ex
-        status, details = health_details()
-        self.assertEqual(status, "fail")
-        self.assertEqual(
-            details,
-            {
-                "celery:ping": {
-                    "componentType": "component",
-                    "output": "['celery@/v1.2.3_my_host'] ping failure",
-                    "status": "fail",
-                    "time": "2018-10-11T15:05:05.663979",
-                }
-            },
-        )
-
 
 class TestGetCeleryStatus(JSONTestCase):
     def create_app(self):
@@ -1270,12 +762,12 @@ class TestGetCeleryStatus(JSONTestCase):
         return app
 
     def test_get_async_status(self):
-        class CeleryTaskStub:
+        class HueyTaskStub:
             id = "idtest"
 
-        celery_task = CeleryTaskStub()
+        huey_task = HueyTaskStub()
         flask.request.base_url = "http://localhost/foo"
-        response = how_to_get_async_status(celery_task)
+        response = how_to_get_asynchronous_status(huey_task)
         self.assert_202_regex(response, "/foo/status/idtest")
         self.assert_json(
             response, {"task_id": "idtest", "url": "http://localhost/foo/status/idtest"}
