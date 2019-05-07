@@ -9,9 +9,11 @@ This package provides the following features:
 
 ## Asynchronous REST API ##
 
-Thanks to Celery, your REST API can now expose asynchronous endpoints.
+Your REST API can expose asynchronous endpoints.
 
-You will find more details in pycommon_server.celery_common module.
+Chose either Celery or Huey (our favourite).
+
+You will find more details in pycommon_server.celery_common and pycommon_server.huey_common modules.
 
 ## YAML Configuration ##
 
