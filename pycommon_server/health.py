@@ -1,8 +1,8 @@
 import datetime
 import re
 from typing import Tuple
-from redis import Redis
 import os
+
 
 def _pycommon_status(health_response):
     if isinstance(health_response, dict):
@@ -96,6 +96,7 @@ def status(*statuses: str) -> str:
         return "warn"
     return "pass"
 
+
 def _namespace() -> str:
     """
     Workers are started using CONTAINER_NAME environment variable as namespace or local.
@@ -105,7 +106,10 @@ def _namespace() -> str:
         f"{os.getenv('CONTAINER_NAME', 'local')}_{os.getenv('HOSTNAME', 'localhost')}"
     )
 
+
 def redis_health_details(config: dict) -> Tuple[str, dict]:
+    from redis import Redis
+
     try:
         redis = Redis.from_url(config["celery"]["backend"])
         redis.ping()
