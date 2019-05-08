@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import re
-from typing import Tuple
 from urllib.parse import urlparse
 
 import celery.result
@@ -11,7 +10,6 @@ import flask
 from celery import Celery
 from celery.task import control
 from flask_restplus import Resource, fields, Namespace
-from redis import Redis
 
 _STATUS_ENDPOINT = "status"
 _RESULT_ENDPOINT = "result"
@@ -256,52 +254,6 @@ def _queue():
     Workers are started using CONTAINER_NAME environment variable as queue or local.
     """
     return os.getenv("CONTAINER_NAME", "local")
-
-
-def redis_health_details(config: dict) -> Tuple[str, dict]:
-    try:
-        redis = Redis.from_url(config["celery"]["backend"])
-        redis.ping()
-
-        namespace = _namespace()
-        keys = redis.keys(namespace)
-
-        if not keys or not isinstance(keys, list):
-            return (
-                "fail",
-                {
-                    "redis:ping": {
-                        "componentType": "component",
-                        "status": "fail",
-                        "time": datetime.datetime.utcnow().isoformat(),
-                        "output": f"Namespace {namespace} cannot be found in {keys}",
-                    }
-                },
-            )
-
-        return (
-            "pass",
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "observedValue": f"Namespace {namespace} can be found.",
-                    "status": "pass",
-                    "time": datetime.datetime.utcnow().isoformat(),
-                }
-            },
-        )
-    except Exception as e:
-        return (
-            "fail",
-            {
-                "redis:ping": {
-                    "componentType": "component",
-                    "status": "fail",
-                    "time": datetime.datetime.utcnow().isoformat(),
-                    "output": str(e),
-                }
-            },
-        )
 
 
 def health_details():

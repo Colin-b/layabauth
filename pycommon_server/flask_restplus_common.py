@@ -94,91 +94,91 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     @namespace.doc(
         responses={
             200: (
-                "Server is in a coherent state.",
-                namespace.model(
-                    "HealthPass",
-                    {
-                        "status": fields.String(
-                            description="Indicates whether the service status is acceptable or not.",
-                            required=True,
-                            example="pass",
-                            enum=["pass"],
-                        ),
-                        "version": fields.String(
-                            description="Public version of the service.",
-                            required=True,
-                            example="1",
-                        ),
-                        "releaseId": fields.String(
-                            description="Version of the service.",
-                            required=True,
-                            example="1.0.0",
-                        ),
-                        "details": fields.Raw(
-                            description="Provides more details about the status of the service.",
-                            required=True,
-                        ),
-                    },
-                ),
+                    "Server is in a coherent state.",
+                    namespace.model(
+                        "HealthPass",
+                        {
+                            "status": fields.String(
+                                description="Indicates whether the service status is acceptable or not.",
+                                required=True,
+                                example="pass",
+                                enum=["pass"],
+                            ),
+                            "version": fields.String(
+                                description="Public version of the service.",
+                                required=True,
+                                example="1",
+                            ),
+                            "releaseId": fields.String(
+                                description="Version of the service.",
+                                required=True,
+                                example="1.0.0",
+                            ),
+                            "details": fields.Raw(
+                                description="Provides more details about the status of the service.",
+                                required=True,
+                            ),
+                        },
+                    ),
             ),
             429: (
-                "Server is almost in a coherent state.",
-                namespace.model(
-                    "HealthWarn",
-                    {
-                        "status": fields.String(
-                            description="Indicates whether the service status is acceptable or not.",
-                            required=True,
-                            example="warn",
-                            enum=["warn"],
-                        ),
-                        "version": fields.String(
-                            description="Public version of the service.",
-                            required=True,
-                            example="1",
-                        ),
-                        "releaseId": fields.String(
-                            description="Version of the service.",
-                            required=True,
-                            example="1.0.0",
-                        ),
-                        "details": fields.Raw(
-                            description="Provides more details about the status of the service.",
-                            required=True,
-                        ),
-                    },
-                ),
+                    "Server is almost in a coherent state.",
+                    namespace.model(
+                        "HealthWarn",
+                        {
+                            "status": fields.String(
+                                description="Indicates whether the service status is acceptable or not.",
+                                required=True,
+                                example="warn",
+                                enum=["warn"],
+                            ),
+                            "version": fields.String(
+                                description="Public version of the service.",
+                                required=True,
+                                example="1",
+                            ),
+                            "releaseId": fields.String(
+                                description="Version of the service.",
+                                required=True,
+                                example="1.0.0",
+                            ),
+                            "details": fields.Raw(
+                                description="Provides more details about the status of the service.",
+                                required=True,
+                            ),
+                        },
+                    ),
             ),
             400: (
-                "Server is not in a coherent state.",
-                namespace.model(
-                    "HealthFail",
-                    {
-                        "status": fields.String(
-                            description="Indicates whether the service status is acceptable or not.",
-                            required=True,
-                            example="fail",
-                            enum=["fail"],
-                        ),
-                        "version": fields.String(
-                            description="Public version of the service.",
-                            required=True,
-                            example="1",
-                        ),
-                        "releaseId": fields.String(
-                            description="Version of the service.",
-                            required=True,
-                            example="1.0.0",
-                        ),
-                        "details": fields.Raw(
-                            description="Provides more details about the status of the service.",
-                            required=True,
-                        ),
-                        "output": fields.String(
-                            description="Raw error output.", required=False
-                        ),
-                    },
-                ),
+                    "Server is not in a coherent state.",
+                    namespace.model(
+                        "HealthFail",
+                        {
+                            "status": fields.String(
+                                description="Indicates whether the service status is acceptable or not.",
+                                required=True,
+                                example="fail",
+                                enum=["fail"],
+                            ),
+                            "version": fields.String(
+                                description="Public version of the service.",
+                                required=True,
+                                example="1",
+                            ),
+                            "releaseId": fields.String(
+                                description="Version of the service.",
+                                required=True,
+                                example="1.0.0",
+                            ),
+                            "details": fields.Raw(
+                                description="Provides more details about the status of the service.",
+                                required=True,
+                            ),
+                            "output": fields.String(
+                                description="Raw error output.", required=False
+                            ),
+                        },
+                    ),
             ),
         }
     )
@@ -216,46 +216,46 @@ def add_monitoring_namespace(api: Api, health_details: callable) -> Namespace:
     @namespace.doc(
         responses={
             200: (
-                "Service changelog.",
-                [
-                    namespace.model(
-                        "ChangelogReleaseModel",
-                        {
-                            "version": fields.String(
-                                description="Release version following semantic versioning.",
-                                required=True,
-                                example="3.12.5",
-                            ),
-                            "release_date": fields.Date(
-                                description="Release date.",
-                                required=True,
-                                example="2019-12-31",
-                            ),
-                            "added": fields.List(
-                                fields.String(description="New features.")
-                            ),
-                            "changed": fields.List(
-                                fields.String(
-                                    description="Changes in existing functionaliy."
-                                )
-                            ),
-                            "deprecated": fields.List(
-                                fields.String(
-                                    description="Soon-to-be removed features."
-                                )
-                            ),
-                            "removed": fields.List(
-                                fields.String(description="Removed features.")
-                            ),
-                            "fixed": fields.List(
-                                fields.String(description="Any bug fixes.")
-                            ),
-                            "security": fields.List(
-                                fields.String(description="Vulnerabilities.")
-                            ),
-                        },
-                    )
-                ],
+                    "Service changelog.",
+                    [
+                        namespace.model(
+                            "ChangelogReleaseModel",
+                            {
+                                "version": fields.String(
+                                    description="Release version following semantic versioning.",
+                                    required=True,
+                                    example="3.12.5",
+                                ),
+                                "release_date": fields.Date(
+                                    description="Release date.",
+                                    required=True,
+                                    example="2019-12-31",
+                                ),
+                                "added": fields.List(
+                                    fields.String(description="New features.")
+                                ),
+                                "changed": fields.List(
+                                    fields.String(
+                                        description="Changes in existing functionaliy."
+                                    )
+                                ),
+                                "deprecated": fields.List(
+                                    fields.String(
+                                        description="Soon-to-be removed features."
+                                    )
+                                ),
+                                "removed": fields.List(
+                                    fields.String(description="Removed features.")
+                                ),
+                                "fixed": fields.List(
+                                    fields.String(description="Any bug fixes.")
+                                ),
+                                "security": fields.List(
+                                    fields.String(description="Vulnerabilities.")
+                                ),
+                            },
+                        )
+                    ],
             ),
             500: ("Unable to retrieve changelog.", fields.String()),
         }
@@ -280,8 +280,8 @@ def base_path() -> str:
     """
     if "X-Original-Request-Uri" in flask.request.headers:
         service_path = (
-            "/"
-            + flask.request.headers["X-Original-Request-Uri"].split("/", maxsplit=2)[1]
+                "/"
+                + flask.request.headers["X-Original-Request-Uri"].split("/", maxsplit=2)[1]
         )
         return f'{flask.request.scheme}://{flask.request.headers["Host"]}{service_path}'
     parsed = urlparse(flask.request.base_url)
@@ -364,6 +364,7 @@ class Authentication:
         """
         engie_tenant_id = "24139d14-c62c-4c47-8bdd-ce71ea1d50cf"
         nonce = scopes.pop("nonce", "7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7")
+        client_id = scopes.pop("client_id", "2bef733d-75be-4159-b280-672e054938c3")
 
         return {
             "oauth2": {
@@ -371,6 +372,7 @@ class Authentication:
                 "flow": "implicit",
                 "authorizationUrl": f"https://login.microsoftonline.com/{engie_tenant_id}/oauth2/authorize?nonce={nonce}",
                 "type": "oauth2",
+                "client_id": client_id,
             }
         }
 
@@ -514,7 +516,7 @@ class _ReverseProxied:
 
             path_info = environ.get("PATH_INFO", "")
             if path_info.startswith(script_name):
-                environ["PATH_INFO"] = path_info[len(script_name) :]
+                environ["PATH_INFO"] = path_info[len(script_name):]
 
             scheme = environ.get("HTTP_X_SCHEME", "")
             if scheme:
@@ -531,11 +533,11 @@ class PycommonApi(Api):
 
 
 def create_api(
-    file_path: str,
-    cors: bool = True,
-    compress_mimetypes: List[str] = None,
-    reverse_proxy: bool = True,
-    **kwargs,
+        file_path: str,
+        cors: bool = True,
+        compress_mimetypes: List[str] = None,
+        reverse_proxy: bool = True,
+        **kwargs,
 ) -> (Flask, Api):
     """
     Create Flask application and related Flask-RestPlus API instance.
