@@ -1,5 +1,7 @@
 import datetime
 import re
+from typing import Tuple
+import os
 
 
 def _pycommon_status(health_response):
@@ -93,3 +95,61 @@ def status(*statuses: str) -> str:
     if "warn" in statuses:
         return "warn"
     return "pass"
+
+
+def _namespace() -> str:
+    """
+    Workers are started using CONTAINER_NAME environment variable as namespace or local.
+    Followed by a unique identifier per machine (HOSTNAME environment variable or localhost)
+    """
+    return (
+        f"{os.getenv('CONTAINER_NAME', 'local')}_{os.getenv('HOSTNAME', 'localhost')}"
+    )
+
+
+def redis_health_details(config: dict) -> Tuple[str, dict]:
+    from redis import Redis
+
+    try:
+        redis = Redis.from_url(config["celery"]["backend"])
+        redis.ping()
+
+        namespace = _namespace()
+        keys = redis.keys(namespace)
+
+        if not keys or not isinstance(keys, list):
+            return (
+                "fail",
+                {
+                    "redis:ping": {
+                        "componentType": "component",
+                        "status": "fail",
+                        "time": datetime.datetime.utcnow().isoformat(),
+                        "output": f"Namespace {namespace} cannot be found in {keys}",
+                    }
+                },
+            )
+
+        return (
+            "pass",
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "observedValue": f"Namespace {namespace} can be found.",
+                    "status": "pass",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                }
+            },
+        )
+    except Exception as e:
+        return (
+            "fail",
+            {
+                "redis:ping": {
+                    "componentType": "component",
+                    "status": "fail",
+                    "time": datetime.datetime.utcnow().isoformat(),
+                    "output": str(e),
+                }
+            },
+        )
