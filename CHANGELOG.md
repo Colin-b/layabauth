@@ -6,9 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [16.2.1] - 2019-04-11
+## [17.0.0] - 2019-04-11
+### Changed
+- Renamed redis_health_details into redis_details to follow the syntax of health functions.
+- Change signature of redis_details so that Redis URL can be provided and redis key name as well.
+- Update pycommon_test to version 6.0.0
+
 ### Fixed
-- Remove hardcoded celery from redis health check and make it general by providing only the url of redis backend.
+- Use asynchronous_server as logger name instead of celery_server for Redis, Huey and Celery related code.
 
 ## [16.2.0] - 2019-04-11
 ### Changed

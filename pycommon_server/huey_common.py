@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     pass  # Those imports are here to be able to eval() exception
 
-logger = logging.getLogger("celery_server")
+logger = logging.getLogger("asynchronous_server")
 
 _STATUS_ENDPOINT = "status"
 _RESULT_ENDPOINT = "result"
@@ -225,13 +225,3 @@ def _snake_case(name: str) -> str:
         raise ValueError(f"{name} should be Camel Case and should not contain any _")
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
-
-
-def _namespace() -> str:
-    """
-    Workers are started using CONTAINER_NAME environment variable as namespace or local.
-    Followed by a unique identifier per machine (HOSTNAME environment variable or localhost)
-    """
-    return (
-        f"{os.getenv('CONTAINER_NAME', 'local')}_{os.getenv('HOSTNAME', 'localhost')}"
-    )

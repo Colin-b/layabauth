@@ -1,7 +1,5 @@
 import datetime
 import re
-from typing import Tuple
-import os
 
 
 def _pycommon_status(health_response):
@@ -97,25 +95,22 @@ def status(*statuses: str) -> str:
     return "pass"
 
 
-def _namespace() -> str:
+def redis_details(url: str, key_pattern: str) -> (str, dict):
     """
-    Workers are started using CONTAINER_NAME environment variable as namespace or local.
-    Followed by a unique identifier per machine (HOSTNAME environment variable or localhost)
+    Return Health details for redis keys.
+
+    :param url: Redis URL
+    :param key_pattern: Pattern to look for in keys.
+    :return: A tuple with a string providing the status (pass, warn, fail) and the details.
+    Details are based on https://inadarei.github.io/rfc-healthcheck/
     """
-    return (
-        f"{os.getenv('CONTAINER_NAME', 'local')}_{os.getenv('HOSTNAME', 'localhost')}"
-    )
-
-
-def redis_health_details(url: str) -> Tuple[str, dict]:
     from redis import Redis
 
     try:
         redis = Redis.from_url(url)
         redis.ping()
 
-        namespace = _namespace()
-        keys = redis.keys(namespace)
+        keys = redis.keys(key_pattern)
 
         if not keys or not isinstance(keys, list):
             return (
@@ -125,7 +120,7 @@ def redis_health_details(url: str) -> Tuple[str, dict]:
                         "componentType": "component",
                         "status": "fail",
                         "time": datetime.datetime.utcnow().isoformat(),
-                        "output": f"Namespace {namespace} cannot be found in {keys}",
+                        "output": f"{key_pattern} cannot be found in {keys}",
                     }
                 },
             )
@@ -135,7 +130,7 @@ def redis_health_details(url: str) -> Tuple[str, dict]:
             {
                 "redis:ping": {
                     "componentType": "component",
-                    "observedValue": f"Namespace {namespace} can be found.",
+                    "observedValue": f"{key_pattern} can be found.",
                     "status": "pass",
                     "time": datetime.datetime.utcnow().isoformat(),
                 }
