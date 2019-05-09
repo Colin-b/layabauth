@@ -370,8 +370,8 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.1...HEAD
-[16.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v16.2.1
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v17.0.0...HEAD
+[17.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v17.0.0
 [16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...v16.0.0
