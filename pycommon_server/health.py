@@ -107,11 +107,11 @@ def _namespace() -> str:
     )
 
 
-def redis_health_details(config: dict) -> Tuple[str, dict]:
+def redis_health_details(url: str) -> Tuple[str, dict]:
     from redis import Redis
 
     try:
-        redis = Redis.from_url(config["celery"]["backend"])
+        redis = Redis.from_url(url)
         redis.ping()
 
         namespace = _namespace()

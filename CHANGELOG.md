@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [16.2.1] - 2019-04-11
+### Fixed
+- Remove hardcoded celery from redis health check and make it general by providing only the url of redis backend.
+
 ## [16.2.0] - 2019-04-11
 ### Changed
 - Move Redis health check from celery_common to health.
@@ -361,7 +365,8 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...HEAD
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.1...HEAD
+[16.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v16.2.1
 [16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...v16.0.0
