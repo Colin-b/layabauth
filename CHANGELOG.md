@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [17.0.0] - 2019-04-11
+### Changed
+- Renamed redis_health_details into redis_details to follow the syntax of health functions.
+- Change signature of redis_details so that Redis URL can be provided and redis key name as well.
+- Update pycommon_test to version 6.0.0
+
+### Fixed
+- Use asynchronous_server as logger name instead of celery_server for Redis, Huey and Celery related code.
+
 ## [16.2.0] - 2019-04-11
 ### Changed
 - Move Redis health check from celery_common to health.
@@ -361,7 +370,8 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...HEAD
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v17.0.0...HEAD
+[17.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v17.0.0
 [16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...v16.1.0
 [16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...v16.0.0
