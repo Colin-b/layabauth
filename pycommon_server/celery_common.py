@@ -14,7 +14,7 @@ from flask_restplus import Resource, fields, Namespace
 _STATUS_ENDPOINT = "status"
 _RESULT_ENDPOINT = "result"
 
-logger = logging.getLogger("celery_server")
+logger = logging.getLogger("asynchronous_server")
 
 
 class AsyncNamespaceProxy:
