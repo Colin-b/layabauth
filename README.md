@@ -7,14 +7,6 @@
 
 This package provides the following features:
 
-## Asynchronous REST API ##
-
-Your REST API can expose asynchronous endpoints.
-
-Chose either Celery or Huey (our favourite).
-
-You will find more details in pycommon_server.celery_common and pycommon_server.huey_common modules.
-
 ## YAML Configuration ##
 
 API configuration and logging configuration can be standardized.
@@ -43,15 +35,3 @@ Importing pycommon_server.flask_restplus_common will make sure that every flask 
 ```python
 import pycommon_server.flask_restplus_common
 ```
-
-## Health check ##
-
-If your REST API is calling other REST API(s) then your health check should ensure that those APIs can be reached.
-
-You will find more details in pycommon_server.health module.
-
-## Accessing Windows from Linux ##
-
-If you need to access Windows computers from your REST API hosted on Linux.
-
-You will find more details in pycommon_server.windows module.
