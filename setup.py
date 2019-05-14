@@ -39,7 +39,7 @@ setup(
         # Used to gz compress http output
         "flask_compress==1.4.0",
         # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.15.1",
+        "pre-commit==1.16.1",
     ],
     extras_require=extra_requirements,
 )

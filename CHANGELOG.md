@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Update pycommon_test to version 7.0.0
+- Update pre-commit to version 1.16.1
+
+## Added
+- Add license
 
 ## [17.0.0] - 2019-05-11
 ### Changed
@@ -380,7 +384,8 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v17.0.0...HEAD
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v18.0.0...HEAD
+[18.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v17.0.0...v18.0.0
 [17.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v17.0.0
 [16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.1.0...v16.2.0
 [16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...v16.1.0
