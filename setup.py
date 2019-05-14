@@ -3,22 +3,10 @@ from setuptools import setup, find_packages
 extra_requirements = {
     "testing": [
         # Used to provide testing help
-        "pycommon_test==6.0.0"
+        "pycommon_test==7.0.0"
     ],
     # Used to manage authentication
     "authentication": ["oauth2helper==1.6.0"],
-    # Used to connect to a Microsoft Windows computer
-    "windows": ["pysmb==1.1.27"],
-    # Async task execution using celery
-    "celery": [
-        # Used to process requests asynchronously
-        "celery[redis,msgpack]==4.3.0"
-    ],
-    # Async task execution using huey
-    "huey": [
-        # Used to process requests asynchronously
-        "huey==2.0.1"
-    ],
     # Used to connect to another REST API
     "rest": ["requests==2.21.0"],
     # Pandas
@@ -51,7 +39,7 @@ setup(
         # Used to gz compress http output
         "flask_compress==1.4.0",
         # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.15.1",
+        "pre-commit==1.16.1",
     ],
     extras_require=extra_requirements,
 )
