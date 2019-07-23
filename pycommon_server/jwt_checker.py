@@ -1,5 +1,4 @@
-import oauth2helper.content
-import oauth2helper.token
+import oauth2helper
 
 
 def get_user(bearer=None, no_auth=True):
@@ -15,11 +14,11 @@ def get_user(bearer=None, no_auth=True):
             return "PARKER"
         else:
             try:
-                json_header, json_body = oauth2helper.token.validate(bearer)
-                return oauth2helper.content.user_name(json_body)
+                json_header, json_body = oauth2helper.validate(bearer)
+                return oauth2helper.user_name(json_body)
             except Exception as e:
                 raise ValueError("Token validation error: " + str(e))
     else:
         raise ValueError(
-            'anonymous access is not authorised. Please provide a valid JWT token or access our API via (<a href="http://guru.trading.gdfsuez.net/confluence/display/ETRMsys/PyxelRest">pyxelrest Excel addin</a>).'
+            'anonymous access is not authorised. Please provide a valid JWT token or access our API via (<a href="https://wiki.gem.myengie.com/display/SER/PyxelRest">pyxelrest Excel addin</a>).'
         )

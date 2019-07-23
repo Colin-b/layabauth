@@ -344,9 +344,9 @@ deleted_response_doc = HTTPStatus.NO_CONTENT, "Deleted"
 
 class User:
     def __init__(self, decoded_body: dict):
-        import oauth2helper.content
+        import oauth2helper
 
-        self.name = oauth2helper.content.user_name(decoded_body)
+        self.name = oauth2helper.user_name(decoded_body)
 
 
 class Authentication:
@@ -388,9 +388,9 @@ class Authentication:
     def _to_user(token: str) -> User:
         try:
             from jwt.exceptions import InvalidTokenError, InvalidKeyError
-            import oauth2helper.token
+            import oauth2helper
 
-            json_header, json_body = oauth2helper.token.validate(token)
+            json_header, json_body = oauth2helper.validate(token)
             return User(json_body)
         except ImportError:
             raise Unauthorized(

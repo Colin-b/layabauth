@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [18.1.0] - 2019-07-23
+### Changed
+- Switch testing to pytest instead of pycommon_test.
+- Update requests version to 2.22.0
+- Update pandas version to 0.25.0
+- Update PyYAML version to 5.1.1
+- Update flask_cors version to 3.0.8
+- Update pre-commit version to 1.17.0
+- Update oauth2helper version to 2.0.0
+
 ## [18.0.0] - 2019-05-13
 ### Removed
 - Remove windows.py, if you were using it, switch to pyndows module.
@@ -384,77 +394,78 @@ or source docker image might want to ensure they set this variable properly.
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v18.0.0...HEAD
-[18.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v17.0.0...v18.0.0
-[17.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.2.0...v17.0.0
-[16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.1.0...v16.2.0
-[16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v16.0.0...v16.1.0
-[16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.2.0...v16.0.0
-[15.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.1.0...v15.2.0
-[15.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v15.0.0...v15.1.0
-[15.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v14.1.0...v15.0.0
-[14.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v14.0.0...v14.1.0
-[14.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.3.2...v14.0.0
-[13.3.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.3.1...v13.3.2
-[13.3.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.3.0...v13.3.1
-[13.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.2.3...v13.3.0
-[13.2.3]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.2.2...v13.2.3
-[13.2.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.2.1...v13.2.2
-[13.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.2.0...v13.2.1
-[13.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.1.0...v13.2.0
-[13.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v13.0.0...v13.1.0
-[13.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.13.0...v13.0.0
-[12.13.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.12.0...v12.13.0
-[12.12.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.11.0...v12.12.0
-[12.11.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.10.0...v12.11.0
-[12.10.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.9.0...v12.10.0
-[12.9.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.8.1...v12.9.0
-[12.8.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.8.0...v12.8.1
-[12.8.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.7.0...v12.8.0
-[12.7.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.6.0...v12.7.0
-[12.6.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.5.0...v12.6.0
-[12.5.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.4.1...v12.5.0
-[12.4.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.4.0...v12.4.1
-[12.4.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.3.0...v12.4.0
-[12.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.2.0...v12.3.0
-[12.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.1.0...v12.2.0
-[12.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v12.0.0...v12.1.0
-[12.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v11.2.0...v12.0.0
-[11.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v11.1.0...v11.2.0
-[11.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v11.0.0...v11.1.0
-[11.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v10.1.1...v11.0.0
-[10.1.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v10.1.0...v10.1.1
-[10.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v10.0.0...v10.1.0
-[10.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v9.0.0...v10.0.0
-[9.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v8.0.0...v9.0.0
-[8.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v7.0.1...v8.0.0
-[7.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v7.0.0...v7.0.1
-[7.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v6.2.0...v7.0.0
-[6.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v6.1.0...v6.2.0
-[6.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v6.0.1...v6.1.0
-[6.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v6.0.0...v6.0.1
-[6.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v5.0.0...v6.0.0
-[5.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v4.1.2...v5.0.0
-[4.1.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v4.1.1...v4.1.2
-[4.1.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v4.1.0...v4.1.1
-[4.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v4.0.1...v4.1.0
-[4.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v4.0.0...v4.0.1
-[4.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.3.3...v4.0.0
-[3.3.3]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.3.2...v3.3.3
-[3.3.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.3.1...v3.3.2
-[3.3.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.3.0...v3.3.1
-[3.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.2.2...v3.3.0
-[3.2.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.2.1...v3.2.2
-[3.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.2.0...v3.2.1
-[3.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.1.0...v3.2.0
-[3.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v3.0.0...v3.1.0
-[3.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.6.0...v3.0.0
-[2.6.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.5.0...v2.6.0
-[2.5.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.4.0...v2.5.0
-[2.4.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.3.0...v2.4.0
-[2.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.2.0...v2.3.0
-[2.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v1.1.0...v2.0.0
-[1.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon-server/releases/tag/v1.0.0
+[Unreleased]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v18.1.0...HEAD
+[18.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v18.0.0...v18.1.0
+[18.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v17.0.0...v18.0.0
+[17.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v16.2.0...v17.0.0
+[16.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v16.1.0...v16.2.0
+[16.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v16.0.0...v16.1.0
+[16.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v15.2.0...v16.0.0
+[15.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v15.1.0...v15.2.0
+[15.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v15.0.0...v15.1.0
+[15.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v14.1.0...v15.0.0
+[14.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v14.0.0...v14.1.0
+[14.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.3.2...v14.0.0
+[13.3.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.3.1...v13.3.2
+[13.3.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.3.0...v13.3.1
+[13.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.2.3...v13.3.0
+[13.2.3]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.2.2...v13.2.3
+[13.2.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.2.1...v13.2.2
+[13.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.2.0...v13.2.1
+[13.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.1.0...v13.2.0
+[13.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v13.0.0...v13.1.0
+[13.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.13.0...v13.0.0
+[12.13.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.12.0...v12.13.0
+[12.12.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.11.0...v12.12.0
+[12.11.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.10.0...v12.11.0
+[12.10.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.9.0...v12.10.0
+[12.9.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.8.1...v12.9.0
+[12.8.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.8.0...v12.8.1
+[12.8.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.7.0...v12.8.0
+[12.7.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.6.0...v12.7.0
+[12.6.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.5.0...v12.6.0
+[12.5.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.4.1...v12.5.0
+[12.4.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.4.0...v12.4.1
+[12.4.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.3.0...v12.4.0
+[12.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.2.0...v12.3.0
+[12.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.1.0...v12.2.0
+[12.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v12.0.0...v12.1.0
+[12.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v11.2.0...v12.0.0
+[11.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v11.1.0...v11.2.0
+[11.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v11.0.0...v11.1.0
+[11.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v10.1.1...v11.0.0
+[10.1.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v10.1.0...v10.1.1
+[10.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v10.0.0...v10.1.0
+[10.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v9.0.0...v10.0.0
+[9.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v8.0.0...v9.0.0
+[8.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v7.0.1...v8.0.0
+[7.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v7.0.0...v7.0.1
+[7.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v6.2.0...v7.0.0
+[6.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v6.1.0...v6.2.0
+[6.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v6.0.1...v6.1.0
+[6.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v6.0.0...v6.0.1
+[6.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v5.0.0...v6.0.0
+[5.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v4.1.2...v5.0.0
+[4.1.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v4.1.1...v4.1.2
+[4.1.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v4.1.0...v4.1.1
+[4.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v4.0.1...v4.1.0
+[4.0.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v4.0.0...v4.0.1
+[4.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.3.3...v4.0.0
+[3.3.3]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.3.2...v3.3.3
+[3.3.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.3.1...v3.3.2
+[3.3.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.3.0...v3.3.1
+[3.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.2.2...v3.3.0
+[3.2.2]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.2.1...v3.2.2
+[3.2.1]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.2.0...v3.2.1
+[3.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.1.0...v3.2.0
+[3.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v3.0.0...v3.1.0
+[3.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.6.0...v3.0.0
+[2.6.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.5.0...v2.6.0
+[2.5.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v1.1.0...v2.0.0
+[1.1.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.tools.digital.engie.com/GEM-Py/pycommon_server/releases/tag/v1.0.0
