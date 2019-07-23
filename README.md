@@ -35,3 +35,10 @@ Importing pycommon_server.flask_restplus_common will make sure that every flask 
 ```python
 import pycommon_server.flask_restplus_common
 ```
+
+## How to install
+1. [python 3.7+](https://www.python.org/downloads/) must be installed
+2. Use pip to install module:
+```sh
+python -m pip install pycommon_server -i https://all-team-remote:tBa%40W%29tvB%5E%3C%3B2Jm3@artifactory.tools.digital.engie.com/artifactory/api/pypi/all-team-pypi-prod/simple
+```
