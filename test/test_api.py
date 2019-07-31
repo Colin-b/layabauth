@@ -127,6 +127,71 @@ def test_reverse_proxy_api():
         }
 
 
+def test_reverse_proxy_api_http_scheme():
+    app, api = pycommon_server.create_api(
+        __file__, title="TestApi", description="Testing API", cors=False
+    )
+
+    with app.test_client() as client:
+        response = client.get(
+            "/swagger.json",
+            headers={
+                "X-Original-Request-Uri": "/behind_reverse_proxy",
+                "X-SCHEME": "http",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json == {
+            "swagger": "2.0",
+            "basePath": "/behind_reverse_proxy",
+            "paths": {},
+            "info": {
+                "title": "TestApi",
+                "version": "1.0.0",
+                "description": "Testing API",
+                "x-server-environment": "default",
+            },
+            "produces": ["application/json"],
+            "consumes": ["application/json"],
+            "tags": [],
+            "responses": {
+                "ParseError": {"description": "When a mask can't be parsed"},
+                "MaskError": {"description": "When any error occurs on mask"},
+            },
+        }
+
+
+def test_reverse_proxy_api_clean_path_info():
+    app, api = pycommon_server.create_api(
+        __file__, title="TestApi", description="Testing API", cors=False
+    )
+
+    with app.test_client() as client:
+        response = client.get(
+            "/behind_reverse_proxy/swagger.json",
+            headers={"X-Original-Request-Uri": "/behind_reverse_proxy"},
+        )
+        assert response.status_code == 200
+        assert response.json == {
+            "swagger": "2.0",
+            "basePath": "/behind_reverse_proxy",
+            "paths": {},
+            "info": {
+                "title": "TestApi",
+                "version": "1.0.0",
+                "description": "Testing API",
+                "x-server-environment": "default",
+            },
+            "produces": ["application/json"],
+            "consumes": ["application/json"],
+            "tags": [],
+            "responses": {
+                "ParseError": {"description": "When a mask can't be parsed"},
+                "MaskError": {"description": "When any error occurs on mask"},
+            },
+        }
+
+
 def test_extra_parameters_api():
     app, api = pycommon_server.create_api(
         __file__,
