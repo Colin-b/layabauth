@@ -4,12 +4,7 @@ import tempfile
 
 import pytest
 
-from pycommon_server.configuration import (
-    load_configuration,
-    load_logging_configuration,
-    load,
-    get_environment,
-)
+import pycommon_server
 
 
 def _add_file(folder: str, file_name: str, *lines) -> None:
@@ -31,7 +26,7 @@ def remove_server_environment():
 
 def test_empty_configuration_if_file_not_found():
     with tempfile.TemporaryDirectory() as tmp_dir:
-        assert {} == load_configuration(tmp_dir)
+        assert {} == pycommon_server.load_configuration(tmp_dir)
 
 
 def test_default_configuration_loaded_if_no_environment_specified():
@@ -39,28 +34,32 @@ def test_default_configuration_loaded_if_no_environment_specified():
         _add_file(
             tmp_dir, "configuration_default.yml", "section_default:", "  key: value"
         )
-        assert {"section_default": {"key": "value"}} == load_configuration(tmp_dir)
+        assert {
+            "section_default": {"key": "value"}
+        } == pycommon_server.load_configuration(tmp_dir)
 
 
 def test_environment_is_default_if_no_environment_specified():
-    assert "default" == get_environment()
+    assert "default" == pycommon_server.get_environment()
 
 
 def test_environment_is_server_environment(remove_server_environment):
     os.environ["SERVER_ENVIRONMENT"] = "test"
-    assert "test" == get_environment()
+    assert "test" == pycommon_server.get_environment()
 
 
 def test_server_environment_configuration_loaded(remove_server_environment):
     os.environ["SERVER_ENVIRONMENT"] = "test"
     with tempfile.TemporaryDirectory() as tmp_dir:
         _add_file(tmp_dir, "configuration_test.yml", "section_test:", "  key: value")
-        assert {"section_test": {"key": "value"}} == load_configuration(tmp_dir)
+        assert {"section_test": {"key": "value"}} == pycommon_server.load_configuration(
+            tmp_dir
+        )
 
 
 def test_hardcoded_default_logging_configuration_if_file_not_found():
     with tempfile.TemporaryDirectory() as tmp_dir:
-        assert not load_logging_configuration(tmp_dir)
+        assert not pycommon_server.load_logging_configuration(tmp_dir)
 
 
 def test_default_logging_configuration_loaded_if_no_environment_specified():
@@ -83,7 +82,7 @@ def test_default_logging_configuration_loaded_if_no_environment_specified():
         )
         assert os.path.join(
             tmp_dir, "logging_default.yml"
-        ) == load_logging_configuration(tmp_dir)
+        ) == pycommon_server.load_logging_configuration(tmp_dir)
 
 
 def test_server_environment_logging_configuration_loaded(remove_server_environment):
@@ -105,9 +104,9 @@ def test_server_environment_logging_configuration_loaded(remove_server_environme
             "  level: INFO",
             "  handlers: [standard_output]",
         )
-        assert os.path.join(tmp_dir, "logging_test.yml") == load_logging_configuration(
-            tmp_dir
-        )
+        assert os.path.join(
+            tmp_dir, "logging_test.yml"
+        ) == pycommon_server.load_logging_configuration(tmp_dir)
 
 
 def test_all_default_environment_configurations_loaded():
@@ -136,7 +135,7 @@ def test_all_default_environment_configurations_loaded():
             "  level: INFO",
             "  handlers: [standard_output]",
         )
-        assert {"section_test": {"key": "value"}} == load(
+        assert {"section_test": {"key": "value"}} == pycommon_server.load(
             os.path.join(server_folder, "server.py")
         )
 
@@ -168,6 +167,6 @@ def test_all_server_environment_configurations_loaded(remove_server_environment)
             "  level: INFO",
             "  handlers: [standard_output]",
         )
-        assert {"section_test": {"key": "value"}} == load(
+        assert {"section_test": {"key": "value"}} == pycommon_server.load(
             os.path.join(server_folder, "server.py")
         )

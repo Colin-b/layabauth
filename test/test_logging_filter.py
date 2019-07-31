@@ -4,7 +4,7 @@ import re
 import pytest
 import flask
 
-from pycommon_server import logging_filter
+import pycommon_server
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def app():
     @application.route("/request_id")
     def get_request_id():
         record = collections.namedtuple("TestRecord", [])
-        logging_filter.RequestIdFilter().filter(record)
+        pycommon_server.RequestIdFilter().filter(record)
         return str(record.request_id)
 
     return application
@@ -45,5 +45,5 @@ def test_request_id_filter_with_value_already_set_in_flask_globals(client):
 
 def test_request_id_filter_without_flask():
     record = collections.namedtuple("TestRecord", [])
-    logging_filter.RequestIdFilter().filter(record)
+    pycommon_server.RequestIdFilter().filter(record)
     assert "" == record.request_id

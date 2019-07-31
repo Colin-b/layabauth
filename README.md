@@ -13,29 +13,29 @@ This package provides the following features:
 
 API configuration and logging configuration can be standardized.
 
-You will find more details in pycommon_server.configuration module.
-
 ### Loading configuration ###
 
 ```python
-from pycommon_server.configuration import load
+import pycommon_server
 
 # Load logging and service configuration
-service_configuration = load('path/to/a/file/in/module/folder')
+service_configuration = pycommon_server.load('path/to/a/file/in/module/folder')
 ```
 
 ## Flask RestPlus ##
 
-The way your REST API behaves can be standardized.
+The way your REST API behaves can be standardized
 
-You will find more details in pycommon_server.flask_restplus_common module.
+You will find more details in the following modules:
+* pycommon_server.authentication
+* pycommon_server.pandas_responses
 
 ### Default behavior ###
 
-Importing pycommon_server.monitoring will make sure that every flask request is loggued on reception. 
+Importing pycommon_server will make sure that every flask request is loggued on reception. 
 
 ```python
-import pycommon_server.monitoring
+import pycommon_server
 ```
 
 ## How to install

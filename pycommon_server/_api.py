@@ -8,7 +8,7 @@ import flask_cors
 import flask_compress
 import werkzeug
 
-from pycommon_server.configuration import get_environment
+from pycommon_server import get_environment
 
 
 class _ReverseProxied:

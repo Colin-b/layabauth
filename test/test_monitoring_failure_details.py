@@ -2,7 +2,7 @@ import pytest
 from flask import Flask
 from flask_restplus import Api
 
-from pycommon_server import monitoring
+import pycommon_server
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def app():
     def failure_details():
         return "fail", {"toto": {"status": "warn"}, "toto2": {"status": "fail"}}
 
-    monitoring.add_monitoring_namespace(api, failure_details)
+    pycommon_server.add_monitoring_namespace(api, failure_details)
 
     return application
 

@@ -4,11 +4,11 @@ import json
 import flask
 import flask_restplus
 
-import pycommon_server.api
+import pycommon_server
 
 
 def test_basic_api():
-    app, api = pycommon_server.api.create_api(
+    app, api = pycommon_server.create_api(
         __file__,
         title="TestApi",
         description="Testing API",
@@ -40,7 +40,7 @@ def test_basic_api():
 
 
 def test_cors_api():
-    app, api = pycommon_server.api.create_api(
+    app, api = pycommon_server.create_api(
         __file__, title="TestApi", description="Testing API", reverse_proxy=False
     )
 
@@ -69,7 +69,7 @@ def test_cors_api():
 
 
 def test_compress_api():
-    app, api = pycommon_server.api.create_api(
+    app, api = pycommon_server.create_api(
         __file__,
         title="TestApi",
         description="Testing API",
@@ -97,7 +97,7 @@ def test_compress_api():
 
 
 def test_reverse_proxy_api():
-    app, api = pycommon_server.api.create_api(
+    app, api = pycommon_server.create_api(
         __file__, title="TestApi", description="Testing API", cors=False
     )
 
@@ -128,7 +128,7 @@ def test_reverse_proxy_api():
 
 
 def test_extra_parameters_api():
-    app, api = pycommon_server.api.create_api(
+    app, api = pycommon_server.create_api(
         __file__,
         title="TestApi",
         description="Testing API",

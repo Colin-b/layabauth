@@ -2,7 +2,7 @@ import pytest
 import flask
 import flask_restplus
 
-from pycommon_server import monitoring
+import pycommon_server._monitoring
 
 
 @pytest.fixture
@@ -13,19 +13,19 @@ def app():
 
     @api.route("/logging")
     class Logging(flask_restplus.Resource):
-        @monitoring._log_request_details
+        @pycommon_server._monitoring._log_request_details
         def get(self):
             return ""
 
-        @monitoring._log_request_details
+        @pycommon_server._monitoring._log_request_details
         def post(self):
             return ""
 
-        @monitoring._log_request_details
+        @pycommon_server._monitoring._log_request_details
         def put(self):
             return ""
 
-        @monitoring._log_request_details
+        @pycommon_server._monitoring._log_request_details
         def delete(self):
             return ""
 

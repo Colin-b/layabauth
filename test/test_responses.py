@@ -4,7 +4,7 @@ import pytest
 import flask
 import flask_restplus
 
-from pycommon_server import responses
+import pycommon_server
 
 
 @pytest.fixture
@@ -15,17 +15,17 @@ def app():
 
     @api.route("/standard_responses")
     class StandardResponses(flask_restplus.Resource):
-        @api.doc(**responses.created_response_doc(api))
+        @api.doc(**pycommon_server.created_response_doc(api))
         def post(self):
-            return responses.created_response("/standard_responses?id=42")
+            return pycommon_server.created_response("/standard_responses?id=42")
 
-        @api.doc(**responses.updated_response_doc(api))
+        @api.doc(**pycommon_server.updated_response_doc(api))
         def put(self):
-            return responses.updated_response("/standard_responses?id=43")
+            return pycommon_server.updated_response("/standard_responses?id=43")
 
-        @api.response(*responses.deleted_response_doc)
+        @api.response(*pycommon_server.deleted_response_doc)
         def delete(self):
-            return responses.deleted_response
+            return pycommon_server.deleted_response
 
     return application
 
