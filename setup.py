@@ -8,21 +8,17 @@ with open(os.path.join(this_dir, "README.md"), "r") as f:
     long_description = f.read()
 
 setup(
-    name="pycommon_server",
-    version=open("pycommon_server/version.py").readlines()[-1].split()[-1].strip("\"'"),
-    description="Provide helper for REST API related stuff.",
+    name="layabauth",
+    version=open("layabauth/version.py").readlines()[-1].split()[-1].strip("\"'"),
+    description="Authentication support for layab.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["test"]),
     install_requires=[
-        # Used to manage endpoints and swagger
-        "flask-restplus==0.12.1",
-        # Used to parse configurations
-        "PyYAML==5.1.1",
-        # Cross Origin handling
-        "flask_cors==3.0.8",
-        # Used to gz compress http output
-        "flask_compress==1.4.0",
+        # Used to manage received requests
+        "flask==1.1.1",
+        # Used to manage authentication
+        "oauth2helper==2.0.0",
         # Used to ensure Black code style is checked on pre-commit
         "pre-commit==1.17.0",
     ],
@@ -30,19 +26,14 @@ setup(
         "testing": [
             # Used to manage testing of a Flask application
             "pytest-flask==0.15.0",
-            # Optional dependencies
-            "oauth2helper==2.0.0",
-            "pandas==0.25.0",
+            # Used to test decorator
+            "flask-restplus==0.12.1",
         ],
-        # Used to manage authentication
-        "authentication": ["oauth2helper==2.0.0"],
-        # Pandas
-        "pandas": ["pandas==0.25.0"],
     },
     python_requires=">=3.6",
     project_urls={
-        "Changelog": "https://github.tools.digital.engie.com/GEM-Py/pycommon_server/blob/development/CHANGELOG.md",
-        "Issues": "https://github.tools.digital.engie.com/GEM-Py/pycommon_server/issues",
+        "Changelog": "https://github.tools.digital.engie.com/GEM-Py/layabauth/blob/development/CHANGELOG.md",
+        "Issues": "https://github.tools.digital.engie.com/GEM-Py/layabauth/issues",
     },
     license="MIT",
     classifiers=[

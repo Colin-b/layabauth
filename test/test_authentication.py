@@ -5,7 +5,8 @@ import pytest
 import flask
 import flask_restplus
 
-from pycommon_server import authentication
+import layabauth
+from layabauth._authentication import get_user
 
 
 def test_get_user_bearer():
@@ -23,7 +24,7 @@ def test_get_user_bearer():
     6DZO-RPse8YZjd4YBuKsg"""
 
     with pytest.raises(ValueError) as exception_info:
-        authentication.get_user(bearer=encoded, no_auth=False)
+        get_user(bearer=encoded, no_auth=False)
     assert re.match(
         "Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM is not a valid key identifier. Valid ones are .*",
         str(exception_info.value),
@@ -31,18 +32,18 @@ def test_get_user_bearer():
 
 
 def test_get_user_no_auth_no_bearer():
-    user = authentication.get_user(bearer=None, no_auth=True)
+    user = get_user(bearer=None, no_auth=True)
     assert "anonymous" == user
 
 
 def test_get_user_no_auth_api_key():
-    user = authentication.get_user(bearer="SESAME", no_auth=True)
+    user = get_user(bearer="SESAME", no_auth=True)
     assert "PARKER" == user
 
 
 def test_get_user_no_auth_wrong_key():
     with pytest.raises(ValueError) as exception_info:
-        authentication.get_user(bearer="TOTO", no_auth=True)
+        get_user(bearer="TOTO", no_auth=True)
     assert (
         str(exception_info.value)
         == "Token validation error: Invalid JWT Token (header, body and signature must be separated by dots)."
@@ -50,7 +51,7 @@ def test_get_user_no_auth_wrong_key():
 
 
 def test_get_user_no_auth_no_br():
-    user = authentication.get_user(bearer="SESAME", no_auth=False)
+    user = get_user(bearer="SESAME", no_auth=False)
     assert "PARKER" == user
 
 
@@ -62,19 +63,19 @@ def app():
 
     @api.route("/requires_authentication")
     class RequiresAuthentication(flask_restplus.Resource):
-        @authentication.requires_authentication
+        @layabauth.requires_authentication
         def get(self):
             return ""
 
-        @authentication.requires_authentication
+        @layabauth.requires_authentication
         def post(self):
             return ""
 
-        @authentication.requires_authentication
+        @layabauth.requires_authentication
         def put(self):
             return ""
 
-        @authentication.requires_authentication
+        @layabauth.requires_authentication
         def delete(self):
             return ""
 
@@ -82,7 +83,7 @@ def app():
     class UserId(flask_restplus.Resource):
         def get(self):
             record = collections.namedtuple("TestRecord", [])
-            authentication.UserIdFilter().filter(record)
+            layabauth.UserIdFilter().filter(record)
             return flask.make_response(str(record.user_id))
 
     return application
@@ -333,5 +334,5 @@ def test_user_id_filter_with_value_already_set_in_flask_globals(client):
 
 def test_user_id_filter_without_flask():
     record = collections.namedtuple("TestRecord", [])
-    authentication.UserIdFilter().filter(record)
+    layabauth.UserIdFilter().filter(record)
     assert record.user_id == ""

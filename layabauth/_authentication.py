@@ -13,50 +13,44 @@ class User:
         self.name = oauth2helper.user_name(decoded_body)
 
 
-class Authentication:
+def authorizations(**scopes) -> dict:
     """
-    Contains helper to manage authentication.
+    Return all security definitions.
+    Contains only one OAuth2 definition using Engie Azure authentication.
+
+    :param scopes: All scopes that should be available (scope_name = 'description as a string').
     """
+    engie_tenant_id = "24139d14-c62c-4c47-8bdd-ce71ea1d50cf"
+    nonce = scopes.pop("nonce", "7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7")
 
-    @staticmethod
-    def authorizations(**scopes) -> dict:
-        """
-        Return all security definitions.
-        Contains only one OAuth2 definition using Engie Azure authentication.
-
-        :param scopes: All scopes that should be available (scope_name = 'description as a string').
-        """
-        engie_tenant_id = "24139d14-c62c-4c47-8bdd-ce71ea1d50cf"
-        nonce = scopes.pop("nonce", "7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7")
-
-        return {
-            "oauth2": {
-                "scopes": scopes,
-                "flow": "implicit",
-                "authorizationUrl": f"https://login.microsoftonline.com/{engie_tenant_id}/oauth2/authorize?nonce={nonce}",
-                "type": "oauth2",
-            }
+    return {
+        "oauth2": {
+            "scopes": scopes,
+            "flow": "implicit",
+            "authorizationUrl": f"https://login.microsoftonline.com/{engie_tenant_id}/oauth2/authorize?nonce={nonce}",
+            "type": "oauth2",
         }
+    }
 
-    @staticmethod
-    def method_authorizations(*scopes) -> dict:
-        """
-        Return method security.
-        Contains only one OAuth2 security.
 
-        :param scopes: All scope names that should be available (as string).
-        """
-        return {"security": [{"oauth2": scopes}]}
+def method_authorizations(*scopes) -> dict:
+    """
+    Return method security.
+    Contains only one OAuth2 security.
 
-    @staticmethod
-    def _to_user(token: str) -> User:
-        try:
-            json_header, json_body = oauth2helper.validate(token)
-            return User(json_body)
-        except (
-            jwt.exceptions.InvalidTokenError or jwt.exceptions.InvalidKeyError
-        ) as e:
-            raise werkzeug.exceptions.Unauthorized(description=str(e))
+    :param scopes: All scope names that should be available (as string).
+    """
+    return {"security": [{"oauth2": scopes}]}
+
+
+def _to_user(token: str) -> User:
+    try:
+        json_header, json_body = oauth2helper.validate(token)
+        return User(json_body)
+    except (
+        jwt.exceptions.InvalidTokenError or jwt.exceptions.InvalidKeyError
+    ) as e:
+        raise werkzeug.exceptions.Unauthorized(description=str(e))
 
 
 def requires_authentication(func):
@@ -68,7 +62,7 @@ def requires_authentication(func):
             if authorization and authorization.startswith("Bearer ")
             else None
         )
-        flask.g.current_user = Authentication._to_user(token)
+        flask.g.current_user = _to_user(token)
         return func(*func_args, **func_kwargs)
 
     return wrapper
