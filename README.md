@@ -7,6 +7,8 @@
 <a href='https://pse.tools.digital.engie.com/drm-all.gem/job/team/view/Python%20modules/job/pycommon_server/job/master/lastSuccessfulBuild/testReport/'><img src='https://pse.tools.digital.engie.com/drm-all.gem/buildStatus/icon?job=team/pycommon_server/master&config=testCount'></a>
 </p>
 
+This module is deprecated in favour of [layab](https://github.tools.digital.engie.com/GEM-Py/layab).
+
 This package provides the following features:
 
 ## YAML Configuration ##
