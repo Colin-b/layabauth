@@ -5,7 +5,7 @@ import pytest
 from flask import Flask
 from flask_restplus import Api
 
-from pycommon_server import flask_restplus_common
+from pycommon_server import monitoring
 
 
 @pytest.fixture
@@ -47,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated feature 1
 - Future removal 2
 
+### Removed
+- Deprecated feature 2
+- Future removal 1
+
 ## [1.1.0] - 2018-05-31
 ### Changed
 - Enhancement 1 (1.1.0)
@@ -67,8 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Known issue 2 (1.0.0)
 """
         )
-    yield changelog_file_path
-    os.remove(changelog_file_path)
+    return changelog_file_path
 
 
 @pytest.fixture
@@ -80,11 +83,11 @@ def app(changelog):
     def pass_details():
         return "pass", {"toto2": {"status": "pass"}}
 
-    flask_restplus_common.add_monitoring_namespace(api, pass_details)
+    monitoring.add_monitoring_namespace(api, pass_details)
     return application
 
 
-def test_changelog_with_versions_and_no_removed(client):
+def test_changelog_with_versions_and_all_categories(client):
     response = client.get("/changelog")
     assert response.status_code == 200
     assert response.json == [

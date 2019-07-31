@@ -18,12 +18,6 @@ def app():
         logging_filter.RequestIdFilter().filter(record)
         return str(record.request_id)
 
-    @application.route("/user_id")
-    def get_user_id():
-        record = collections.namedtuple("TestRecord", [])
-        logging_filter.UserIdFilter().filter(record)
-        return str(record.user_id)
-
     return application
 
 
@@ -53,20 +47,3 @@ def test_request_id_filter_without_flask():
     record = collections.namedtuple("TestRecord", [])
     logging_filter.RequestIdFilter().filter(record)
     assert "" == record.request_id
-
-
-def test_user_id_filter_with_value_not_set_in_header(client):
-    response = client.get("/user_id")
-    assert response.get_data(as_text=True) == "anonymous"
-
-
-def test_user_id_filter_with_value_already_set_in_flask_globals(client):
-    client.get("/user_id", headers={"Bearer": "sesame"})
-    response = client.get("/user_id")
-    assert response.get_data(as_text=True) == "PARKER"
-
-
-def test_user_id_filter_without_flask():
-    record = collections.namedtuple("TestRecord", [])
-    logging_filter.UserIdFilter().filter(record)
-    assert "" == record.user_id

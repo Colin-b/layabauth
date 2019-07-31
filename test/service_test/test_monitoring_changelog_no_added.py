@@ -1,4 +1,3 @@
-import logging
 import os
 import os.path
 
@@ -6,9 +5,7 @@ import pytest
 from flask import Flask
 from flask_restplus import Api
 
-from pycommon_server import flask_restplus_common
-
-logger = logging.getLogger(__name__)
+from pycommon_server import monitoring
 
 
 @pytest.fixture
@@ -29,12 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Release note 1.
 - Release note 2.
-
-### Added
-- Enhancement 1
-- sub enhancement 1
-- sub enhancement 2
-- Enhancement 2
 
 ### Fixed
 - Bug fix 1
@@ -87,11 +78,11 @@ def app(changelog):
     def pass_details():
         return "pass", {"toto2": {"status": "pass"}}
 
-    flask_restplus_common.add_monitoring_namespace(api, pass_details)
+    monitoring.add_monitoring_namespace(api, pass_details)
     return application
 
 
-def test_changelog_with_versions_and_no_security(client):
+def test_changelog_with_versions_and_no_added(client):
     response = client.get("/changelog")
     assert response.status_code == 200
     assert response.json == [

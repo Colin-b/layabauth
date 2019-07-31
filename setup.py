@@ -7,29 +7,6 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_dir, "README.md"), "r") as f:
     long_description = f.read()
 
-extra_requirements = {
-    "testing": [
-        # Used to manage testing of a Flask application
-        "pytest-flask==0.15.0"
-    ],
-    # Used to manage authentication
-    "authentication": ["oauth2helper==2.0.0"],
-    # Used to connect to another REST API
-    "rest": ["requests==2.22.0"],
-    # Pandas
-    "pandas": ["pandas==0.25.0"],
-}
-
-
-# Add all extra requirements to testing
-extra_requirements["testing"] += [
-    extra
-    for extra_name, extra_list in extra_requirements.items()
-    if extra_name != "testing"
-    for extra in extra_list
-]
-
-
 setup(
     name="pycommon_server",
     version=open("pycommon_server/version.py").readlines()[-1].split()[-1].strip("\"'"),
@@ -49,7 +26,19 @@ setup(
         # Used to ensure Black code style is checked on pre-commit
         "pre-commit==1.17.0",
     ],
-    extras_require=extra_requirements,
+    extras_require={
+        "testing": [
+            # Used to manage testing of a Flask application
+            "pytest-flask==0.15.0",
+            # Optional dependencies
+            "oauth2helper==2.0.0",
+            "pandas==0.25.0",
+        ],
+        # Used to manage authentication
+        "authentication": ["oauth2helper==2.0.0"],
+        # Pandas
+        "pandas": ["pandas==0.25.0"],
+    },
     python_requires=">=3.6",
     project_urls={
         "Changelog": "https://github.tools.digital.engie.com/GEM-Py/pycommon_server/blob/development/CHANGELOG.md",

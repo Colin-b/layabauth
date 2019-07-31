@@ -2,7 +2,7 @@ import pytest
 from flask import Flask
 from flask_restplus import Api
 
-from pycommon_server import flask_restplus_common
+from pycommon_server import monitoring
 
 
 @pytest.fixture
@@ -11,10 +11,10 @@ def app():
     application.testing = True
     api = Api(application, version="3.2.1")
 
-    def throw_exception():
-        raise Exception("This is the error message.")
+    def failure_details():
+        return "fail", {"toto": {"status": "warn"}, "toto2": {"status": "fail"}}
 
-    flask_restplus_common.add_monitoring_namespace(api, throw_exception)
+    monitoring.add_monitoring_namespace(api, failure_details)
 
     return application
 
@@ -23,8 +23,7 @@ def test_health_check_response_on_exception(client):
     response = client.get("/health")
     assert response.status_code == 400
     assert response.json == {
-        "details": {},
-        "output": "This is the error message.",
+        "details": {"toto": {"status": "warn"}, "toto2": {"status": "fail"}},
         "releaseId": "3.2.1",
         "status": "fail",
         "version": "3",

@@ -6,6 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [19.0.0] - 2019-07-31
+### Removed
+- jwt_checker (content is now within authentication)
+- logging_filter.UserIdFilter (class is now within authentication)
+- flask_restplus_common.add_monitoring_namespace (function is now within monitoring)
+- flask_restplus_common.base_path (function is now private)
+- flask_restplus_common.created_response (function is now within responses)
+- flask_restplus_common.created_response_doc (function is now within responses)
+- flask_restplus_common.updated_response (function is now within responses)
+- flask_restplus_common.updated_response_doc (function is now within responses)
+- flask_restplus_common.deleted_response (variable is now within responses)
+- flask_restplus_common.deleted_response_doc (variable is now within responses)
+- flask_restplus_common.PycommonApi (class is now private)
+- flask_restplus_common.create_api (function is now within api)
+- "rest" optional dependency (not needed anymore as REST related code is in healthpy module)
+
+### Changed
+- logging_filter.RequestIdFilter (CeleryTaskIdFilter class is now within flasynk and should be use to track celery tasks)
+
 ## [18.1.0] - 2019-07-23
 ### Changed
 - Switch testing to pytest instead of pycommon_test.

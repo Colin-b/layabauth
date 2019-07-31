@@ -1,129 +1,91 @@
-import gzip
 import re
+import collections
 
 import pytest
-from flask import Flask, Response, json
-from flask_restplus import Resource, Api
+import flask
+import flask_restplus
 
-from pycommon_server import flask_restplus_common
+from pycommon_server import authentication
+
+
+def test_get_user_bearer():
+    encoded = u"""eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImEzUU4wQlpTN3M0bk4tQmRyamJGMFlfTGRNTSIsImtpZCI6ImEzUU4wQ
+    lpTN3M0bk4tQmRyamJGMFlfTGRNTSJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYjI4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy5
+    3aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDctOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNDkwNzc5NzEyLCJuYmYiOjE0OTA3Nzk3MTIsImV4cC
+    I6MTQ5MDc4MzYxMiwiYW1yIjpbInB3ZCJdLCJmYW1pbHlfbmFtZSI6IkRlIE1hZXllciIsImdpdmVuX25hbWUiOiJGYWJyaWNlIiwiaXBhZGRyIjoiMTA0L
+    jQ2LjU4LjE0OSIsIm5hbWUiOiJEZSBNYWV5ZXIgRmFicmljZSAoZXh0ZXJuYWwpIiwibm9uY2UiOiI3MzYyQ0FFQS05Q0E1LTRCNDMtOUJBMy0zNEQ3QzMw
+    M0VCQTciLCJvaWQiOiI1YTJmOGQyYS0xNzQ1LTRmNTctOTcwYS03YjIwMzU5YWUyZGMiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwOTA4MjIzMy0xNDE
+    3MDAxMzMzLTY4MjAwMzMzMC0yODUxNjAiLCJwbGF0ZiI6IjMiLCJzdWIiOiJRcjhNZlAwQk9oRld3WlNoNFZSVEpYeGd3Z19XTFBId193TnBnS1lMQTJVIi
+    widGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiwidW5pcXVlX25hbWUiOiJCSUY1OTBAZW5naWUuY29tIiwidXBuIjoiQklGN
+    TkwQGVuZ2llLmNvbSIsInZlciI6IjEuMCJ9.vZO7a5Vs0G_g92Bb00BPKcLuF9WmrqfLjwbLhz8xEe3OfqfthWHqh_jzf_Md88INc4ZuMqOMPhWZTZjQMgC
+    ACIpTiHDpFRkokZ-jqC09BaQSSjwV_27b-zy-m6CZcFtdUe10LIBQEqiL9JnZlVIrBgFqr49bKBvZKr3uuaoeiuR2XcC0U2klYkDr3CYIexX0w57lvD5Ow0
+    xKkdWKYVswcJipenU9PP63R0wNXr-8cb-6PGIUzaQDREo-EuR2e3uShF9u5cagG7emt9fDmJr8eGxBJU9ppRoffJpuaYeJiIg1F_n0iK7hENnIjZVnHjFn4
+    6DZO-RPse8YZjd4YBuKsg"""
+
+    with pytest.raises(ValueError) as exception_info:
+        authentication.get_user(bearer=encoded, no_auth=False)
+    assert re.match(
+        "Token validation error: a3QN0BZS7s4nN-BdrjbF0Y_LdMM is not a valid key identifier. Valid ones are .*",
+        str(exception_info.value),
+    )
+
+
+def test_get_user_no_auth_no_bearer():
+    user = authentication.get_user(bearer=None, no_auth=True)
+    assert "anonymous" == user
+
+
+def test_get_user_no_auth_api_key():
+    user = authentication.get_user(bearer="SESAME", no_auth=True)
+    assert "PARKER" == user
+
+
+def test_get_user_no_auth_wrong_key():
+    with pytest.raises(ValueError) as exception_info:
+        authentication.get_user(bearer="TOTO", no_auth=True)
+    assert (
+        str(exception_info.value)
+        == "Token validation error: Invalid JWT Token (header, body and signature must be separated by dots)."
+    )
+
+
+def test_get_user_no_auth_no_br():
+    user = authentication.get_user(bearer="SESAME", no_auth=False)
+    assert "PARKER" == user
 
 
 @pytest.fixture
 def app():
-    application = Flask(__name__)
+    application = flask.Flask(__name__)
     application.testing = True
-    api = Api(application)
+    api = flask_restplus.Api(application)
 
     @api.route("/requires_authentication")
-    class RequiresAuthentication(Resource):
-        @flask_restplus_common.requires_authentication
+    class RequiresAuthentication(flask_restplus.Resource):
+        @authentication.requires_authentication
         def get(self):
             return ""
 
-        @flask_restplus_common.requires_authentication
+        @authentication.requires_authentication
         def post(self):
             return ""
 
-        @flask_restplus_common.requires_authentication
+        @authentication.requires_authentication
         def put(self):
             return ""
 
-        @flask_restplus_common.requires_authentication
+        @authentication.requires_authentication
         def delete(self):
             return ""
 
-    @api.route("/logging")
-    class Logging(Resource):
-        @flask_restplus_common._log_request_details
+    @api.route("/user_id")
+    class UserId(flask_restplus.Resource):
         def get(self):
-            return ""
-
-        @flask_restplus_common._log_request_details
-        def post(self):
-            return ""
-
-        @flask_restplus_common._log_request_details
-        def put(self):
-            return ""
-
-        @flask_restplus_common._log_request_details
-        def delete(self):
-            return ""
-
-    @api.route("/standard_responses")
-    class StandardResponses(Resource):
-        @api.doc(**flask_restplus_common.created_response_doc(api))
-        def post(self):
-            return flask_restplus_common.created_response("/standard_responses?id=42")
-
-        @api.doc(**flask_restplus_common.updated_response_doc(api))
-        def put(self):
-            return flask_restplus_common.updated_response("/standard_responses?id=43")
-
-        @api.response(*flask_restplus_common.deleted_response_doc)
-        def delete(self):
-            return flask_restplus_common.deleted_response
+            record = collections.namedtuple("TestRecord", [])
+            authentication.UserIdFilter().filter(record)
+            return flask.make_response(str(record.user_id))
 
     return application
-
-
-def test_standard_post_response_without_reverse_proxy(client):
-    response = client.post(
-        "/standard_responses", data=json.dumps({}), content_type="application/json"
-    )
-    assert response.status_code == 201
-    assert response.json == {"status": "Successful"}
-    assert response.headers["location"] == "http://localhost/standard_responses?id=42"
-
-
-def test_standard_post_response_with_reverse_proxy(client):
-    response = client.post(
-        "/standard_responses",
-        data=json.dumps({}),
-        content_type="application/json",
-        headers={
-            "X-Original-Request-Uri": "/reverse/standard_responses",
-            "Host": "localhost",
-        },
-    )
-    assert response.status_code == 201
-    assert response.json == {"status": "Successful"}
-    assert (
-        response.headers["location"]
-        == "http://localhost/reverse/standard_responses?id=42"
-    )
-
-
-def test_standard_put_response_without_reverse_proxy(client):
-    response = client.put(
-        "/standard_responses", data=json.dumps({}), content_type="application/json"
-    )
-    assert response.status_code == 201
-    assert response.json == {"status": "Successful"}
-    assert response.headers["location"] == "http://localhost/standard_responses?id=43"
-
-
-def test_standard_put_response_with_reverse_proxy(client):
-    response = client.put(
-        "/standard_responses",
-        data=json.dumps({}),
-        content_type="application/json",
-        headers={
-            "X-Original-Request-Uri": "/reverse/standard_responses",
-            "Host": "localhost",
-        },
-    )
-    assert response.status_code == 201
-    assert response.json == {"status": "Successful"}
-    assert (
-        response.headers["location"]
-        == "http://localhost/reverse/standard_responses?id=43"
-    )
-
-
-def test_standard_delete_response(client):
-    response = client.delete("/standard_responses")
-    assert response.status_code == 204
 
 
 def test_generated_swagger(client):
@@ -133,28 +95,6 @@ def test_generated_swagger(client):
         "swagger": "2.0",
         "basePath": "/",
         "paths": {
-            "/logging": {
-                "delete": {
-                    "responses": {"200": {"description": "Success"}},
-                    "operationId": "delete_logging",
-                    "tags": ["default"],
-                },
-                "get": {
-                    "responses": {"200": {"description": "Success"}},
-                    "operationId": "get_logging",
-                    "tags": ["default"],
-                },
-                "post": {
-                    "responses": {"200": {"description": "Success"}},
-                    "operationId": "post_logging",
-                    "tags": ["default"],
-                },
-                "put": {
-                    "responses": {"200": {"description": "Success"}},
-                    "operationId": "put_logging",
-                    "tags": ["default"],
-                },
-            },
             "/requires_authentication": {
                 "delete": {
                     "responses": {"200": {"description": "Success"}},
@@ -177,44 +117,12 @@ def test_generated_swagger(client):
                     "tags": ["default"],
                 },
             },
-            "/standard_responses": {
-                "delete": {
-                    "responses": {"204": {"description": "Deleted"}},
-                    "operationId": "delete_standard_responses",
+            "/user_id": {
+                "get": {
+                    "operationId": "get_user_id",
+                    "responses": {"200": {"description": "Success"}},
                     "tags": ["default"],
-                },
-                "post": {
-                    "responses": {
-                        "201": {
-                            "description": "Created",
-                            "headers": {
-                                "location": {
-                                    "description": "Location of created resource.",
-                                    "type": "string",
-                                }
-                            },
-                            "schema": {"$ref": "#/definitions/Created"},
-                        }
-                    },
-                    "operationId": "post_standard_responses",
-                    "tags": ["default"],
-                },
-                "put": {
-                    "responses": {
-                        "201": {
-                            "description": "Updated",
-                            "headers": {
-                                "location": {
-                                    "description": "Location of updated resource.",
-                                    "type": "string",
-                                }
-                            },
-                            "schema": {"$ref": "#/definitions/Updated"},
-                        }
-                    },
-                    "operationId": "put_standard_responses",
-                    "tags": ["default"],
-                },
+                }
             },
         },
         "info": {"title": "API", "version": "1.0"},
@@ -224,16 +132,6 @@ def test_generated_swagger(client):
         "responses": {
             "ParseError": {"description": "When a mask can't be parsed"},
             "MaskError": {"description": "When any error occurs on mask"},
-        },
-        "definitions": {
-            "Created": {
-                "properties": {"status": {"default": "Successful", "type": "string"}},
-                "type": "object",
-            },
-            "Updated": {
-                "properties": {"status": {"default": "Successful", "type": "string"}},
-                "type": "object",
-            },
         },
     }
 
@@ -422,183 +320,18 @@ def test_authentication_failure_invalid_key_identifier_in_token_on_delete(client
     )
 
 
-def test_log_get_request_details(client):
-    response = client.get("/logging")
-    assert response.status_code == 200
-    assert response.json == ""
+def test_user_id_filter_with_value_not_set_in_header(client):
+    response = client.get("/user_id")
+    assert response.get_data(as_text=True) == "anonymous"
 
 
-def test_log_delete_request_details(client):
-    response = client.delete("/logging")
-    assert response.status_code == 200
-    assert response.json == ""
+def test_user_id_filter_with_value_already_set_in_flask_globals(client):
+    client.get("/user_id", headers={"Bearer": "sesame"})
+    response = client.get("/user_id")
+    assert response.get_data(as_text=True) == "PARKER"
 
 
-def test_log_post_request_details(client):
-    response = client.post("/logging")
-    assert response.status_code == 200
-    assert response.json == ""
-
-
-def test_log_put_request_details(client):
-    response = client.put("/logging")
-    assert response.status_code == 200
-    assert response.json == ""
-
-
-def test_basic_api():
-    app, api = flask_restplus_common.create_api(
-        __file__,
-        title="TestApi",
-        description="Testing API",
-        cors=False,
-        reverse_proxy=False,
-    )
-
-    with app.test_client() as client:
-        response = client.get("/swagger.json")
-        assert response.status_code == 200
-        assert response.json == {
-            "swagger": "2.0",
-            "basePath": "/",
-            "paths": {},
-            "info": {
-                "title": "TestApi",
-                "version": "1.0.0",
-                "description": "Testing API",
-                "x-server-environment": "default",
-            },
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "tags": [],
-            "responses": {
-                "ParseError": {"description": "When a mask can't be parsed"},
-                "MaskError": {"description": "When any error occurs on mask"},
-            },
-        }
-
-
-def test_cors_api():
-    app, api = flask_restplus_common.create_api(
-        __file__, title="TestApi", description="Testing API", reverse_proxy=False
-    )
-
-    with app.test_client() as client:
-        response = client.get("/swagger.json")
-        assert response.status_code == 200
-        assert response.json == {
-            "swagger": "2.0",
-            "basePath": "/",
-            "paths": {},
-            "info": {
-                "title": "TestApi",
-                "version": "1.0.0",
-                "description": "Testing API",
-                "x-server-environment": "default",
-            },
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "tags": [],
-            "responses": {
-                "ParseError": {"description": "When a mask can't be parsed"},
-                "MaskError": {"description": "When any error occurs on mask"},
-            },
-        }
-        assert response.headers.get("Access-Control-Allow-Origin") == "*"
-
-
-def test_compress_api():
-    app, api = flask_restplus_common.create_api(
-        __file__,
-        title="TestApi",
-        description="Testing API",
-        cors=False,
-        reverse_proxy=False,
-        compress_mimetypes=["application/json"],
-    )
-
-    heavy_answer = {"test": 1000 * "A"}
-
-    @api.route("/test")
-    class TestRoute(Resource):
-        def get(self):
-            return Response(
-                response=json.dumps(heavy_answer), mimetype="application/json"
-            )
-
-    with app.test_client() as client:
-        response = client.get("/test", headers=[("Accept-Encoding", "gzip")])
-        assert response.status_code == 200
-        assert response.content_encoding == "gzip"
-        assert (
-            json.loads(gzip.decompress(response.data).decode("utf-8")) == heavy_answer
-        )
-
-
-def test_reverse_proxy_api():
-    app, api = flask_restplus_common.create_api(
-        __file__, title="TestApi", description="Testing API", cors=False
-    )
-
-    with app.test_client() as client:
-        response = client.get(
-            "/swagger.json",
-            headers=[("X-Original-Request-Uri", "/behind_reverse_proxy")],
-        )
-        assert response.status_code == 200
-        assert response.json == {
-            "swagger": "2.0",
-            "basePath": "/behind_reverse_proxy",
-            "paths": {},
-            "info": {
-                "title": "TestApi",
-                "version": "1.0.0",
-                "description": "Testing API",
-                "x-server-environment": "default",
-            },
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "tags": [],
-            "responses": {
-                "ParseError": {"description": "When a mask can't be parsed"},
-                "MaskError": {"description": "When any error occurs on mask"},
-            },
-        }
-
-
-def test_extra_parameters_api():
-    app, api = flask_restplus_common.create_api(
-        __file__,
-        title="TestApi",
-        description="Testing API",
-        cors=False,
-        reverse_proxy=False,
-        license_url="my.license.com",
-        license="MIT",
-    )
-
-    with app.test_client() as client:
-        response = client.get(
-            "/swagger.json",
-            headers=[("X-Original-Request-Uri", "/behind_reverse_proxy")],
-        )
-        assert response.status_code == 200
-        assert response.json == {
-            "swagger": "2.0",
-            "basePath": "/",
-            "paths": {},
-            "info": {
-                "title": "TestApi",
-                "version": "1.0.0",
-                "description": "Testing API",
-                "x-server-environment": "default",
-                "license": {"name": "MIT", "url": "my.license.com"},
-            },
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "tags": [],
-            "responses": {
-                "ParseError": {"description": "When a mask can't be parsed"},
-                "MaskError": {"description": "When any error occurs on mask"},
-            },
-        }
+def test_user_id_filter_without_flask():
+    record = collections.namedtuple("TestRecord", [])
+    authentication.UserIdFilter().filter(record)
+    assert record.user_id == ""

@@ -1,7 +1,7 @@
 <h2 align="center">Python Common Server Module</h2>
 
 <p align="center">
-<a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 <a href='https://pse.tools.digital.engie.com/drm-all.gem/job/team/view/Python%20modules/job/pycommon_server/job/master/'><img src='https://pse.tools.digital.engie.com/drm-all.gem/buildStatus/icon?job=team/pycommon_server/master'></a>
 <a href='https://pse.tools.digital.engie.com/drm-all.gem/job/team/view/Python%20modules/job/pycommon_server/job/master/cobertura/'><img src='https://pse.tools.digital.engie.com/drm-all.gem/buildStatus/icon?job=team/pycommon_server/master&config=testCoverage'></a>
 <a href='https://pse.tools.digital.engie.com/drm-all.gem/job/team/view/Python%20modules/job/pycommon_server/job/master/lastSuccessfulBuild/testReport/'><img src='https://pse.tools.digital.engie.com/drm-all.gem/buildStatus/icon?job=team/pycommon_server/master&config=testCount'></a>
@@ -32,10 +32,10 @@ You will find more details in pycommon_server.flask_restplus_common module.
 
 ### Default behavior ###
 
-Importing pycommon_server.flask_restplus_common will make sure that every flask request is loggued on reception. 
+Importing pycommon_server.monitoring will make sure that every flask request is loggued on reception. 
 
 ```python
-import pycommon_server.flask_restplus_common
+import pycommon_server.monitoring
 ```
 
 ## How to install
