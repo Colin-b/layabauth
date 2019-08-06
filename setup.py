@@ -18,9 +18,7 @@ setup(
         # Used to manage received requests
         "flask==1.1.1",
         # Used to manage authentication
-        "oauth2helper==2.0.0",
-        # Used to ensure Black code style is checked on pre-commit
-        "pre-commit==1.17.0",
+        "oauth2helper==3.0.1",
     ],
     extras_require={
         "testing": [
@@ -28,6 +26,8 @@ setup(
             "pytest-flask==0.15.0",
             # Used to test decorator
             "flask-restplus==0.12.1",
+            # Used to mock requests sent to check keys
+            "pytest-responses==0.4.0",
         ],
     },
     python_requires=">=3.6",

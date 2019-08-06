@@ -7,6 +7,23 @@
 <a href='https://pse.tools.digital.engie.com/drm-all.gem/job/team/view/Python%20modules/job/layabauth/job/master/lastSuccessfulBuild/testReport/'><img src='https://pse.tools.digital.engie.com/drm-all.gem/buildStatus/icon?job=team/layabauth/master&config=testCount'></a>
 </p>
 
+## pytest fixture
+
+Authentication can be mocked using layabauth.mock.auth_mock fixture.
+You will need to supply upn fixture returning the UPN located in token used in tests.
+
+```python
+from layabauth.mock import *
+
+@pytest.fixture
+def upn():
+    return "TEST@email.com"
+
+
+def test_authentication(auth_mock):
+    pass
+```
+
 ## How to install
 1. [python 3.7+](https://www.python.org/downloads/) must be installed
 2. Use pip to install module:
