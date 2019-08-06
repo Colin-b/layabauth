@@ -343,28 +343,12 @@ def test_user_id_filter_with_value_set_in_header(client):
     assert response.get_data(as_text=True) == "JS5391"
 
 
-def test_user_id_filter_with_value_already_set_in_flask_globals(client):
-    client.get("/user_id", headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMC"
-            "IsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYj"
-            "I4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDc"
-            "tOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3"
-            "NDQwMSwiYWlvIjoiWTJOZ1lFaHlXMjYwVS9kR1RGeWNTMWNPVnczYnpqVXQ0Zk96TkNTekJYaWMyWTVOWFFNQSIsI"
-            "mFtciI6WyJwd2QiXSwiZmFtaWx5X25hbWUiOiJCb3Vub3VhciIsImdpdmVuX25hbWUiOiJDb2xpbiIsImlwYWRkci"
-            "I6IjE5NC4yOS45OC4xNDQiLCJuYW1lIjoiQm91bm91YXIgQ29saW4gKEVOR0lFIEVuZXJneSBNYW5hZ2VtZW50KSI"
-            "sIm5vbmNlIjoiW1x1MDAyNzczNjJDQUVBLTlDQTUtNEI0My05QkEzLTM0RDdDMzAzRUJBN1x1MDAyN10iLCJvaWQi"
-            "OiJkZTZiOGVjYS01ZTEzLTRhZTEtODcyMS1mZGNmNmI0YTljZGQiLCJvbnByZW1fc2lkIjoiUy0xLTUtMjEtMTQwO"
-            "TA4MjIzMy0xNDE3MDAxMzMzLTY4MjAwMzMzMC0zNzY5NTQiLCJzdWIiOiI2eEZSV1FBaElOZ0I4Vy10MnJRVUJzcE"
-            "lGc1VyUXQ0UUZ1V1VkSmRxWFdnIiwidGlkIjoiMjQxMzlkMTQtYzYyYy00YzQ3LThiZGQtY2U3MWVhMWQ1MGNmIiw"
-            "idW5pcXVlX25hbWUiOiJKUzUzOTFAZW5naWUuY29tIiwidXBuIjoiSlM1MzkxQGVuZ2llLmNvbSIsInV0aSI6InVm"
-            "M0x0X1Q5aWsyc0hGQ01oNklhQUEiLCJ2ZXIiOiIxLjAifQ.addwLSoO-2t1kXgljqnaU-P1hQGHQBiJMcNCLwELhB"
-            "ZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fh"
-            "b8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10"
-            "i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfED"
-            "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"})
+def test_user_id_filter_with_value_already_set_in_flask_globals(client, auth_mock):
+    client.get("/requires_authentication")
 
     record = namedtuple("TestRecord", [])
     layabauth.UserIdFilter().filter(record)
-    assert record.user_id == "JS5391"
+    assert record.user_id == "TEST"
 
 
 def test_user_id_filter_without_flask():
@@ -382,3 +366,18 @@ def test_auth_mock(client, auth_mock):
     response = client.delete("/requires_authentication")
     assert response.status_code == 200
     assert response.get_data(as_text=True) == '"OK"\n'
+
+
+def test_method_authorizations():
+    assert layabauth.method_authorizations("test1", "test2") == {"security": [{"oauth2": ("test1", "test2")}]}
+
+
+def test_authorizations():
+    assert layabauth.authorizations("https://test_auth", test1="test1 desc", test2="test2 desc") == {
+        "oauth2": {
+            "scopes": {"test1": "test1 desc", "test2": "test2 desc"},
+            "flow": "implicit",
+            "authorizationUrl": "https://test_auth",
+            "type": "oauth2",
+        }
+    }
