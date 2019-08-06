@@ -1,3 +1,3 @@
 @Library('jenkins-lib') _
 
-pythonModulePipeline('layabauth', 77, slackChannel: '#corps_pycommon')
+pythonModulePipeline('layabauth', slackChannel: '#corps_pycommon')

@@ -1,6 +1,6 @@
-import warnings
 import logging
 import functools
+from typing import Optional
 
 import flask
 import werkzeug.exceptions
@@ -13,21 +13,19 @@ class User:
         self.name = oauth2helper.user_name(decoded_body)
 
 
-def authorizations(**scopes) -> dict:
+def authorizations(auth_url, **scopes) -> dict:
     """
     Return all security definitions.
-    Contains only one OAuth2 definition using Engie Azure authentication.
+    Contains only one OAuth2 implicit flow definition.
 
+    :param auth_url: Authorization URL.
     :param scopes: All scopes that should be available (scope_name = 'description as a string').
     """
-    engie_tenant_id = "24139d14-c62c-4c47-8bdd-ce71ea1d50cf"
-    nonce = scopes.pop("nonce", "7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7")
-
     return {
         "oauth2": {
             "scopes": scopes,
             "flow": "implicit",
-            "authorizationUrl": f"https://login.microsoftonline.com/{engie_tenant_id}/oauth2/authorize?nonce={nonce}",
+            "authorizationUrl": auth_url,
             "type": "oauth2",
         }
     }
@@ -43,9 +41,9 @@ def method_authorizations(*scopes) -> dict:
     return {"security": [{"oauth2": scopes}]}
 
 
-def _to_user(token: str) -> User:
+def _to_user(token: str, identity_provider_url: str) -> User:
     try:
-        json_header, json_body = oauth2helper.validate(token)
+        json_header, json_body = oauth2helper.validate(token, identity_provider_url)
         return User(json_body)
     except (
         jwt.exceptions.InvalidTokenError or jwt.exceptions.InvalidKeyError
@@ -53,59 +51,31 @@ def _to_user(token: str) -> User:
         raise werkzeug.exceptions.Unauthorized(description=str(e))
 
 
-def requires_authentication(func):
-    @functools.wraps(func)
-    def wrapper(*func_args, **func_kwargs):
-        authorization = flask.request.headers.get("Authorization")
-        token = (
-            authorization[7:]
-            if authorization and authorization.startswith("Bearer ")
-            else None
-        )
-        flask.g.current_user = _to_user(token)
-        return func(*func_args, **func_kwargs)
-
-    return wrapper
+def _get_token():
+    authorization = flask.request.headers.get("Authorization")
+    if authorization and authorization.startswith("Bearer "):
+        return authorization[7:]
 
 
-def get_user(bearer=None, no_auth=True):
-    warnings.warn(
-        "Use @requires_authentication decorator and retrieve user via flask.g.current_user",
-        DeprecationWarning,
-    )
-    # if there is a request_context, we still check
-    if no_auth and bearer is None:
-        return "anonymous"
-    elif bearer is not None:
-        if bearer.lower() == "sesame":
-            return "PARKER"
-        else:
-            try:
-                json_header, json_body = oauth2helper.validate(bearer)
-                return oauth2helper.user_name(json_body)
-            except Exception as e:
-                raise ValueError("Token validation error: " + str(e))
-    else:
-        raise ValueError(
-            'anonymous access is not authorised. Please provide a valid JWT token or access our API via (<a href="https://wiki.gem.myengie.com/display/SER/PyxelRest">pyxelrest Excel addin</a>).'
-        )
+def requires_authentication(identity_provider_url: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*func_args, **func_kwargs):
+            flask.g.current_user = _to_user(_get_token(), identity_provider_url)
+            return func(*func_args, **func_kwargs)
+
+        return wrapper
+    return decorator
 
 
-def _user_id():
-    """
-    Returns the user identifier or anonymous if there is none
-    Also store it in flask.g.user_id
-
-    :return: current user identifier or anonymous if there is none
-    """
-    if getattr(flask.g, "user_id", None):
-        return flask.g.user_id
-
-    # TODO implement generic authentication user_id retrieval
-    user_id = get_user(flask.request.headers.get("Bearer"))
-
-    flask.g.user_id = user_id
-    return user_id
+def _extract_user_name() -> Optional[str]:
+    if getattr(flask.g, "current_user", None):
+        return flask.g.current_user.name
+    try:
+        json_header, json_body = oauth2helper.decode(_get_token())
+        return User(json_body).name
+    except:
+        return ""
 
 
 class UserIdFilter(logging.Filter):
@@ -115,13 +85,5 @@ class UserIdFilter(logging.Filter):
     """
 
     def filter(self, record):
-        if flask.has_request_context():
-            if getattr(flask.g, "user_id", None):
-                user_id = flask.g.user_id
-            else:
-                user_id = get_user(flask.request.headers.get("Bearer"))
-                flask.g.user_id = user_id
-        else:
-            user_id = ""
-        record.user_id = user_id
+        record.user_id = _extract_user_name() if flask.has_request_context() else ""
         return True
