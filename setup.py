@@ -25,14 +25,14 @@ setup(
             # Used to manage testing of a Flask application
             "pytest-flask==0.15.0",
             # Used to test decorator
-            "flask-restplus==0.12.1",
+            "flask-restplus==0.13.0",
             # Used to mock requests sent to check keys
             "pytest-responses==0.4.0",
         ],
     },
     python_requires=">=3.6",
     project_urls={
-        "Changelog": "https://github.tools.digital.engie.com/GEM-Py/layabauth/blob/development/CHANGELOG.md",
+        "Changelog": "https://github.tools.digital.engie.com/GEM-Py/layabauth/blob/master/CHANGELOG.md",
         "Issues": "https://github.tools.digital.engie.com/GEM-Py/layabauth/issues",
     },
     license="MIT",
