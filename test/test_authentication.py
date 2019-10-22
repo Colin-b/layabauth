@@ -4,7 +4,7 @@ import flask
 import flask_restplus
 
 import layabauth
-from layabauth.mock import *
+from layabauth.testing import *
 
 
 @pytest.fixture
