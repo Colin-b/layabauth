@@ -18,22 +18,22 @@ setup(
         # Used to manage received requests
         "flask==1.1.1",
         # Used to manage authentication
-        "oauth2helper==3.0.1",
+        "oauth2helper==3.1.0",
     ],
     extras_require={
         "testing": [
             # Used to manage testing of a Flask application
             "pytest-flask==0.15.0",
             # Used to test decorator
-            "flask-restplus==0.12.1",
+            "flask-restplus==0.13.0",
             # Used to mock requests sent to check keys
             "pytest-responses==0.4.0",
         ],
     },
     python_requires=">=3.6",
     project_urls={
-        "Changelog": "https://github.tools.digital.engie.com/GEM-Py/layabauth/blob/development/CHANGELOG.md",
-        "Issues": "https://github.tools.digital.engie.com/GEM-Py/layabauth/issues",
+        "Changelog": "https://github.tools.digital.engie.com/gempy/layabauth/blob/master/CHANGELOG.md",
+        "Issues": "https://github.tools.digital.engie.com/gempy/layabauth/issues",
     },
     license="MIT",
     classifiers=[
@@ -45,6 +45,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Build Tools",
     ],
     keywords=["flask"],
