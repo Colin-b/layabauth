@@ -13,7 +13,8 @@ Provides a decorator to ensure that, in a context of a `Flask` server, a valid O
 As expected by the HTTP specification, token is extracted from `Authorization` header and must be prefixed with `Bearer `.
 
 If validation fails, an `werkzeug.exceptions.Unauthorized` exception is raised.
-Otherwise user details are stored in `flask.g.current_user`.
+Otherwise user details are stored in `flask.g.current_user`, this variable is an instance of the `User` class, 
+it contains `name` property holding the authenticated user name (extracted from the upn field inside the token).
 
 Decorator works fine on `flask-restplus` methods as well.
 
