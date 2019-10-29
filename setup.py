@@ -16,18 +16,18 @@ setup(
     packages=find_packages(exclude=["test"]),
     install_requires=[
         # Used to manage received requests
-        "flask==1.1.1",
+        "flask==1.*",
         # Used to manage authentication
-        "oauth2helper==3.1.0",
+        "oauth2helper==3.*",
     ],
     extras_require={
         "testing": [
             # Used to manage testing of a Flask application
-            "pytest-flask==0.15.0",
+            "pytest-flask==0.15.*",
             # Used to test decorator
-            "flask-restplus==0.13.0",
+            "flask-restplus==0.13.*",
             # Used to mock requests sent to check keys
-            "pytest-responses==0.4.0",
+            "pytest-responses==0.4.*",
         ],
     },
     python_requires=">=3.6",
