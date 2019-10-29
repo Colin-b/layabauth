@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2019-10-29
+### Changed
+- Do not use fixed first level dependencies.
+
 ## [3.0.0] - 2019-10-21
 ### Changed
 - Update [oauth2helper](https://github.tools.digital.engie.com/gempy/oauth2helper) to version 3.1.0
@@ -29,7 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release.
 
-[Unreleased]: https://github.tools.digital.engie.com/gempy/layabauth/compare/v3.0.0...HEAD
+[Unreleased]: https://github.tools.digital.engie.com/gempy/layabauth/compare/v3.1.0...HEAD
+[3.1.0]: https://github.tools.digital.engie.com/gempy/layabauth/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.tools.digital.engie.com/gempy/layabauth/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.tools.digital.engie.com/gempy/layabauth/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.tools.digital.engie.com/gempy/layabauth/releases/tag/v1.0.0
