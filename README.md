@@ -1,11 +1,12 @@
 <h2 align="center">Authentication for layab</h2>
 
 <p align="center">
-<a href='https://github.tools.digital.engie.com/gempy/layabauth/releases/latest'><img src='https://pse.tools.digital.engie.com/all/buildStatus/icon?job=team/layabauth/master&config=version'></a>
-<a href='https://pse.tools.digital.engie.com/all/job/team/view/Python%20modules/job/layabauth/job/master/'><img src='https://pse.tools.digital.engie.com/all/buildStatus/icon?job=team/layabauth/master'></a>
-<a href='https://pse.tools.digital.engie.com/all/job/team/view/Python%20modules/job/layabauth/job/master/cobertura/'><img src='https://pse.tools.digital.engie.com/all/buildStatus/icon?job=team/layabauth/master&config=testCoverage'></a>
+<a href="https://pypi.org/project/layabauth/"><img alt="pypi version" src="https://img.shields.io/pypi/v/layabauth"></a>
+<a href="https://travis-ci.org/Colin-b/layabauth"><img alt="Build status" src="https://api.travis-ci.org/Colin-b/layabauth.svg?branch=develop"></a>
+<a href="https://travis-ci.org/Colin-b/layabauth"><img alt="Coverage" src="https://img.shields.io/badge/coverage-100%25-brightgreen"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-<a href='https://pse.tools.digital.engie.com/all/job/team/view/Python%20modules/job/layabauth/job/master/lastSuccessfulBuild/testReport/'><img src='https://pse.tools.digital.engie.com/all/buildStatus/icon?job=team/layabauth/master&config=testCount'></a>
+<a href="https://travis-ci.org/Colin-b/layabauth"><img alt="Number of tests" src="https://img.shields.io/badge/tests-20 passed-blue"></a>
+<a href="https://pypi.org/project/layabauth/"><img alt="Number of downloads" src="https://img.shields.io/pypi/dm/layabauth"></a>
 </p>
 
 Provides a decorator to ensure that, in a context of a `Flask` server, a valid OAuth2 token was received.
@@ -62,5 +63,5 @@ def test_authentication(auth_mock):
 1. [python 3.6+](https://www.python.org/downloads/) must be installed
 2. Use pip to install module:
 ```sh
-python -m pip install layabauth -i https://all-team-remote:tBa%40W%29tvB%5E%3C%3B2Jm3@artifactory.tools.digital.engie.com/artifactory/api/pypi/all-team-pypi-prod/simple
+python -m pip install layabauth
 ```
