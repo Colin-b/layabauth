@@ -17,6 +17,11 @@ class OAuth2IdTokenBackend(AuthenticationBackend):
     """Handle authentication via OAuth2 id-token (implicit flow, authorization code, with or without PKCE)"""
 
     def __init__(self, identity_provider_url: str, scopes_retrieval: callable):
+        """
+        :param identity_provider_url: URL to retrieve the keys.
+            * Azure Active Directory: https://sts.windows.net/common/discovery/keys
+        :param scopes_retrieval: callable receiving the username and returning the list of associated scopes.
+        """
         self.identity_provider_url = identity_provider_url
         self.scopes_retrieval = scopes_retrieval
 
