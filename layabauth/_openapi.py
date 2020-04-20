@@ -1,13 +1,3 @@
-from typing import Mapping
-
-import oauth2helper
-
-
-class User:
-    def __init__(self, decoded_body: dict):
-        self.name = oauth2helper.user_name(decoded_body)
-
-
 def authorizations(auth_url, **scopes) -> dict:
     """
     Return all security definitions.
@@ -34,14 +24,3 @@ def method_authorizations(*scopes) -> dict:
     :param scopes: All scope names that should be available (as string).
     """
     return {"security": [{"oauth2": scopes}]}
-
-
-def _to_user(token: str, identity_provider_url: str) -> User:
-    json_header, json_body = oauth2helper.validate(token, identity_provider_url)
-    return User(json_body)
-
-
-def _get_token(headers: Mapping[str, str]):
-    authorization = headers.get("Authorization")
-    if authorization and authorization.startswith("Bearer "):
-        return authorization[7:]
