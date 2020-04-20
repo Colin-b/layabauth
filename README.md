@@ -34,7 +34,7 @@ from starlette.responses import PlainTextResponse
 import layabauth.starlette
 
 backend = layabauth.starlette.OAuth2IdTokenBackend(
-    identity_provider_url="https://test_identity_provider",
+    identity_provider_url="https://sts.windows.net/common/discovery/keys",
     create_user=lambda token, token_body: SimpleUser(token_body["name"]),
     scopes=lambda token, token_body: ["my_scope"]
 )
