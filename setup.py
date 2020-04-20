@@ -41,6 +41,7 @@ setup(
     extras_require={
         "testing": [
             # Used to test flask application
+            "flask_restx==0.2.*",
             "pytest-flask==1.*",
             # Used to test starlette authentication
             "starlette==0.13.*",

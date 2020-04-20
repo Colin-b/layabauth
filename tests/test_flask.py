@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 import flask
-import flask_restplus
+import flask_restx
 
 import layabauth.flask
 from layabauth.testing import *
@@ -11,10 +11,10 @@ from layabauth.testing import *
 def app():
     application = flask.Flask(__name__)
     application.testing = True
-    api = flask_restplus.Api(application)
+    api = flask_restx.Api(application)
 
     @api.route("/requires_authentication")
-    class RequiresAuthentication(flask_restplus.Resource):
+    class RequiresAuthentication(flask_restx.Resource):
         @layabauth.flask.requires_authentication("https://test_identity_provider")
         def get(self):
             return "OK"
@@ -32,7 +32,7 @@ def app():
             return "OK"
 
     @api.route("/user_id")
-    class UserId(flask_restplus.Resource):
+    class UserId(flask_restx.Resource):
         def get(self):
             record = namedtuple("TestRecord", [])
             layabauth.flask.UserIdFilter("upn").filter(record)
@@ -361,7 +361,7 @@ def test_user_id_filter_with_value_set_in_header(client):
             "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
         },
     )
-    assert response.get_data(as_text=True) == "JS5391"
+    assert response.get_data(as_text=True) == "JS5391@engie.com"
 
 
 def test_user_id_filter_with_value_already_set_in_flask_globals(client, auth_mock):
@@ -369,7 +369,7 @@ def test_user_id_filter_with_value_already_set_in_flask_globals(client, auth_moc
 
     record = namedtuple("TestRecord", [])
     layabauth.flask.UserIdFilter("upn").filter(record)
-    assert record.user_id == "TEST"
+    assert record.user_id == "TEST@email.com"
 
 
 def test_user_id_filter_without_flask():
