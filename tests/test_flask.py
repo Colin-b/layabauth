@@ -368,13 +368,13 @@ def test_user_id_filter_with_value_already_set_in_flask_globals(client, auth_moc
     client.get("/requires_authentication")
 
     record = namedtuple("TestRecord", [])
-    layabauth.UserIdFilter("upn").filter(record)
+    layabauth.flask.UserIdFilter("upn").filter(record)
     assert record.user_id == "TEST"
 
 
 def test_user_id_filter_without_flask():
     record = namedtuple("TestRecord", [])
-    layabauth.UserIdFilter("upn").filter(record)
+    layabauth.flask.UserIdFilter("upn").filter(record)
     assert record.user_id == ""
 
 
