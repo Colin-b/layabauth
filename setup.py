@@ -32,25 +32,25 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords=["flask"],
+    keywords=["flask", "starlette", "auth"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
-        # Used to manage received requests
-        "flask==1.*",
         # Used to manage authentication
-        "oauth2helper==3.*",
+        "oauth2helper==3.*"
     ],
     extras_require={
         "testing": [
-            # Used to manage testing of a Flask application
-            "pytest-flask==0.15.*",
-            # Used to test decorator
-            "flask-restplus==0.13.*",
+            # Used to test flask application
+            "flask_restx==0.2.*",
+            "pytest-flask==1.*",
+            # Used to test starlette authentication
+            "starlette==0.13.*",
+            "requests==2.*",
             # Used to mock requests sent to check keys
             "pytest-responses==0.4.*",
             # Used to check coverage
             "pytest-cov==2.*",
-        ],
+        ]
     },
     python_requires=">=3.6",
     project_urls={
