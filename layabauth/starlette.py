@@ -1,28 +1,37 @@
 from typing import Optional, Tuple
 
 import jwt
+import oauth2helper
 from starlette.authentication import (
     AuthenticationBackend,
     AuthCredentials,
     BaseUser,
-    SimpleUser,
     AuthenticationError,
 )
 from starlette.requests import Request
 
-from layabauth._authentication import _get_token, _to_user
+from layabauth._http import _get_token
 
 
 class OAuth2IdTokenBackend(AuthenticationBackend):
-    """Handle authentication via OAuth2 id-token (implicit flow, authorization code, with or without PKCE)"""
+    """
+    Handle authentication via OAuth2 id-token (implicit flow, authorization code, with or without PKCE)
+    """
 
-    def __init__(self, identity_provider_url: str, scopes_retrieval: callable):
+    def __init__(
+        self,
+        identity_provider_url: str,
+        create_user: callable,
+        scopes_retrieval: callable,
+    ):
         """
         :param identity_provider_url: URL to retrieve the keys.
             * Azure Active Directory: https://sts.windows.net/common/discovery/keys
-        :param scopes_retrieval: callable receiving the username and returning the list of associated scopes.
+        :param create_user: callable receiving the token and the decoded token body and returning a starlette.BaseUser instance.
+        :param scopes_retrieval: callable receiving the decoded token body and returning the list of associated scopes str.
         """
         self.identity_provider_url = identity_provider_url
+        self.create_user = create_user
         self.scopes_retrieval = scopes_retrieval
 
     async def authenticate(
@@ -33,13 +42,13 @@ class OAuth2IdTokenBackend(AuthenticationBackend):
             return  # Consider that user is not authenticated
 
         try:
-            user = _to_user(token, self.identity_provider_url)
-        except (
-            jwt.exceptions.InvalidTokenError or jwt.exceptions.InvalidKeyError
-        ) as e:
+            json_header, json_body = oauth2helper.validate(
+                token, self.identity_provider_url
+            )
+        except jwt.PyJWTError as e:
             raise AuthenticationError(str(e)) from e
 
         return (
-            AuthCredentials(scopes=self.scopes_retrieval(user.name)),
-            SimpleUser(user.name),
+            AuthCredentials(scopes=self.scopes_retrieval(json_body)),
+            self.create_user(token=token, token_body=json_body),
         )

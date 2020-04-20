@@ -3,7 +3,7 @@ from collections import namedtuple
 import flask
 import flask_restplus
 
-import layabauth
+import layabauth.flask
 from layabauth.testing import *
 
 
@@ -15,19 +15,19 @@ def app():
 
     @api.route("/requires_authentication")
     class RequiresAuthentication(flask_restplus.Resource):
-        @layabauth.requires_authentication("https://test_identity_provider")
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
         def get(self):
             return "OK"
 
-        @layabauth.requires_authentication("https://test_identity_provider")
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
         def post(self):
             return "OK"
 
-        @layabauth.requires_authentication("https://test_identity_provider")
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
         def put(self):
             return "OK"
 
-        @layabauth.requires_authentication("https://test_identity_provider")
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
         def delete(self):
             return "OK"
 
@@ -35,7 +35,7 @@ def app():
     class UserId(flask_restplus.Resource):
         def get(self):
             record = namedtuple("TestRecord", [])
-            layabauth.UserIdFilter().filter(record)
+            layabauth.flask.UserIdFilter("upn").filter(record)
             return flask.make_response(str(record.user_id))
 
     return application
@@ -153,7 +153,9 @@ def test_authentication_failure_fake_token_provided_on_delete(client):
     }
 
 
-def test_authentication_failure_invalid_key_identifier_in_token_on_get(client, responses):
+def test_authentication_failure_invalid_key_identifier_in_token_on_get(
+    client, responses
+):
     responses.add(
         responses.GET,
         "https://test_identity_provider",
@@ -191,10 +193,14 @@ def test_authentication_failure_invalid_key_identifier_in_token_on_get(client, r
         },
     )
     assert response.status_code == 401
-    assert response.json == {'message': "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."}
+    assert response.json == {
+        "message": "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."
+    }
 
 
-def test_authentication_failure_invalid_key_identifier_in_token_on_post(client, responses):
+def test_authentication_failure_invalid_key_identifier_in_token_on_post(
+    client, responses
+):
     responses.add(
         responses.GET,
         "https://test_identity_provider",
@@ -232,10 +238,14 @@ def test_authentication_failure_invalid_key_identifier_in_token_on_post(client, 
         },
     )
     assert response.status_code == 401
-    assert response.json == {'message': "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."}
+    assert response.json == {
+        "message": "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."
+    }
 
 
-def test_authentication_failure_invalid_key_identifier_in_token_on_put(client, responses):
+def test_authentication_failure_invalid_key_identifier_in_token_on_put(
+    client, responses
+):
     responses.add(
         responses.GET,
         "https://test_identity_provider",
@@ -273,10 +283,14 @@ def test_authentication_failure_invalid_key_identifier_in_token_on_put(client, r
         },
     )
     assert response.status_code == 401
-    assert response.json == {'message': "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."}
+    assert response.json == {
+        "message": "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."
+    }
 
 
-def test_authentication_failure_invalid_key_identifier_in_token_on_delete(client, responses):
+def test_authentication_failure_invalid_key_identifier_in_token_on_delete(
+    client, responses
+):
     responses.add(
         responses.GET,
         "https://test_identity_provider",
@@ -314,7 +328,9 @@ def test_authentication_failure_invalid_key_identifier_in_token_on_delete(client
         },
     )
     assert response.status_code == 401
-    assert response.json == {'message': "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."}
+    assert response.json == {
+        "message": "SSQdhI1cKvhQEDSJxE2gGYs40Q0 is not a valid key identifier. Valid ones are ['SSQdhI1cKvhQEDSJxE2gGYs40Q1']."
+    }
 
 
 def test_user_id_filter_with_value_not_set_in_header(client):
@@ -323,7 +339,10 @@ def test_user_id_filter_with_value_not_set_in_header(client):
 
 
 def test_user_id_filter_with_value_set_in_header(client):
-    response = client.get("/user_id", headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMC"
+    response = client.get(
+        "/user_id",
+        headers={
+            "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMC"
             "IsImtpZCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiIyYmVmNzMzZC03NWJlLTQxNTktYj"
             "I4MC02NzJlMDU0OTM4YzMiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC8yNDEzOWQxNC1jNjJjLTRjNDc"
             "tOGJkZC1jZTcxZWExZDUwY2YvIiwiaWF0IjoxNTIwMjcwNTAxLCJuYmYiOjE1MjAyNzA1MDEsImV4cCI6MTUyMDI3"
@@ -339,7 +358,9 @@ def test_user_id_filter_with_value_set_in_header(client):
             "ZT_vHvkZHFrmgfcTzED_AMdB9mTpvUm_Mk0d3F3RzLtyCeAApOPJaRAwccAc3PB1pKTwjFhdzIXtxib0_MQ6_F1fh"
             "b8R8ZcLCbwhMtT8nXoeWJOvH9_71O_vkfOn6E-VwLo17jkvQJOa89KfctGNnHNMcPBBju0oIgp_UVal311SMUw_10"
             "i4GZZkjR2I1m7EMg5jMwQgUatYWv2J5HoefAQQDat9jJeEnYNITxsJMN81FHTyuvMnN_ulFzOGtcvlBpmP6jVHfED"
-            "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"})
+            "oJiqFM4NFh6r4IlOs2U2-jUb_bR5xi2zg"
+        },
+    )
     assert response.get_data(as_text=True) == "JS5391"
 
 
@@ -347,37 +368,22 @@ def test_user_id_filter_with_value_already_set_in_flask_globals(client, auth_moc
     client.get("/requires_authentication")
 
     record = namedtuple("TestRecord", [])
-    layabauth.UserIdFilter().filter(record)
+    layabauth.UserIdFilter("upn").filter(record)
     assert record.user_id == "TEST"
 
 
 def test_user_id_filter_without_flask():
     record = namedtuple("TestRecord", [])
-    layabauth.UserIdFilter().filter(record)
+    layabauth.UserIdFilter("upn").filter(record)
     assert record.user_id == ""
 
 
 @pytest.fixture
-def upn():
-    return "TEST@email.com"
+def token_body():
+    return {"upn": "TEST@email.com"}
 
 
 def test_auth_mock(client, auth_mock):
     response = client.delete("/requires_authentication")
     assert response.status_code == 200
     assert response.get_data(as_text=True) == '"OK"\n'
-
-
-def test_method_authorizations():
-    assert layabauth.method_authorizations("test1", "test2") == {"security": [{"oauth2": ("test1", "test2")}]}
-
-
-def test_authorizations():
-    assert layabauth.authorizations("https://test_auth", test1="test1 desc", test2="test2 desc") == {
-        "oauth2": {
-            "scopes": {"test1": "test1 desc", "test2": "test2 desc"},
-            "flow": "implicit",
-            "authorizationUrl": "https://test_auth",
-            "type": "oauth2",
-        }
-    }

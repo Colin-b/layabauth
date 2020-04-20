@@ -32,7 +32,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords=["flask"],
+    keywords=["flask", "starlette", "auth"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         # Used to manage authentication
@@ -40,6 +40,8 @@ setup(
     ],
     extras_require={
         "testing": [
+            # Used to test flask application
+            "flask==1.*",
             # Used to test starlette authentication
             "starlette==0.13.*",
             "requests==2.*",
