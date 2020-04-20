@@ -19,20 +19,17 @@ class OAuth2IdTokenBackend(AuthenticationBackend):
     """
 
     def __init__(
-        self,
-        identity_provider_url: str,
-        create_user: callable,
-        scopes_retrieval: callable,
+        self, identity_provider_url: str, create_user: callable, scopes: callable
     ):
         """
         :param identity_provider_url: URL to retrieve the keys.
             * Azure Active Directory: https://sts.windows.net/common/discovery/keys
         :param create_user: callable receiving the token and the decoded token body and returning a starlette.BaseUser instance.
-        :param scopes_retrieval: callable receiving the decoded token body and returning the list of associated scopes str.
+        :param scopes: callable receiving the token and the decoded token body and returning the list of associated scopes str.
         """
         self.identity_provider_url = identity_provider_url
         self.create_user = create_user
-        self.scopes_retrieval = scopes_retrieval
+        self.scopes = scopes
 
     async def authenticate(
         self, request: Request
@@ -49,6 +46,6 @@ class OAuth2IdTokenBackend(AuthenticationBackend):
             raise AuthenticationError(str(e)) from e
 
         return (
-            AuthCredentials(scopes=self.scopes_retrieval(json_body)),
+            AuthCredentials(scopes=self.scopes(token=token, token_body=json_body)),
             self.create_user(token=token, token_body=json_body),
         )
