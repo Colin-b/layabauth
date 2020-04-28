@@ -86,9 +86,16 @@ You can generate OpenAPI 2.0 `method security` thanks to `layabauth.method_autho
 Authentication can be mocked using `layabauth.testing.auth_mock` `pytest` fixture.
 
 `token_body` `pytest` fixture returning the decoded token body used in tests must be provided.
+`identity_provider_url` `pytest` fixture returning the identity_provider_url used in tests must be provided.
 
 ```python
 from layabauth.testing import *
+
+
+@pytest.fixture
+def identity_provider_url():
+    return "https://sts.windows.net/common/discovery/keys"
+
 
 @pytest.fixture
 def token_body():

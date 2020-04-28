@@ -1,7 +1,5 @@
 from typing import Optional, Tuple
 
-import jwt
-import oauth2helper
 from starlette.authentication import (
     AuthenticationBackend,
     AuthCredentials,
@@ -9,8 +7,9 @@ from starlette.authentication import (
     AuthenticationError,
 )
 from starlette.requests import Request
+from jose import exceptions
 
-from layabauth._http import _get_token
+from layabauth._http import _get_token, validate
 
 
 class OAuth2IdTokenBackend(AuthenticationBackend):
@@ -39,10 +38,8 @@ class OAuth2IdTokenBackend(AuthenticationBackend):
             return  # Consider that user is not authenticated
 
         try:
-            json_header, json_body = oauth2helper.validate(
-                token, self.identity_provider_url
-            )
-        except jwt.PyJWTError as e:
+            json_body = validate(token, self.identity_provider_url)
+        except exceptions.JOSEError as e:
             raise AuthenticationError(str(e)) from e
 
         return (

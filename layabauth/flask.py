@@ -1,12 +1,12 @@
 import logging
 import functools
+import json
 
 import flask
 import werkzeug
-import jwt
-import oauth2helper
+from jose import exceptions, jws
 
-from layabauth._http import _get_token
+from layabauth._http import _get_token, validate
 
 
 def requires_authentication(identity_provider_url: str):
@@ -15,10 +15,10 @@ def requires_authentication(identity_provider_url: str):
         def wrapper(*func_args, **func_kwargs):
             try:
                 flask.g.token = _get_token(flask.request.headers)
-                json_header, flask.g.token_body = oauth2helper.validate(
-                    flask.g.token, identity_provider_url
-                )
-            except jwt.PyJWTError as e:
+                if not flask.g.token:
+                    raise werkzeug.exceptions.Unauthorized()
+                flask.g.token_body = validate(flask.g.token, identity_provider_url)
+            except exceptions.JOSEError as e:
                 raise werkzeug.exceptions.Unauthorized(description=str(e)) from e
             return func(*func_args, **func_kwargs)
 
@@ -30,10 +30,14 @@ def requires_authentication(identity_provider_url: str):
 def _extract_token_body() -> dict:
     if getattr(flask.g, "token_body", None):
         return flask.g.token_body
+
+    token = _get_token(flask.request.headers)
+    if not token:
+        return {}
+
     try:
-        json_header, json_body = oauth2helper.decode(_get_token(flask.request.headers))
-        return json_body
-    except jwt.PyJWTError:
+        return json.loads(jws.get_unverified_claims(token=token))
+    except exceptions.JOSEError:
         return {}
 
 
