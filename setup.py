@@ -15,7 +15,7 @@ setup(
     maintainer="Colin Bounouar",
     maintainer_email="colin.bounouar.dev@gmail.com",
     url="https://colin-b.github.io/layabauth/",
-    description="Authentication support for layab.",
+    description="Handle OAuth2 authentication for REST APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
     download_url="https://pypi.org/project/layabauth/",
@@ -35,8 +35,10 @@ setup(
     keywords=["flask", "starlette", "auth"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
+        # Used to request JWKs (keys)
+        "requests==2.*",
         # Used to manage authentication
-        "oauth2helper==3.*"
+        "python-jose==3.*",
     ],
     extras_require={
         "testing": [

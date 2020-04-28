@@ -18,7 +18,9 @@ Token will then be validated and in case it is valid, you will be able to access
 Provides a [Starlette authentication backend](https://www.starlette.io/authentication/): `layabauth.starlette.OAuth2IdTokenBackend`.
 
 3 arguments are required:
-* The identity provided URL to validate the token key.
+* The [JWKs](https://tools.ietf.org/html/rfc7517) URI as defined in .well-known.
+ - Azure Active Directory: `https://sts.windows.net/common/discovery/keys`
+ - Microsoft Identity Platform: `https://sts.windows.net/common/discovery/keys`
 * A callable to create the [authenticated user](https://www.starlette.io/authentication/#users) based on received token.
 * A callable to returns [authenticated user scopes](https://www.starlette.io/authentication/#permissions) based on received token.
 
@@ -34,7 +36,7 @@ from starlette.responses import PlainTextResponse
 import layabauth.starlette
 
 backend = layabauth.starlette.OAuth2IdTokenBackend(
-    identity_provider_url="https://sts.windows.net/common/discovery/keys",
+    jwks_uri="https://sts.windows.net/common/discovery/keys",
     create_user=lambda token, token_body: SimpleUser(token_body["name"]),
     scopes=lambda token, token_body: ["my_scope"]
 )
@@ -50,8 +52,9 @@ async def my_endpoint(request):
 
 Provides a decorator `layabauth.flask.requires_authentication` to ensure that, in a context of a `Flask` application, a valid OAuth2 token was received.
 
-1 argument is required:
-* The identity provided URL to validate the token key.
+The [JWKs](https://tools.ietf.org/html/rfc7517) URI as defined in .well-known is the only required argument.
+- Azure Active Directory: `https://sts.windows.net/common/discovery/keys`
+- Microsoft Identity Platform: `https://sts.windows.net/common/discovery/keys`
 
 If validation fails, an `werkzeug.exceptions.Unauthorized` exception is raised.
 Otherwise token is stored in `flask.g.token` and decoded token body is stored in `flask.g.token_body`.
@@ -86,9 +89,16 @@ You can generate OpenAPI 2.0 `method security` thanks to `layabauth.method_autho
 Authentication can be mocked using `layabauth.testing.auth_mock` `pytest` fixture.
 
 `token_body` `pytest` fixture returning the decoded token body used in tests must be provided.
+`jwks_uri` `pytest` fixture returning the jwks_uri used in tests must be provided.
 
 ```python
 from layabauth.testing import *
+
+
+@pytest.fixture
+def jwks_uri():
+    return "https://sts.windows.net/common/discovery/keys"
+
 
 @pytest.fixture
 def token_body():
