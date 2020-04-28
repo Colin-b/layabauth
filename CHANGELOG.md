@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drop oauth2helper in favor of python-jose to handle all kind of tokens.
 
 ### Changed
-- `identity_provider_url` pytest fixture needs to be provided in addition to `token_body`.
+- `identity_provider_url` has been renamed to `jwks_uri` to match the key in .well-known
+- `jwks_uri` pytest fixture needs to be provided in addition to `token_body`.
 - Flask tests will require a fake token to be provided in headers (unless you want to test behavior without providing a token).
 
 ## [4.0.0] - 2020-04-20

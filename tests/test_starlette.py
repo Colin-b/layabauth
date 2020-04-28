@@ -13,7 +13,7 @@ from layabauth.testing import *
 @pytest.fixture
 def client() -> starlette.testclient.TestClient:
     backend = layabauth.starlette.OAuth2IdTokenBackend(
-        identity_provider_url="https://test_identity_provider",
+        jwks_uri="https://test_identity_provider",
         create_user=lambda token, token_body: SimpleUser(token_body["upn"]),
         scopes=lambda token, token_body: ["my_scope"],
     )
@@ -140,7 +140,7 @@ def test_with_invalid_jwt(
 
 
 @pytest.fixture
-def identity_provider_url():
+def jwks_uri():
     return "https://test_identity_provider"
 
 

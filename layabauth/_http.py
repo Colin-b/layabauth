@@ -10,19 +10,24 @@ def _get_token(headers: Mapping[str, str]):
         return authorization[7:]
 
 
-def validate(token: str, keys_url: str) -> dict:
+def validate(token: str, key: str) -> dict:
+    return jwt.decode(
+        token=token, key=key, algorithms=["RS256"], options={"verify_aud": False}
+    )
+
+
+# TODO Cache keys for faster token validation
+def keys(jwks_url: str) -> str:
     try:
-        keys = requests.get(keys_url, verify=False)
+        response = requests.get(jwks_url, verify=False)
     except requests.RequestException as e:
         raise exceptions.JOSEError(
             f"{type(e).__name__} error while retrieving keys: {str(e)}"
         )
 
-    if not keys:
+    if not response:
         raise exceptions.JOSEError(
-            f"HTTP {keys.status_code} error while retrieving keys: {keys.text}"
+            f"HTTP {response.status_code} error while retrieving keys: {response.text}"
         )
 
-    return jwt.decode(
-        token=token, key=keys.text, algorithms=["RS256"], options={"verify_aud": False}
-    )
+    return response.text

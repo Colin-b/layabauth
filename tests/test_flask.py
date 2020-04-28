@@ -237,7 +237,7 @@ def test_user_id_filter_without_flask():
 
 
 @pytest.fixture
-def identity_provider_url():
+def jwks_uri():
     return "https://test_identity_provider"
 
 

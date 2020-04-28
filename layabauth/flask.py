@@ -6,10 +6,19 @@ import flask
 import werkzeug
 from jose import exceptions, jws
 
-from layabauth._http import _get_token, validate
+from layabauth._http import _get_token, validate, keys
 
 
-def requires_authentication(identity_provider_url: str):
+def requires_authentication(jwks_uri: str):
+    """
+    Ensure that a valid JWT is received before entering the annotated endpoint.
+
+    :param jwks_uri: The JWKs URI as defined in .well-known.
+    For more information on JWK, refer to https://tools.ietf.org/html/rfc7517
+        * Azure Active Directory: https://sts.windows.net/common/discovery/keys
+        * Microsoft Identity Platform: https://sts.windows.net/common/discovery/keys
+    """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*func_args, **func_kwargs):
@@ -17,7 +26,8 @@ def requires_authentication(identity_provider_url: str):
                 flask.g.token = _get_token(flask.request.headers)
                 if not flask.g.token:
                     raise werkzeug.exceptions.Unauthorized()
-                flask.g.token_body = validate(flask.g.token, identity_provider_url)
+                key = keys(jwks_uri)
+                flask.g.token_body = validate(flask.g.token, key)
             except exceptions.JOSEError as e:
                 raise werkzeug.exceptions.Unauthorized(description=str(e)) from e
             return func(*func_args, **func_kwargs)
