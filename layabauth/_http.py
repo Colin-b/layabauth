@@ -17,9 +17,9 @@ def validate(token: str, key: str) -> dict:
 
 
 # TODO Cache keys for faster token validation
-def keys(jwks_url: str) -> str:
+def keys(jwks_uri: str) -> str:
     try:
-        response = requests.get(jwks_url, verify=False)
+        response = requests.get(jwks_uri, verify=False)
     except requests.RequestException as e:
         raise exceptions.JOSEError(
             f"{type(e).__name__} error while retrieving keys: {str(e)}"
