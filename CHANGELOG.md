@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2020-05-29
+### Changed
+- layabauth.authorizations now requires scopes to be provided as a dictionary inside scopes parameter instead of kwargs.
+
+### Fixed
+- Allow to provide scopes that cannot be stored as python variables (such as names containing `.` (dots) or `-` (minus) symbols).
+
+### Added
+- `layabauth.flask.requires_scopes` function to ensure that expected scopes are received.
+
 ## [4.0.1] - 2020-04-28
 ### Fixed
 - Drop oauth2helper in favor of python-jose to handle all kind of tokens.
@@ -27,7 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/Colin-b/layabauth/compare/v4.0.1...v5.0.0
 [4.0.1]: https://github.com/Colin-b/layabauth/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/Colin-b/layabauth/compare/v3.2.0...v4.0.0
 [3.2.0]: https://github.com/Colin-b/layabauth/releases/tag/v3.2.0

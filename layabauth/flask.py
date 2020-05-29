@@ -37,6 +37,26 @@ def requires_authentication(jwks_uri: str):
     return decorator
 
 
+def requires_scopes(scopes: callable, *expected_scopes: str):
+    """
+    Ensure that the token contains the required scopes.
+    Raises werkzeug.exceptions.Forbidden otherwise.
+
+    :param scopes: callable receiving the token and the decoded token body and returning the list of associated scopes str.
+    :param expected_scopes: all expected scopes in the token.
+    """
+    try:
+        scopes = scopes(token=flask.g.token, token_body=flask.g.token_body) or []
+    except:
+        scopes = []
+
+    for expected_scope in expected_scopes:
+        if expected_scope not in scopes:
+            raise werkzeug.exceptions.Forbidden(
+                description=f"The {expected_scope} must be provided in the token."
+            )
+
+
 def _extract_token_body() -> dict:
     if getattr(flask.g, "token_body", None):
         return flask.g.token_body

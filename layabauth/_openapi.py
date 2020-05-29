@@ -1,4 +1,7 @@
-def authorizations(auth_url, **scopes) -> dict:
+from typing import Dict
+
+
+def authorizations(auth_url: str, scopes: Dict[str, str]) -> dict:
     """
     Return all security definitions.
     Contains only one OAuth2 implicit flow definition.
@@ -16,7 +19,7 @@ def authorizations(auth_url, **scopes) -> dict:
     }
 
 
-def method_authorizations(*scopes) -> dict:
+def method_authorizations(*scopes: str) -> dict:
     """
     Return method security.
     Contains only one OAuth2 security.
