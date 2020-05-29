@@ -38,7 +38,7 @@ import layabauth.starlette
 backend = layabauth.starlette.OAuth2IdTokenBackend(
     jwks_uri="https://sts.windows.net/common/discovery/keys",
     create_user=lambda token, token_body: SimpleUser(token_body["name"]),
-    scopes=lambda token, token_body: ["my_scope"]
+    scopes=lambda token, token_body: token_body["scopes"]
 )
 app = starlette.applications.Starlette(middleware=[Middleware(AuthenticationMiddleware, backend=backend)])
 
@@ -72,6 +72,8 @@ app = flask.Flask(__name__)
 @app.route("/my_endpoint")
 @layabauth.flask.requires_authentication("https://sts.windows.net/common/discovery/keys")
 def my_endpoint():
+    # Optional, ensure that the appropriates scopes are provided
+    layabauth.flask.requires_scopes(lambda token, token_body: token_body["scopes"], "my_scope")
     # Return the content of the name entry within the decoded token body.
     return flask.Response(flask.g.token_body["name"])
 
@@ -102,7 +104,7 @@ def jwks_uri():
 
 @pytest.fixture
 def token_body():
-    return {"name": "TEST@email.com"}
+    return {"name": "TEST@email.com", "scopes": ["my_scope"]}
 
 
 def test_authentication(auth_mock, client):

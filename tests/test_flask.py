@@ -33,6 +33,36 @@ def app() -> flask.Flask:
         def delete(self):
             return flask.g.token_body
 
+    @api.route("/requires_scopes")
+    class RequiresScopes(flask_restx.Resource):
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
+        def get(self):
+            layabauth.flask.requires_scopes(
+                lambda token, token_body: token_body["scopes"], "scope1", "scope2"
+            )
+            return flask.g.token_body
+
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
+        def post(self):
+            layabauth.flask.requires_scopes(
+                lambda token, token_body: token_body["scopes"], "scope1"
+            )
+            return flask.g.token_body
+
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
+        def put(self):
+            layabauth.flask.requires_scopes(
+                lambda token, token_body: token_body["scopes"]
+            )
+            return flask.g.token_body
+
+        @layabauth.flask.requires_authentication("https://test_identity_provider")
+        def delete(self):
+            layabauth.flask.requires_scopes(
+                lambda token, token_body: token_body["scopes"], "sc.op-e1", "scope2"
+            )
+            return flask.g.token_body
+
     @api.route("/user_id")
     class UserId(flask_restx.Resource):
         def get(self):
@@ -69,6 +99,28 @@ def test_generated_swagger(client: flask.testing.FlaskClient):
                 "put": {
                     "responses": {"200": {"description": "Success"}},
                     "operationId": "put_requires_authentication",
+                    "tags": ["default"],
+                },
+            },
+            "/requires_scopes": {
+                "delete": {
+                    "responses": {"200": {"description": "Success"}},
+                    "operationId": "delete_requires_scopes",
+                    "tags": ["default"],
+                },
+                "get": {
+                    "responses": {"200": {"description": "Success"}},
+                    "operationId": "get_requires_scopes",
+                    "tags": ["default"],
+                },
+                "post": {
+                    "responses": {"200": {"description": "Success"}},
+                    "operationId": "post_requires_scopes",
+                    "tags": ["default"],
+                },
+                "put": {
+                    "responses": {"200": {"description": "Success"}},
+                    "operationId": "put_requires_scopes",
                     "tags": ["default"],
                 },
             },
@@ -243,7 +295,7 @@ def jwks_uri():
 
 @pytest.fixture
 def token_body():
-    return {"upn": "TEST@email.com"}
+    return {"upn": "TEST@email.com", "scopes": ["scope2", "sc.op-e1", "scope1"]}
 
 
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
@@ -254,7 +306,24 @@ def test_auth_mock(client: flask.testing.FlaskClient, auth_mock, method: str):
         headers={"Authorization": "Bearer my_token"},
     )
     assert response.status_code == 200
-    assert response.json == {"upn": "TEST@email.com"}
+    assert response.json == {
+        "upn": "TEST@email.com",
+        "scopes": ["scope2", "sc.op-e1", "scope1"],
+    }
+
+
+@pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
+def test_auth_mock_scopes(client: flask.testing.FlaskClient, auth_mock, method: str):
+    response = client.open(
+        method=method,
+        path="/requires_scopes",
+        headers={"Authorization": "Bearer my_token"},
+    )
+    assert response.status_code == 200
+    assert response.json == {
+        "upn": "TEST@email.com",
+        "scopes": ["scope2", "sc.op-e1", "scope1"],
+    }
 
 
 def test_keys_cannot_be_retrieved_due_to_network_failure(
