@@ -30,13 +30,14 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Build Tools",
     ],
     keywords=["flask", "starlette", "auth"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         # Used to request JWKs (keys)
-        "requests==2.*",
+        "httpx==0.16.*",
         # Used to manage authentication
         "python-jose==3.*",
     ],
@@ -49,7 +50,7 @@ setup(
             "starlette==0.13.*",
             "requests==2.*",
             # Used to mock requests sent to check keys
-            "pytest-responses==0.4.*",
+            "pytest-httpx==0.10.*",
             # Used to check coverage
             "pytest-cov==2.*",
         ]

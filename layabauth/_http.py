@@ -1,6 +1,6 @@
 from typing import Mapping
 
-import requests
+import httpx
 from jose import jwt, exceptions
 
 
@@ -17,15 +17,15 @@ def validate(token: str, key: str) -> dict:
 
 
 # TODO Cache keys for faster token validation
-def keys(jwks_uri: str) -> str:
+def keys(client: httpx.Client, jwks_uri: str) -> str:
     try:
-        response = requests.get(jwks_uri, verify=False)
-    except requests.RequestException as e:
+        response = client.get(jwks_uri)
+    except httpx.HTTPError as e:
         raise exceptions.JOSEError(
             f"{type(e).__name__} error while retrieving keys: {str(e)}"
         )
 
-    if not response:
+    if response.is_error:
         raise exceptions.JOSEError(
             f"HTTP {response.status_code} error while retrieving keys: {response.text}"
         )

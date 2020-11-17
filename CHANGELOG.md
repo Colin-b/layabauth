@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1] - 2020-11-17
+### Added
+- Add explicit support for python `3.9`.
+
+### Changed
+- Update [`black`](https://github.com/psf/black/blob/master/CHANGES.md) version from `master` to `20.8b1`.
+- Use `httpx` instead of `requests` to query keys.
+- Testing mock does not rely on `pytest-responses` anymore.
+
+### Fixed
+- Verify SSL certificate by default.
+
 ## [5.0.0] - 2020-05-29
 ### Changed
 - layabauth.authorizations now requires scopes to be provided as a dictionary inside scopes parameter instead of kwargs.
@@ -37,7 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.0.0...HEAD
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.0.1...HEAD
+[5.0.1]: https://github.com/Colin-b/layabauth/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/Colin-b/layabauth/compare/v4.0.1...v5.0.0
 [4.0.1]: https://github.com/Colin-b/layabauth/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/Colin-b/layabauth/compare/v3.2.0...v4.0.0
