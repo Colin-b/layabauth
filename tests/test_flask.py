@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import flask
 import flask_restx
-import requests
+import httpx
 import flask.testing
 
 import layabauth.flask
@@ -153,10 +153,8 @@ def test_without_authentication_header(client: flask.testing.FlaskClient, method
 
 
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
-def test_with_non_jwt(
-    client: flask.testing.FlaskClient, responses: RequestsMock, method: str
-):
-    responses.add(method=responses.GET, url="https://test_identity_provider")
+def test_with_non_jwt(client: flask.testing.FlaskClient, httpx_mock, method: str):
+    httpx_mock.add_response(method="GET", url="https://test_identity_provider")
     response = client.open(
         method=method,
         path="/requires_authentication",
@@ -167,10 +165,10 @@ def test_with_non_jwt(
 
 
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
-def test_with_invalid_jwt(client: flask.testing.FlaskClient, responses, method: str):
-    responses.add(
-        responses.GET,
-        "https://test_identity_provider",
+def test_with_invalid_jwt(client: flask.testing.FlaskClient, httpx_mock, method: str):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test_identity_provider",
         json={
             "keys": [
                 {
@@ -327,28 +325,31 @@ def test_auth_mock_scopes(client: flask.testing.FlaskClient, auth_mock, method: 
 
 
 def test_keys_cannot_be_retrieved_due_to_network_failure(
-    client: flask.testing.FlaskClient, responses: RequestsMock
+    client: flask.testing.FlaskClient, httpx_mock
 ):
-    def raise_exception(*args, **kwargs):
-        raise requests.exceptions.Timeout("description")
+    def raise_exception(request, *args, **kwargs):
+        raise httpx.TimeoutException("description", request=request)
 
-    responses.add_callback(
-        responses.GET, "https://test_identity_provider", callback=raise_exception
+    httpx_mock.add_callback(
+        method="GET", url="https://test_identity_provider", callback=raise_exception
     )
     response = client.get(
         "/requires_authentication", headers={"Authorization": "Bearer my_token"}
     )
     assert response.status_code == 401
     assert response.json == {
-        "message": "Timeout error while retrieving keys: description"
+        "message": "TimeoutException error while retrieving keys: description"
     }
 
 
 def test_keys_cannot_be_retrieved_due_to_http_failure(
-    client: flask.testing.FlaskClient, responses: RequestsMock
+    client: flask.testing.FlaskClient, httpx_mock
 ):
-    responses.add(
-        responses.GET, "https://test_identity_provider", status=500, body=b"description"
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test_identity_provider",
+        status_code=500,
+        data=b"description",
     )
     response = client.get(
         "/requires_authentication", headers={"Authorization": "Bearer my_token"}

@@ -1,4 +1,4 @@
-import requests
+import httpx
 import starlette.applications
 import starlette.testclient
 from starlette.authentication import SimpleUser, requires
@@ -54,10 +54,8 @@ def test_without_authentication_header(
 
 
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
-def test_with_non_jwt(
-    client: starlette.testclient.TestClient, responses: RequestsMock, method: str
-):
-    responses.add(method=responses.GET, url="https://test_identity_provider")
+def test_with_non_jwt(client: starlette.testclient.TestClient, httpx_mock, method: str):
+    httpx_mock.add_response(method="GET", url="https://test_identity_provider")
     response = client.request(
         method,
         "/requires_authentication",
@@ -69,11 +67,11 @@ def test_with_non_jwt(
 
 @pytest.mark.parametrize("method", ["GET", "POST", "PUT", "DELETE"])
 def test_with_invalid_jwt(
-    client: starlette.testclient.TestClient, responses: RequestsMock, method: str
+    client: starlette.testclient.TestClient, httpx_mock, method: str
 ):
-    responses.add(
-        responses.GET,
-        "https://test_identity_provider",
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test_identity_provider",
         json={
             "keys": [
                 {
@@ -159,26 +157,29 @@ def test_auth_mock(client: starlette.testclient.TestClient, auth_mock, method: s
 
 
 def test_keys_cannot_be_retrieved_due_to_network_failure(
-    client: starlette.testclient.TestClient, responses: RequestsMock
+    client: starlette.testclient.TestClient, httpx_mock
 ):
-    def raise_exception(*args, **kwargs):
-        raise requests.exceptions.Timeout("description")
+    def raise_exception(request, *args, **kwargs):
+        raise httpx.TimeoutException("description", request=request)
 
-    responses.add_callback(
-        responses.GET, "https://test_identity_provider", callback=raise_exception
+    httpx_mock.add_callback(
+        method="GET", url="https://test_identity_provider", callback=raise_exception
     )
     response = client.get(
         "/requires_authentication", headers={"Authorization": "Bearer my_token"}
     )
     assert response.status_code == 400
-    assert response.text == "Timeout error while retrieving keys: description"
+    assert response.text == "TimeoutException error while retrieving keys: description"
 
 
 def test_keys_cannot_be_retrieved_due_to_http_failure(
-    client: starlette.testclient.TestClient, responses: RequestsMock
+    client: starlette.testclient.TestClient, httpx_mock
 ):
-    responses.add(
-        responses.GET, "https://test_identity_provider", status=500, body=b"description"
+    httpx_mock.add_response(
+        method="GET",
+        url="https://test_identity_provider",
+        status_code=500,
+        data=b"description",
     )
     response = client.get(
         "/requires_authentication", headers={"Authorization": "Bearer my_token"}

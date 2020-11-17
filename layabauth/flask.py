@@ -3,13 +3,14 @@ import functools
 import json
 
 import flask
+import httpx
 import werkzeug
 from jose import exceptions, jws
 
-from layabauth._http import _get_token, validate, keys
+from layabauth import _http
 
 
-def requires_authentication(jwks_uri: str):
+def requires_authentication(jwks_uri: str, **httpx_kwargs):
     """
     Ensure that a valid JWT is received before entering the annotated endpoint.
 
@@ -17,17 +18,19 @@ def requires_authentication(jwks_uri: str):
     For more information on JWK, refer to https://tools.ietf.org/html/rfc7517
         * Azure Active Directory: https://sts.windows.net/common/discovery/keys
         * Microsoft Identity Platform: https://sts.windows.net/common/discovery/keys
+    :param httpx_kwargs: Any other argument will be provided to httpx.Client to be able to retrieve the keys.
     """
 
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*func_args, **func_kwargs):
             try:
-                flask.g.token = _get_token(flask.request.headers)
+                flask.g.token = _http._get_token(flask.request.headers)
                 if not flask.g.token:
                     raise werkzeug.exceptions.Unauthorized()
-                key = keys(jwks_uri)
-                flask.g.token_body = validate(flask.g.token, key)
+                with httpx.Client(**httpx_kwargs) as client:
+                    key = _http.keys(client, jwks_uri)
+                flask.g.token_body = _http.validate(flask.g.token, key)
             except exceptions.JOSEError as e:
                 raise werkzeug.exceptions.Unauthorized(description=str(e)) from e
             return func(*func_args, **func_kwargs)
@@ -61,7 +64,7 @@ def _extract_token_body() -> dict:
     if getattr(flask.g, "token_body", None):
         return flask.g.token_body
 
-    token = _get_token(flask.request.headers)
+    token = _http._get_token(flask.request.headers)
     if not token:
         return {}
 
