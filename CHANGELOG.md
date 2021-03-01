@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.0] - 2021-03-01
+### Changed
+- Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.16.*` to `0.17.*`
+- Update [`pytest-httpx`](https://github.com/Colin-b/pytest_httpx/blob/master/CHANGELOG.md) version from `0.10.*` to `0.11.*`.
+- Update [`starlette`](https://www.starlette.io/release-notes/) version from `0.13.*` to `0.14.*`.
+
 ## [5.0.1] - 2020-11-17
 ### Added
 - Add explicit support for python `3.9`.
@@ -49,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.0.1...HEAD
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.1.0...HEAD
+[5.1.0]: https://github.com/Colin-b/layabauth/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/Colin-b/layabauth/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/Colin-b/layabauth/compare/v4.0.1...v5.0.0
 [4.0.1]: https://github.com/Colin-b/layabauth/compare/v4.0.0...v4.0.1
