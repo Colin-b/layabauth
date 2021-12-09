@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.1] - 2021-12-07
+### Changed
+- Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.17.*` to `0.19.*`
+- Update [`pytest-httpx`](https://github.com/Colin-b/pytest_httpx/blob/master/CHANGELOG.md) version from `0.11.*` to `0.13.*`.
+- Update [`flask_restx`](https://github.com/python-restx/flask-restx/blob/master/CHANGELOG.rst) version from `0.2.*` to `0.5.*`
+
 ## [5.1.0] - 2021-03-01
 ### Changed
 - Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.16.*` to `0.17.*`
