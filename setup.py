@@ -38,20 +38,20 @@ setup(
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         # Used to request JWKs (keys)
-        "httpx==0.17.*",
+        "httpx==0.19.*",
         # Used to manage authentication
         "python-jose==3.*",
     ],
     extras_require={
         "testing": [
             # Used to test flask application
-            "flask_restx==0.2.*",
+            "flask_restx==0.5.*",
             "pytest-flask==1.*",
             # Used to test starlette authentication
             "starlette==0.14.*",
             "requests==2.*",
             # Used to mock requests sent to check keys
-            "pytest-httpx==0.11.*",
+            "pytest-httpx==0.13.*",
             # Used to check coverage
             "pytest-cov==2.*",
         ]
