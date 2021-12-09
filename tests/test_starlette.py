@@ -179,7 +179,7 @@ def test_keys_cannot_be_retrieved_due_to_http_failure(
         method="GET",
         url="https://test_identity_provider",
         status_code=500,
-        data=b"description",
+        content=b"description",
     )
     response = client.get(
         "/requires_authentication", headers={"Authorization": "Bearer my_token"}
