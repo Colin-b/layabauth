@@ -59,8 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v5.1.1...HEAD
-[5.1.1]: https://github.com/Colin-b/layabauth/compare/v5.1.0...v5.1.1
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/Colin-b/layabauth/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/Colin-b/layabauth/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/Colin-b/layabauth/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/Colin-b/layabauth/compare/v4.0.1...v5.0.0
