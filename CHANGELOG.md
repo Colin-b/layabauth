@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [7.0.0] - 2023-04-26
 ### Changed
 - Drop support for python `3.6`
 - Add support for python `3.11`
@@ -65,7 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/Colin-b/layabauth/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/Colin-b/layabauth/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/Colin-b/layabauth/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/Colin-b/layabauth/compare/v5.0.0...v5.0.1
