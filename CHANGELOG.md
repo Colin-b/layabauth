@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- Drop support for python `3.6`
+- Add support for python `3.11`
 - Update [`flask-restx`](https://github.com/python-restx/flask-restx) version from `0.5.*` to `1.1.*`.
 - Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.21.*` to `>=0.21.*, <0.25.`.
 - Update [`pytest-httpx`](https://github.com/Colin-b/pytest_httpx/blob/master/CHANGELOG.md) version from `0.15.*` to `>=0.15.*, <0.23.*`.

@@ -113,7 +113,7 @@ def test_authentication(auth_mock, client):
 ```
 
 ## How to install
-1. [python 3.6+](https://www.python.org/downloads/) must be installed
+1. [python 3.7+](https://www.python.org/downloads/) must be installed
 2. Use pip to install module:
 ```sh
 python -m pip install layabauth
