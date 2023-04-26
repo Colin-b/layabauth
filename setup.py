@@ -27,36 +27,36 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Software Development :: Build Tools",
     ],
     keywords=["flask", "starlette", "auth"],
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
         # Used to request JWKs (keys)
-        "httpx==0.21.*",
+        "httpx==0.24.*",
         # Used to manage authentication
         "python-jose==3.*",
     ],
     extras_require={
         "testing": [
             # Used to test flask application
-            "flask_restx==0.5.*",
+            "flask_restx==1.1.*",
             "pytest-flask==1.*",
             # Used to test starlette authentication
             "starlette==0.17.*",
             "requests==2.*",
             # Used to mock requests sent to check keys
-            "pytest-httpx==0.15.*",
+            "pytest-httpx==0.22.*",
             # Used to check coverage
             "pytest-cov==3.*",
         ]
     },
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     project_urls={
         "GitHub": "https://github.com/Colin-b/layabauth",
         "Changelog": "https://github.com/Colin-b/layabauth/blob/master/CHANGELOG.md",

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0] - 2023-04-26
+### Changed
+- Drop support for python `3.6`
+- Add support for python `3.11`
+- Update [`flask-restx`](https://github.com/python-restx/flask-restx/blob/master/CHANGELOG.rst) version from `0.5.*` to `1.1.*`.
+- Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.21.*` to `0.24.*`.
+- Update [`pytest-httpx`](https://github.com/Colin-b/pytest_httpx/blob/master/CHANGELOG.md) version from `0.15.*` to `0.22.*`.
+
 ## [6.0.0] - 2021-12-10
 ### Changed
 - Update [`httpx`](https://github.com/encode/httpx/blob/master/CHANGELOG.md) version from `0.17.*` to `0.21.*`.
@@ -59,7 +67,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release.
 
-[Unreleased]: https://github.com/Colin-b/layabauth/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/Colin-b/layabauth/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/Colin-b/layabauth/compare/v6.0.0...v7.0.0
 [6.0.0]: https://github.com/Colin-b/layabauth/compare/v5.1.0...v6.0.0
 [5.1.0]: https://github.com/Colin-b/layabauth/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/Colin-b/layabauth/compare/v5.0.0...v5.0.1
